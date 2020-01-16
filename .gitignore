@@ -1,11 +1,11 @@
 
 *sctools*
-*local*
+*dataset*
 
 local/src/__pycache__
 
 *.log
 *.sbatch
 
-phylics/dataset/
+
 
