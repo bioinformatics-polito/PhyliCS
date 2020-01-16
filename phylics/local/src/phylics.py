@@ -90,11 +90,12 @@ if __name__ == "__main__":
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(0)
+    '''
     elif '--run' not in sys.argv and '--run_10x_preproc' not in sys.argv and '--run_cell_filtering' not in sys.argv and '--help' not in sys.argv and '-h' not in sys.argv:
         print("ERROR: one of the following execution modes must be specified: --run, --run_10x_preproc, --run_cell_filtering")
         parser.print_help()
         sys.exit(1)
-
+    '''
     args = parser.parse_args()
  
 

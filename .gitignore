@@ -6,6 +6,6 @@
 
 *.log
 *.sbatch
-
+*.swp
 
 
