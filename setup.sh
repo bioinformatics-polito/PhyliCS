@@ -38,8 +38,8 @@ if [ ! -d $SCTOOLS ] ; then
 
     cd $ROOT
 
-    export SCTOOLS_DEMUX=$SCTOOLS/build/apps/sctools_demultiplex
 fi
 
+export SCTOOLS_DEMUX=$SCTOOLS/build/apps/sctools_demultiplex
 
 
