@@ -84,7 +84,6 @@ if __name__ == "__main__":
     #run_opts.add_argument("--barcodes_csv", required = '--run_10x_preproc' in sys.argv, action='store', metavar='per_cell_summary_metrics.csv', help='Cell Ranger DNA output file containing cell barcodes.', type=str)
 
     #run_opts.add_argument("--input_bam", required = '--run_10x_preproc' in sys.argv, action='store', metavar='possorted_bam.bam', help='Cell Ranger DNA output file containing reads alignments.' type=str)
-
     
     run_opts.add_argument("--verbose", action='store_true',  help='Verbose execution.')
 
@@ -366,7 +365,7 @@ if __name__ == "__main__":
                 else:
                     print ("Successfully created the directory {} ".format(out_dir))
 
-        demux = "sctools_demultiplex"        
+        demux = os.environ["SCTOOLS_DEMUX"]
         log_file = os.path.join(out_dir, "demux.log")
     
         '''
