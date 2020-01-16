@@ -1,0 +1,19 @@
+#!/bin/bash
+
+#SBATCH --job-name=processGenome   
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=marilisa.montemurro@polito.it
+#SBATCH --cpus-per-task=4
+#SBATCH --partition=global
+#SBATCH --time=1:00:00
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --mem=3072M
+#SBATCH --output=processGenome_%j.log
+
+IN=$1
+LENGTH=$2
+
+#Extract reads at all positions across chromosome
+/home/mmontemurro/ginkgo/genomes/scripts/simReads ${IN}.fa ${IN}_${LENGTH}_frags $LENGTH
+

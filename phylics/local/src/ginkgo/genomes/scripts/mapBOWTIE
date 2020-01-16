@@ -1,0 +1,26 @@
+#!/bin/bash
+
+#SBATCH --job-name=mapBOWTIE      
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=marilisa.montemurro@polito.it
+#SBATCH --cpus-per-task=4
+#SBATCH --partition=global
+#SBATCH --time=2:00:00
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=2
+#SBATCH --mem=8192M
+#SBATCH --output=mapBOWTIE_%j.log
+
+ASSEMBLY=$1
+IN=$2
+LENGTH=$3
+
+bowtie2 --chunkmbs=400 ${ASSEMBLY}.fa -f -S -t -m1 --best --strata -p4 ${IN}_${LENGTH}_frags | awk -v chr=${IN} '{if (($5 >= 25) && ($3 == chr)) print $3"\t"$4}' | sort -k2,2g > ${IN}_${LENGTH}_bowtie_done
+
+for size in `cat binsizes`; do
+  #/opt/uge/bin/lx-amd64/qsub -V -cwd -l m_mem_free=3G -v LENGTH=$LENGTH -v SIZE=$size -v TYPE=bowtie -v IN=$IN /seq/schatz/mschatz/ginkgo/genomes/scripts/binBOWTIE
+  /home/mmontemurro/ginkgo/genomes/scripts/binBOWTIE $LENGTH $size "bowtie" $IN
+done
+
+touch bowtie_done
+

@@ -1,0 +1,20 @@
+#!/bin/bash
+
+#SBATCH --job-name=indexBOWTIE      
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=marilisa.montemurro@polito.it
+#SBATCH --cpus-per-task=4
+#SBATCH --partition=global
+#SBATCH --time=1:00:00
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --mem=8192M
+#SBATCH --output=indexBOWTIE_%j.log
+
+ASSEMBLY=$1
+
+#Build bowtie reference files
+bowtie2-build ${ASSEMBLY}.fa ${ASSEMBLY}.fa
+echo "Bowtie index built for assembly:" ${ASSEMBLY}
+touch bowtieBUILT
+

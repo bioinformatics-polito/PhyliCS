@@ -1,0 +1,8 @@
+#!/bin/bash
+
+LENGTH=$1 
+SIZE=$2
+TYPE=$3
+IN=$4
+
+/home/mmontemurro/ginkgo/genomes/scripts/bin results_${SIZE}_${LENGTH}_${TYPE}_${IN} centromeres $SIZE $LENGTH `grep -w $IN lengths | awk '{print $2}'` ${IN}_${LENGTH}_${TYPE}_done
