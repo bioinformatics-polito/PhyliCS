@@ -11,8 +11,8 @@
 #    fi
 #fi
 ROOT="$(pwd)"
-SCTOOLS="SCTools"
-PHILICS="phylics"
+SCTOOLS=$ROOT/SCTools
+PHILICS=$ROOT/phylics
 
 
 ENV="phylics_conda_env"
@@ -38,9 +38,8 @@ if [ ! -d $SCTOOLS ] ; then
 
     cd $ROOT
 
-    export SCTOOLS_DEMUX=$ROOT/SCTools/build/apps/sctools_demultiplex
+    export SCTOOLS_DEMUX=$SCTOOLS/build/apps/sctools_demultiplex
 fi
 
-#setup permissions
-chmod +x 
+
 
