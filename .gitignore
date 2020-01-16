@@ -1,0 +1,10 @@
+
+local/src/sctools/
+local/bin/sctools/
+
+local/src/__pycache__
+
+*.log
+
+dataset/
+
