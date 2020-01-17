@@ -27,7 +27,7 @@ cd bin
 for p in $ROOT/src; do
     NOPATH=$(basename -- "$p")
     NOEXT="${NOPATH%.*}"
-    ln -s bin/$NOEXT $p
+    ln -s $p $NOEXT
 done 
 
 #compile ginkgo
@@ -37,5 +37,5 @@ make
 cd $ROOT/phylics/local/src/ginkgo/genomes/scripts
 make
 
-cp phylics/local/src/ginkgo/cli/ginkgo.sh $ROOT/bin/
-cp -r phylics/local/src/ginkgo/* $ROOT/
+cp $ROOT/phylics/local/src/ginkgo/cli/ginkgo.sh $ROOT/bin/
+cp -r $ROOT/phylics/local/src/ginkgo/* $ROOT/
