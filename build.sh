@@ -4,19 +4,19 @@
 #   if not, create it
 
 ROOT="$(pwd)"
-CONDA_ROOT="$(conda info --base)"
+#CONDA_ROOT="$(conda info --base)"
 
-ENV="phylics"
+#ENV="phylics"
 
 # enable the 'conda' command from bash
-source $CONDA_ROOT/etc/profile.d/conda.sh
+#source $CONDA_ROOT/etc/profile.d/conda.sh
 
 # Check if the environment exists
-conda activate $ENV
-if [ $? != 0 ]; then
-    conda create --name $ENV --file $ROOT/phylics_env.txt
-    conda activate $ENV
-fi
+#conda activate $ENV
+#if [ $? != 0 ]; then
+#    conda create --name $ENV --file $ROOT/phylics_env.txt
+#    conda activate $ENV
+#fi
 
 mkdir -p bin
 mkdir -p src
@@ -37,5 +37,9 @@ make 2> /dev/null
 cd $ROOT/phylics/local/src/ginkgo/genomes/scripts
 make 2> /dev/null
 
+
+#scripts cli genomes
 cp $ROOT/phylics/local/src/ginkgo/cli/ginkgo.sh $ROOT/bin/
-cp -r $ROOT/phylics/local/src/ginkgo/* $ROOT/
+cp -r $ROOT/phylics/local/src/ginkgo/scripts $ROOT/
+cp -r $ROOT/phylics/local/src/ginkgo/cli $ROOT/
+cp -r $ROOT/phylics/local/src/ginkgo/genomes $ROOT/
