@@ -13,7 +13,7 @@ source $CONDA_ROOT/etc/profile.d/conda.sh
 
 # Check if the environment exists
 conda activate $ENV
-if [ $? -neq 0 ]; then
+if [ $? != 0 ]; then
     conda create --name $ENV --file $ROOT/phylics_env.txt
     conda activate $ENV
 fi
