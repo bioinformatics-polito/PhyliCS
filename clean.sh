@@ -2,7 +2,7 @@
 
 ROOT="$(pwd)"
 
-rm -rf $ROOT/bin/
+rm -rf $ROOT/bin/ $ROOT/src/
 
 rm -rf scripts cli genomes
 
