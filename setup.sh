@@ -11,11 +11,11 @@
 #    fi
 #fi
 ROOT="$(pwd)"
-SCTOOLS=$ROOT/SCTools
-PHILICS=$ROOT/phylics
+#SCTOOLS=$ROOT/SCTools
+#PHILICS=$ROOT/phylics
 
 
-ENV="phylics_conda_env"
+ENV="phylics"
 
 # Check if the environment exists
 conda activate $ENV
@@ -27,19 +27,22 @@ if [ $? -neq 0 ]; then
 fi
    
 
-if [ ! -d $SCTOOLS ] ; then
-    #download sctools and build it
-    git clone https://github.com/bioinformatics-polito/SCTools.git
-    cd SCTools
-    mkdir build
-    cd build
-    cmake .. -DCMAKE_BUILD_TYPE=Release
-    make
+#if [ ! -d $SCTOOLS ] ; then
+#    #download sctools and build it
+#    git clone https://github.com/bioinformatics-polito/SCTools.git
+#    cd SCTools
+#    mkdir build
+#    cd build
+#    cmake .. -DCMAKE_BUILD_TYPE=Release
+#    make
 
-    cd $ROOT
+#    cd $ROOT
 
-fi
+#fi
 
-export SCTOOLS_DEMUX=$SCTOOLS/build/apps/sctools_demultiplex
+#export SCTOOLS_DEMUX=$SCTOOLS/build/apps/sctools_demultiplex
 
-
+#compile ginkgo
+cd $ROOT/phylics/local/src/ginkgo
+make 
+cd $ROOT
