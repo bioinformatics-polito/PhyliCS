@@ -144,7 +144,7 @@ if __name__ == "__main__":
             for sample in samples:
                 input_dir = os.path.join(os.getcwd(), input_dirs[sample])
         
-                ginkgo_path = os.path.join(BIN_DIR,"ginkgo", "cli", "ginkgo.sh")
+                ginkgo_path = "ginkgo.sh"
                 cmd = "{} --input {} --genome {} --binning {} --init | grep -v \"pipe\"" .format(ginkgo_path, input_dir, args.genome, args.binning)
                 #if args.init_ginkgo:
                 #    cmd = cmd + " --init"
