@@ -22,15 +22,20 @@ mkdir -p bin
 mkdir -p src
 
 cp phylics/local/src/*.py src
-for p in src; do
+cd bin
+
+for p in $ROOT/src; do
     NOPATH=$(basename -- "$p")
     NOEXT="${NOPATH%.*}"
-    ln -s $p bin/$NOEXT;
+    ln -s bin/$NOEXT $p
 done 
 
 #compile ginkgo
-cd phylics/local/src/ginkgo & make
-cd phylics/local/src/ginkgo/genomes/scripts & make
+cd $ROOT/phylics/local/src/ginkgo 
+make
+
+cd $ROOT/phylics/local/src/ginkgo/genomes/scripts
+make
 
 cp phylics/local/src/ginkgo/cli/ginkgo.sh $ROOT/bin/
 cp -r phylics/local/src/ginkgo/* $ROOT/
