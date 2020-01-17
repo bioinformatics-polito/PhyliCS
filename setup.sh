@@ -26,6 +26,7 @@ for p in src; do
     NOPATH=$(basename -- "$p")
     NOEXT="${NOPATH%.*}"
     ln -s $p bin/$NOEXT;
+done 
 
 #compile ginkgo
 cd phylics/local/src/ginkgo & make
