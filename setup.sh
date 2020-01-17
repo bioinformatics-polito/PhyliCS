@@ -33,5 +33,3 @@ cd phylics/local/src/ginkgo/genomes/scripts & make
 
 cp phylics/local/src/ginkgo/cli/ginkgo.sh $ROOT/bin/
 cp -r phylics/local/src/ginkgo/* $ROOT/
-
-
