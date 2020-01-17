@@ -215,7 +215,7 @@ if __name__ == "__main__":
                     else:
                         print ("Successfully created the directory {} ".format(out_dir))
 
-                tool = os.path.join(BIN_DIR, "single_sample_post_analysis")
+                tool = "single_sample_post_analysis"
                 cmd = "{} {} {} {} {} {} {} {}".format(tool, sample, cnvs_file, results_file, args.method, args.metric, args.meta_format, out_dir)
                 '''
                 if args.tsne_iterations:
@@ -297,7 +297,7 @@ if __name__ == "__main__":
 
             sample_cnvs_files  = ' '.join(cnvs_files)
                         
-            tool = os.path.join(BIN_DIR, "multi_sample_post_analysis")
+            tool =  "multi_sample_post_analysis"
             cmd = "{} {} {} {} {} {}".format(tool, sample_cnvs_files, args.method, args.metric, args.meta_format, out_dir)
             if args.tasks:
                 cmd = "{} --n_jobs {}".format(cmd, args.tasks)
@@ -366,10 +366,10 @@ if __name__ == "__main__":
                 else:
                     print ("Successfully created the directory {} ".format(out_dir))
 
-        demux = os.environ["SCTOOLS_DEMUX"]
+        demux = "sctools_demultiplex"
         log_file = os.path.join(out_dir, "demux.log")
     
-        '''
+        
         if args.verbose:
             os.system("{tool} --barcodes-csv {csv} --forbidden-tags XA,SA --min-mapq 30 -o {output} {bam}".format(tool=demux, csv=barcodes_csv, output=out_dir, bam=input_bam))
         else:
@@ -379,7 +379,7 @@ if __name__ == "__main__":
         noise_bam = os.path.join(out_dir, "noise.bam")
         noise_rename = os.path.join(out_dir, "noise.bam.noise")
         os.rename(noise_bam, noise_rename)
-        '''
+        
         # samtools view  -u {input} | bamToBed -i - > {output}
         bams = []
         for file in glob.glob(os.path.join(out_dir, "*.bam")):
@@ -481,7 +481,7 @@ if __name__ == "__main__":
     
         outliers = intervals + " " + values
 
-        tool = os.path.join(BIN_DIR, "valid_cells")
+        tool = os.path.join("valid_cells")
         cmd = "{} {} {} {} {} {}".format(tool, sample, results, cnvs, outliers, out_dir)
         if args.verbose:
             cmd = "{} --verbose".format(cmd)
