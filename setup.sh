@@ -4,8 +4,12 @@
 #   if not, create it
 
 ROOT="$(pwd)"
+CONDA_ROOT="$(conda info --base)"
 
 ENV="phylics"
+
+# enable the 'conda' command from bash
+source $CONDA_ROOT/etc/profile.d/conda.sh
 
 # Check if the environment exists
 conda activate $ENV
