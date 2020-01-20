@@ -27,3 +27,10 @@ conda activate $ENV
 Once you have built the application, add the directory containing the binaries to your `$PATH`. To do so, open `~/.bashrc` and add the following line:
 
 ```export PATH=<path/to/phylics>/PhyliCS/bin:$PATH```
+
+## Test
+We have provided a Jupyter-notebook showing the code to test our application. It can be executed b, simply typing:
+
+```jupyter notebook```
+
+from the root directory of this project.
