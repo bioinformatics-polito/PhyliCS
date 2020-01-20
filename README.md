@@ -1,6 +1,14 @@
 # PhyliCS (TODO)
 A pipeline for multi-sample copy-number variation (CNV) analysis on single-cell DNA sequencing data and intra-tumor heterogeneity quantification. 
 
+## Requirements
+
+- Platform: 
+    - linux-64
+- Software:
+    - Python >= 3.6
+    - conda >= 4.3
+
 ## Installation and setup instructions
 
 Download the .zip archive of the project and uncompress it or clone it via git, typing:
