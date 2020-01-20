@@ -7,7 +7,7 @@ Download the .zip archive of the project and uncompress it or clone it via git, 
 
 ```git clone https://github.com/bioinformatics-polito/PhyliCS.git```
 
-You need to create and activate a conda environment which will contain all the packages required to run PhyliCS. Then you can build the application by executing `build.sh':
+You need to create and activate a conda environment which will contain all the packages required to run PhyliCS. Then you can build the application by executing `build.sh`:
 ```
 cd PhyliCS
 ENV=<env_name> #substitute <env_name> with your preferred environment name
