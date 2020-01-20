@@ -297,6 +297,7 @@ https://conda.anaconda.org/intel/linux-64/tbb4py-2019.8-py36_intel_0.tar.bz2
 https://conda.anaconda.org/intel/linux-64/tcl-8.6.4-24.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/tk-8.6.9-hed695b0_1003.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/tktable-2.10-h555a92e_2.tar.bz2
+https://conda.anaconda.org/anaconda/linux-64/tornado-6.0.3-py36h7b6447c_0.tar.bz2
 https://conda.anaconda.org/anaconda/linux-64/traitlets-4.3.3-py36_0.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/typing_extensions-3.7.4-py36_0.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/urllib3-1.25.6-py36_0.tar.bz2
