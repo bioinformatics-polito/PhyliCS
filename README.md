@@ -29,8 +29,7 @@ Once you have built the application, add the directory containing the binaries t
 ```export PATH=<path/to/phylics>/PhyliCS/bin:$PATH```
 
 ## Test
-We have provided a Jupyter-notebook showing the code to test our application. It can be executed b, simply typing:
+We have provided a Jupyter-notebook showing the code to test our application. It must be executed after activating the conda environment. To run it, just do:
 
 ```jupyter notebook```
 
-from the root directory of this project.
