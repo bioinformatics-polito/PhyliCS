@@ -6,7 +6,7 @@ A pipeline for multi-sample copy-number variation (CNV) analysis on single-cell 
 - Platform: 
     - linux-64
 - Software:
-    - Python >= 3.6
+    - python >= 3.6
     - conda >= 4.3
 
 ## Installation and setup instructions
