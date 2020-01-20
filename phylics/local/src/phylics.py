@@ -122,7 +122,8 @@ if __name__ == "__main__":
         for sample_input in args.input_dirs:
             sample = sample_input.split(':')[0]
             inputdir = sample_input.split(':')[1]
-            if os.path.isdir(inputdir):
+            if os.path.exists(os.path.expanduser(inputdir)): # os.path.expanduser(path): On Unix and Windows, return the argument with an 
+                                                             # initial component of ~ or ~user replaced by that user’s home directory.
                 input_dirs[sample] = inputdir
             else:
                 print("FilePathError: {} is not a valid path".format(inputdir))
@@ -194,11 +195,11 @@ if __name__ == "__main__":
             for sample in samples:
                 #sample = sample_cnvs.split(":")[0]
                 cnvs_file = os.path.join(input_dirs[sample], "SegCopy")
-                if os.path.exists(cnvs_file) == False:
+                if os.path.exists(os.path.expanduser(cnvs_file)) == False:
                     print("FilePathError: {} does not  exist".format(cnvs_file))
                     sys.exit(1)
                 results_file = os.path.join(input_dirs[sample], "results.txt")
-                if os.path.exists(results_file) == False:
+                if os.path.exists(os.path.expanduser(results_file)) == False:
                     print("FilePathError: {} does not  exist".format(results_file))
                     sys.exit(1)
                 
@@ -206,7 +207,7 @@ if __name__ == "__main__":
                 if out_prefix != "":
                     out_name = out_prefix + "_" + out_name
                 out_dir= os.path.join(out_path, out_name)
-                if os.path.exists(out_dir) == False:
+                if os.path.exists(os.path.expanduser(out_dir)) == False:
                     try:
                         os.mkdir(out_dir)
                     except OSError:
@@ -277,7 +278,7 @@ if __name__ == "__main__":
                 out_name = out_prefix + "_" + out_name
             out_name = out_name + "_postCNV"
             out_dir = os.path.join(out_path, out_name)
-            if os.path.exists(out_dir) == False:
+            if os.path.exists(os.path.expanduser(out_dir)) == False:
                 try:
                     os.mkdir(out_dir)
                 except OSError:
@@ -289,7 +290,7 @@ if __name__ == "__main__":
             cnvs_files = []
             for sample in samples:
                 cnvs_file = os.path.join(input_dirs[sample], "SegCopy")
-                if os.path.exists(cnvs_file) == False:
+                if os.path.exists(os.path.expanduser(cnvs_file)) == False:
                     print("FilePathError: {} does not  exist".format(cnvs_file))
                     sys.exit(1)
                 sample_cnvs = sample + ":" + cnvs_file
@@ -330,7 +331,7 @@ if __name__ == "__main__":
             gzip {input}
                 
         """
-        if os.path.exists(args.output_path) == False:
+        if os.path.exists(os.path.expanduser(args.output_path)) == False:
             print("FilePathError: {} does not  exist".format(args.output_path))
             sys.exit(1)
 
@@ -340,11 +341,11 @@ if __name__ == "__main__":
         input_dir = sample_input.split(":")[1]
 
         input_bam = os.path.join(input_dir, "possorted_bam.bam")
-        if os.path.exists(input_bam) == False:
+        if os.path.exists(os.path.expanduser(input_bam)) == False:
             print("FilePathError: {} does not  exist".format(input_bam))
             sys.exit(1)
         barcodes_csv = os.path.join(input_dir, "per_cell_summary_metrics.csv")
-        if os.path.exists(barcodes_csv) == False:
+        if os.path.exists(os.path.expanduser(barcodes_csv)) == False:
             print("FilePathError: {} does not  exist".format(barcodes_csv))
             sys.exit(1)
 
@@ -357,7 +358,7 @@ if __name__ == "__main__":
 
         out_dir = os.path.join(out_path, out_name)
 
-        if os.path.exists(out_dir) == False:
+        if os.path.exists(os.path.expanduser(out_dir)) == False:
                 try:
                     os.mkdir(out_dir)
                 except OSError:
@@ -429,7 +430,7 @@ if __name__ == "__main__":
                           sample_name results.txt SegCopy interval/value
                           [interval/value ...] out_dir
         """
-        if os.path.exists(args.output_path) == False:
+        if os.path.exists(os.path.expanduser(args.output_path)) == False:
             print("FilePathError: {} does not  exist".format(args.output_path))
             sys.exit(1)
 
@@ -439,11 +440,11 @@ if __name__ == "__main__":
         input_dir = sample_input.split(":")[1]
 
         cnvs = os.path.join(input_dir, "SegCopy")
-        if os.path.exists(cnvs) == False:
+        if os.path.exists(os.path.expanduser(cnvs)) == False:
             print("FilePathError: {} does not  exist".format(cnvs))
             sys.exit(1)
         results = os.path.join(input_dir, "results.txt")
-        if os.path.exists(results) == False:
+        if os.path.exists(os.path.expanduser(results)) == False:
             print("FilePathError: {} does not  exist".format(results))
             sys.exit(1)     
 
@@ -459,7 +460,7 @@ if __name__ == "__main__":
 
         out_dir = os.path.join(out_path, out_name)
 
-        if os.path.exists(out_dir) == False:
+        if os.path.exists(os.path.expanduser(out_dir)) == False:
                 try:
                     os.mkdir(out_dir)
                 except OSError:
