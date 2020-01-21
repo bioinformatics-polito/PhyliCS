@@ -17,7 +17,7 @@ if __name__ == "__main__":
     run_grp = parser.add_argument_group("execution modes (REQUIRED)", "One of the following execution modes MUST be specified")
     run_cmds = run_grp.add_mutually_exclusive_group(required=True)
 
-    run_cmds.add_argument("--run", action='store_true', help='Run the pipeline. USAGE: phylics --run [--run_cnvs | --run_single | --run_multiple] --input_dirs sample:beds_dir [sample:beds_dir ...] --genome hg19 --binning variable_500000_101_bwa  --meta_format {json,xml} --output_path out_path [--output_prefix out_prefix] [--verbose]') 
+    run_cmds.add_argument("--run", action='store_true', help='Run the pipeline. USAGE: phylics --run [--run_cnvs | --run_single | --run_multiple] --input_dirs sample:beds_dir [sample:beds_dir ...] --genome hg19 --binning variable_500000_101_bwa   --output_path out_path [--output_prefix out_prefix] [--verbose]') 
     #run_cmds.add_argument("--run_cnv", action='store_true', help='Run only the CNV calling stage. USAGE: phylics.py --input_dirs beds_dir [beds_dir ...] --genome hg19 --binning variable_500000_101_bwa [--init_ginkgo]')
     #run_cmds.add_argument("--run_single", action='store_true', help='Run only the single-sample analysis stage. USAGE: phylics.py --run_single --input_dirs sample:input_dir [sample:input_dir ...]  --meta_format {json,xml} --outdir outdir')
     #run_cmds.add_argument("--run_multiple", action='store_true', help='Run only the  multiple-sample analysis stage. USAGE: phylics.py --run_multiple --input_dirs sample:input_dir [sample:input_dir ...] --meta_format {json,xml} --outdir outdir')
@@ -27,8 +27,8 @@ if __name__ == "__main__":
     run_grp1 = parser.add_argument_group("Single-stage execution options", "The following options may be specified to run only one of the pipeline stages when executing the --run mode.")
     run_single_modules_opts = run_grp1.add_mutually_exclusive_group()
     run_single_modules_opts.add_argument("--run_cnvs", action='store_true', help='Run only the CNV calling stage. USAGE: phylics --run --run_cnvs --input_dirs beds_dir [beds_dir ...] --genome hg19 --binning variable_500000_101_bwa [--init_ginkgo] [--verbose]')
-    run_single_modules_opts.add_argument("--run_single", action='store_true', help='Run only the single-sample analysis stage. USAGE: phylics --run --run_single --input_dirs sample:input_dir [sample:input_dir ...]  --meta_format {json,xml} --output_path out_path [--output_prefix out_prefix] [--verbose]')
-    run_single_modules_opts.add_argument("--run_multiple", action='store_true', help='Run only the  multiple-sample analysis stage. USAGE: phylics --run --run_multiple --input_dirs sample:input_dir [sample:input_dir ...] --meta_format {json,xml} --output_path out_path [--output_prefix out_prefix] [--verbose]')
+    run_single_modules_opts.add_argument("--run_single", action='store_true', help='Run only the single-sample analysis stage. USAGE: phylics --run --run_single --input_dirs sample:input_dir [sample:input_dir ...]  --output_path out_path [--output_prefix out_prefix] [--verbose]')
+    run_single_modules_opts.add_argument("--run_multiple", action='store_true', help='Run only the  multiple-sample analysis stage. USAGE: phylics --run --run_multiple --input_dirs sample:input_dir [sample:input_dir ...] --output_path out_path [--output_prefix out_prefix] [--verbose]')
 
     run_opts = parser.add_argument_group(title = "execution options")
 
@@ -45,7 +45,7 @@ if __name__ == "__main__":
 
     run_opts.add_argument("--method", choices=['single', 'complete', 'average', 'weighted', 'centroid', 'median', 'ward'], action='store', default='complete', help='Clustering method (default = complete)', type=str)
     run_opts.add_argument("--metric", choices=['euclidean', 'cityblock', 'sqeuclidean', 'cosine', 'correlation', 'hamming', 'jaccard', 'chebyshev', 'canberra'], default='euclidean', action='store', help='Distance metric', type=str)
-    run_opts.add_argument("--meta_format", required='--run'  in sys.argv, choices=['json', 'xml'], action='store', help='Metadata file format.', type=str)
+    #run_opts.add_argument("--meta_format", required='--run'  in sys.argv, choices=['json', 'xml'], action='store', help='Metadata file format.', type=str)
 
     #run_opts.add_argument("--outdirs", required='--run_single' in sys.argv or '--run_cell_filtering' in sys.argv, metavar=':sample:outdir', action=check_valid_samples(), help='Sample names and the path to the corresponding output directory, separated by ":". Sample names and output directory paths cannot contain ":".', nargs='+', type=str)
 
@@ -217,7 +217,7 @@ if __name__ == "__main__":
                         print ("Successfully created the directory {} ".format(out_dir))
 
                 tool = "single_sample_post_analysis"
-                cmd = "{} {} {} {} {} {} {} {}".format(tool, sample, cnvs_file, results_file, args.method, args.metric, args.meta_format, out_dir)
+                cmd = "{} {} {} {} {} {} {}".format(tool, sample, cnvs_file, results_file, args.method, args.metric, out_dir)
                 '''
                 if args.tsne_iterations:
                     cmd = "{} --tsne_iterations {}".format(cmd, args.tsne_iterations)
@@ -299,7 +299,7 @@ if __name__ == "__main__":
             sample_cnvs_files  = ' '.join(cnvs_files)
                         
             tool =  "multi_sample_post_analysis"
-            cmd = "{} {} {} {} {} {}".format(tool, sample_cnvs_files, args.method, args.metric, args.meta_format, out_dir)
+            cmd = "{} {} {} {} {}".format(tool, sample_cnvs_files, args.method, args.metric,  out_dir)
             if args.tasks:
                 cmd = "{} --n_jobs {}".format(cmd, args.tasks)
             if args.n_permutations:

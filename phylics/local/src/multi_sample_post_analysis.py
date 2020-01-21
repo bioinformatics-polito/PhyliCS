@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 from funcs import *
-from check_funcs import *
-from dicttoxml import dicttoxml
-from xml.dom.minidom import parseString
+#from check_funcs import *
+#from dicttoxml import dicttoxml
+#from xml.dom.minidom import parseString
 import time
 import json
 import random
@@ -48,11 +48,12 @@ if __name__ == "__main__":
             help='Distance metric.',
             nargs=1, type=str)
 
+    """
     parser.add_argument("meta_format", choices=['json', 'xml'], action='store',
             help='Metadata file format.',
             nargs=1, type=str)
 
-
+    """
     parser.add_argument("outdir", metavar='out_dir', action='store',
             help='Path to the output directory (must exist).',
             nargs=1, type=str)
@@ -89,7 +90,7 @@ if __name__ == "__main__":
     samples = args.samples
     method = args.method[0]
     metric = args.metric[0]
-    meta_format = args.meta_format[0]
+    #meta_format = args.meta_format[0]
     outdir = args.outdir[0]
 
     # default params
@@ -127,6 +128,7 @@ if __name__ == "__main__":
     if args.verbose:
         verbose = True
 
+    """
     metadata = {}
     if not reclust:
         metadata['analysis'] = 'complete'
@@ -153,7 +155,7 @@ if __name__ == "__main__":
         metadata['seed'] = seed
     else:
          metadata['seed'] = ''
-
+    """
 
     cnvs = pd.DataFrame()
     samples_dict = {}
@@ -460,7 +462,7 @@ if __name__ == "__main__":
             Silhouette coefficient: optimal number of clusters
         '''
         print_line(verbose)
-        n_clusters = my_silhouette_score(Z, merged_cnvs, outdir, verbose, metadata)
+        n_clusters = my_silhouette_score(Z, merged_cnvs, outdir, verbose)
 
     '''
         Extract clusters and compute mean cnv profiles
@@ -471,7 +473,7 @@ if __name__ == "__main__":
     df_mean = extract_clusters(Z, boundaries, n_clusters, merged_cnvs, reclust, outdir, verbose)
     heatmap(df_mean.transpose(), boundaries, method, metric,outdir, True, verbose, sample=sample)
 
-
+    """
     if meta_format == 'xml':
         xml=dicttoxml(metadata,  custom_root='analysis', attr_type=False)
         dom = parseString(xml)
@@ -480,4 +482,4 @@ if __name__ == "__main__":
     else:
         with open(outdir+'/metadata.json', 'w+') as f:
             json.dump(metadata, f, indent=2)
-
+    """

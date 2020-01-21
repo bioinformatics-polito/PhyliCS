@@ -200,7 +200,7 @@ def tsne_pca(cnvs, tsne_iterations, metadata, outdir, verbose, perplexity=None):
     plt.savefig(outdir+"/tsne.png")
     plt.gcf().clf()
 
-def my_silhouette_score(Z, cnvs, outdir, verbose, metadata):
+def my_silhouette_score(Z, cnvs, outdir, verbose):
     print_msg("Computing the optimal number of clusters", 0, verbose)
     range_n_clusters = range(2,18)
     silhouette_avgs = {}
@@ -300,7 +300,7 @@ def my_silhouette_score(Z, cnvs, outdir, verbose, metadata):
     fig2.clf()
 
     n_clusters = opt_n_clusters
-    metadata['n_clusters'] = n_clusters
+    #metadata['n_clusters'] = n_clusters
 
     return n_clusters
 

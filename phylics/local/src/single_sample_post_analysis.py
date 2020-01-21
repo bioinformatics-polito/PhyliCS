@@ -4,9 +4,9 @@
 from funcs import *
 from check_funcs import *
 
-from dicttoxml import dicttoxml
-from xml.dom.minidom import parseString
-import json
+#from dicttoxml import dicttoxml
+#from xml.dom.minidom import parseString
+#import json
 import random
 import argparse
 import seaborn as sns
@@ -35,9 +35,9 @@ if __name__ == "__main__":
         help='Distance metric',
         nargs=1, type=str)
 
-    parser.add_argument("meta_format", choices=['json', 'xml'], action='store',
-        help='Metadata file format.',
-        nargs=1, type=str)
+    #parser.add_argument("meta_format", choices=['json', 'xml'], action='store',
+    #    help='Metadata file format.',
+    #    nargs=1, type=str)
 
     parser.add_argument("outdir", metavar='outdir', action='store',
         help='Path to the desired output directory where the merged files have to be stored',
@@ -47,9 +47,9 @@ if __name__ == "__main__":
         help='Seed to initialize the pseudo-random generator used to perform the permutation test.',
         nargs=1, type=int)
 
-    parser.add_argument("--n_permutations", metavar='N', action='store',
-        help='Number of permutations to execute the permutation test for sample coesion score.',
-        nargs=1, type=int)
+    #parser.add_argument("--n_permutations", metavar='N', action='store',
+    #    help='Number of permutations to execute the permutation test for sample coesion score.',
+    #    nargs=1, type=int)
 
     #parser.add_argument("--tsne_iterations", metavar='N', action='store', help='Number of iterations for tSNE computation.', nargs=1, type=int)
 
@@ -61,7 +61,7 @@ if __name__ == "__main__":
 
     parser.add_argument("--reinit", action='store_true',
         help='This option has effect only if combined with the --clustering option. It allows to recompute the entire analysis and then recluster with the specified number of clusters.')
-
+1
     parser.add_argument("--verbose", action='store_true', help='Verbose execution.')
 
 
@@ -78,7 +78,7 @@ if __name__ == "__main__":
     outdir = args.outdir[0]
 
     # default params
-    n_permutations = 10
+    #n_permutations = 10
     #tsne_iterations = 5000
 
     #tnse_perplexity is computed afterwards if not specified as parameter
@@ -107,31 +107,31 @@ if __name__ == "__main__":
     if args.verbose:
         verbose = True
 
-    metadata = {}
-    metadata['sample'] = sample
-    if not reclust:
-        metadata['analysis'] = 'complete'
-    else:
-        metadata['analysis'] = 'reclust'
+    #metadata = {}
+    #metadata['sample'] = sample
+    #if not reclust:
+    #    metadata['analysis'] = 'complete'
+    #else:
+    #    metadata['analysis'] = 'reclust'
 
-    metadata['clustering_method'] = method
-    metadata['distance_metric'] = metric
-    metadata['n_permutations'] = n_permutations
+    #metadata['clustering_method'] = method
+    #metadata['distance_metric'] = metric
+    #metadata['n_permutations'] = n_permutations
     #metadata['tsne_iterations'] = tsne_iterations
     #if args.tsne_perplexity:
     #    metadata['tsne_perplexity'] = perplexity
     #else:
     #    metadata['tsne_perplexity'] = ''
     
-    if reclust:
-        metadata['n_clusters'] = n_clusters
-    else:
-        metadata['n_clusters'] = ''
+    #if reclust:
+    #    metadata['n_clusters'] = n_clusters
+    #else:
+    #    metadata['n_clusters'] = ''
 
-    if args.seed:
-        metadata['seed'] = seed
-    else:
-         metadata['seed'] = ''
+    #if args.seed:
+    #    metadata['seed'] = seed
+    #else:
+    #     metadata['seed'] = ''
 
 
 
@@ -251,7 +251,7 @@ if __name__ == "__main__":
             Silhouette coefficient: optimal number of clusters
         '''
         print_line(verbose)
-        n_clusters = my_silhouette_score(Z, cnvs, outdir, verbose, metadata)
+        n_clusters = my_silhouette_score(Z, cnvs, outdir, verbose)
     '''
         Extract clusters and compute mean cnv profiles
 
@@ -260,7 +260,8 @@ if __name__ == "__main__":
 
     df_mean = extract_clusters(Z, boundaries, n_clusters, cnvs, reclust, outdir, verbose)
     heatmap(df_mean.transpose(), boundaries, method, metric,outdir, True, verbose, sample=sample)
-
+    
+    """
     if meta_format == 'xml':
         xml=dicttoxml(metadata,  custom_root='analysis', attr_type=False)
         dom = parseString(xml)
@@ -269,3 +270,5 @@ if __name__ == "__main__":
     else:
         with open(outdir+'/metadata.json', 'w+') as f:
             json.dump(metadata, f, indent=2)
+
+    """
