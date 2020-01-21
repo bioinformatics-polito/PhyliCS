@@ -60,7 +60,7 @@ for outlier in outliers:
             df = df.loc[(df["Copy_Number"] != p)]
 
 
-df.to_csv(os.path.join(outdir, "results_filtered.txt"), sep='\t', index=False)
+df.to_csv(os.path.join(outdir, "results.txt"), sep='\t', index=False)
 
 valid_cells = df.Sample.tolist()
 
@@ -72,7 +72,7 @@ header_cols = ['CHR', 'START', 'END']
 valid_cols = np.append(valid_cells, header_cols)
 
 df = pd.read_csv(segcopy, sep="\t", usecols = valid_cols)
-df.to_csv(os.path.join(outdir,'SegCopy_filtered'), sep='\t', index=False)
+df.to_csv(os.path.join(outdir,'SegCopy'), sep='\t', index=False)
 
 print_msg("Initial cells: {}".format(tot_cells), 0, verbose)
 print_msg("Filtered out cells: {}".format(removed_cells), 0, verbose)
