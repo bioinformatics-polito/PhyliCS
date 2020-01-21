@@ -350,7 +350,7 @@ if __name__ == "__main__":
             sys.exit(1)
 
 
-        out_name = sample + "_demux"
+        out_name = sample + "_sc"
         out_path = args.output_path
 
         if args.output_prefix :
