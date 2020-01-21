@@ -5,7 +5,7 @@ import argparse
 import numpy as np
 import pandas as pd
 from check_funcs import *
-from my_funcs import print_msg
+from funcs import print_msg
 
 
 parser = argparse.ArgumentParser(description="Ploidy interval filtering.")

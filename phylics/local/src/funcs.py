@@ -332,7 +332,7 @@ def extract_clusters(Z, boundaries, n_clusters, cnvs, reclust, outdir, verbose):
 
     cnvs['CLUSTER'] = cluster_labels
     cnvs.index.name = 'cellid'
-    cnvs['CLUSTER'].to_csv(outdir+"/clusters.csv", sep='\t', header=True)
+    #cnvs['CLUSTER'].to_csv(outdir+"/clusters.csv", sep='\t', header=True)
     clusters = cnvs['CLUSTER'].unique()
 
     '''
