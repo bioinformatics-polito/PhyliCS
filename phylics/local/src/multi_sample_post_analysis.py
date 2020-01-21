@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from funcs import *
-#from check_funcs import *
+from check_funcs import *
 #from dicttoxml import dicttoxml
 #from xml.dom.minidom import parseString
 import time

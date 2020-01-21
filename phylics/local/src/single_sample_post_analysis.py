@@ -35,10 +35,6 @@ if __name__ == "__main__":
         help='Distance metric',
         nargs=1, type=str)
 
-    #parser.add_argument("meta_format", choices=['json', 'xml'], action='store',
-    #    help='Metadata file format.',
-    #    nargs=1, type=str)
-
     parser.add_argument("outdir", metavar='outdir', action='store',
         help='Path to the desired output directory where the merged files have to be stored',
         nargs=1, type=str)
@@ -47,13 +43,6 @@ if __name__ == "__main__":
         help='Seed to initialize the pseudo-random generator used to perform the permutation test.',
         nargs=1, type=int)
 
-    #parser.add_argument("--n_permutations", metavar='N', action='store',
-    #    help='Number of permutations to execute the permutation test for sample coesion score.',
-    #    nargs=1, type=int)
-
-    #parser.add_argument("--tsne_iterations", metavar='N', action='store', help='Number of iterations for tSNE computation.', nargs=1, type=int)
-
-    #parser.add_argument("--tsne_perplexity", metavar='N', action='store', help='Perplexity value for tSNE computation.', nargs=1, type=int)
 
     parser.add_argument("--reclust", metavar='n_clusters', action=check_valid(),
         help='If this option is specified, only the clustering part is executed with the specified number of clusters, unless --reinit option is specified (see below).',
@@ -61,7 +50,7 @@ if __name__ == "__main__":
 
     parser.add_argument("--reinit", action='store_true',
         help='This option has effect only if combined with the --clustering option. It allows to recompute the entire analysis and then recluster with the specified number of clusters.')
-1
+    
     parser.add_argument("--verbose", action='store_true', help='Verbose execution.')
 
 
@@ -73,23 +62,12 @@ if __name__ == "__main__":
     results = args.results[0]
     method = args.method[0]
     metric = args.metric[0]
-    meta_format = args.meta_format[0]
 
     outdir = args.outdir[0]
 
-    # default params
-    #n_permutations = 10
-    #tsne_iterations = 5000
-
-    #tnse_perplexity is computed afterwards if not specified as parameter
-
-    reclust = False
     reinit = False
     verbose = False
-
-    if args.n_permutations:
-        n_permutations = args.n_permutations[0]
-
+    
     if args.seed:
         random.seed(args.seed[0])
     '''
