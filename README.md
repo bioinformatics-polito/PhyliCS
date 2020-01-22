@@ -33,3 +33,4 @@ We have provided a Jupyter-notebook showing the code to test our application. It
 
 ```jupyter notebook```
 
+Additionally, we have provided a static .html version of the notebook, just in case you only want to navigate through the manual without executing the embedded code.
