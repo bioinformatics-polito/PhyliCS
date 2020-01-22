@@ -1,4 +1,4 @@
-# PhyliCS (TODO)
+# PhyliCS
 A pipeline for multi-sample copy-number variation (CNV) analysis on single-cell DNA sequencing data and intra-tumor heterogeneity quantification. 
 
 ## Requirements
