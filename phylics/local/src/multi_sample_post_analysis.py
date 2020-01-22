@@ -286,7 +286,7 @@ if __name__ == "__main__":
         plt.legend()
 
         fig.suptitle("Average heterogeneity score: permutation test distribution.\nSamples = {}".format(str(list(set(sample_labels)))), fontsize=14, fontweight='bold')
-        fig.savefig(outdir+"/het_score_boxplot.png", bbox_inches='tight')
+        fig.savefig(outdir+"/het_violin_boxplot.png", bbox_inches='tight')
         fig.clf()
 
         '''

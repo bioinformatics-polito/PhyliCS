@@ -64,7 +64,8 @@ if __name__ == "__main__":
     metric = args.metric[0]
 
     outdir = args.outdir[0]
-
+    
+    reclust = False
     reinit = False
     verbose = False
     
@@ -169,7 +170,7 @@ if __name__ == "__main__":
 
         plt.gcf().suptitle("Distribution plot of mean ploidies of all cells", fontsize=14, fontweight='bold')
         plt.gcf().set_size_inches(36,14)
-        plt.savefig(outdir+"/mean_plody_distribution.svg")
+        plt.savefig(outdir+"/mean_ploidy_distribution.svg")
         plt.gcf().clf()
 
         '''
