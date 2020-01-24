@@ -135,7 +135,7 @@ if __name__ == "__main__":
     
         samples = (input_dirs.keys())
         #if sorted(args.samples) != sorted(sample_inputs.keys()):
-            #print('ArgumentError: --input_dirs and --samples must specify the same set of samples')
+            #printI('ArgumentError: --input_dirs and --samples must specify the same set of samples')
         if run_cnvs:
             #-------------------------------------#
             #           cnvs calling              #
@@ -372,30 +372,42 @@ if __name__ == "__main__":
     
         
         if args.verbose:
-            os.system("{tool} --barcodes-csv {csv} --forbidden-tags XA,SA --min-mapq 30 -o {output} {bam}".format(tool=demux, csv=barcodes_csv, output=out_dir, bam=input_bam))
+            os.system("{tool} --barcodes-csv {csv} --forbidden-tags XA,SA --min-mapq 30 --bed -o {output} {bam}".format(tool=demux, csv=barcodes_csv, output=out_dir, bam=input_bam))
         else:
-            os.system("{tool} --barcodes-csv {csv} --forbidden-tags XA,SA --min-mapq 30 -o {output} {bam} &> {log}".format(tool=demux, csv=barcodes_csv, output=out_dir, bam=input_bam, log=log_file))
+            os.system("{tool} --barcodes-csv {csv} --forbidden-tags XA,SA --min-mapq 30 --bed -o {output} {bam} &> {log}".format(tool=demux, csv=barcodes_csv, output=out_dir, bam=input_bam, log=log_file))
         
+        print_msg("Demux done", 0, verbose)
+
         # mv {input}/noise.bam {params.noisedir}/{params.newnoisebam}
         noise_bam = os.path.join(out_dir, "noise.bam")
         noise_rename = os.path.join(out_dir, "noise.bam.noise")
         os.rename(noise_bam, noise_rename)
         
         # samtools view  -u {input} | bamToBed -i - > {output}
+        """
         bams = []
         for file in glob.glob(os.path.join(out_dir, "*.bam")):
             bams.append(file)
+        """
+        beds = []
+        for file in glob.glob(os.path.join(out_dir, "*.bed")):
+            beds.append(file)
 
+        cmds = []
+        for bed in beds:
+            cmds.append("gzip {bed}".format(bed=bed))
         
+        """
         cmds = []
         for bam in bams:
             bed = os.path.splitext(bam)[0] + ".bed"
             gzip = bed + ".gz"
             cmds.append("samtools view  -u {bam_file} | bamToBed -i - > {bed_file} | gzip > {gzipped}".format(bam_file=bam, bed_file=bed, gzipped=gzip))
-        
+        """
+
         if args.tasks:
             njobs = args.tasks
-            nbams = len(bams)
+            nbams = len(beds)
                 
             for i in range(0, nbams, njobs):
                 jobs = []
@@ -414,15 +426,11 @@ if __name__ == "__main__":
                 #print("{} jobs done.".format(njobs))
         else:
             for cmd in cmds:
-                if args.verbose:
-                    os.system(cmd)
-                    #print(cmd)
-                else:
-                    cmd = cmd + "  &> samtools.log"
-                    #print(cmd)
                     os.system(cmd)
 
-        
+        bams = os.path.join(out_dir, "*.bam")
+        os.system("rm {bams}".format(bams=bams))
+
     elif args.run_cell_filtering:
         print("Cell filtering execution")
         """
