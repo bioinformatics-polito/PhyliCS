@@ -40,6 +40,10 @@ make 2> /dev/null
 
 #scripts cli genomes
 cp $ROOT/phylics/local/src/ginkgo/cli/ginkgo.sh $ROOT/bin/
+cd $ROOT/phylics/local/src/ginkgo/
+cp testBED status interval binUnsorted CNVcaller scripts
+
+cd $ROOT
 cp -r $ROOT/phylics/local/src/ginkgo/scripts $ROOT/
 cp -r $ROOT/phylics/local/src/ginkgo/cli $ROOT/
 cp -r $ROOT/phylics/local/src/ginkgo/genomes $ROOT/
