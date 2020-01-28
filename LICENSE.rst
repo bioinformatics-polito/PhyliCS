@@ -27,5 +27,5 @@ These are covered by the three clause BSD license as can be found in
 the file `LICENSE-BSD.rst <./LICENSE-BSD.rst>`__. In cases of doubt
 the terms of both licenses apply.
 
-OTHER_PhyliCS is published under the terms of the three clause BSD license as can
-be found in the file `include/OTHER_PhyliCS/LICENSE <./include/OTHER_PhyliCS/LICENSE>`__.
+Ginkgo is published under the terms of the three clause BSD license as can
+be found in the file `phylics/local/src/ginkgo//LICENSE <./phylics/local/src/ginkgo/LICENSE>`__.
