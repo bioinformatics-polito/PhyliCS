@@ -18,14 +18,4 @@ See the file `LICENSE-AGPL3.rst <./LICENSE-AGPL3.rst>`__ or
 http://www.gnu.org/licenses/ for a full text of the license and the
 rights and obligations implied.
 
-Some of the contributions to PhyliCS are alternatively or additionally
-::
-
-  Copyright (c) 2018-2020, Marilisa Montemurro, Elena Grassi, Gianvito Urgese, and Politecnico di Torino
-
-These are covered by the three clause BSD license as can be found in
-the file `LICENSE-BSD.rst <./LICENSE-BSD.rst>`__. In cases of doubt
-the terms of both licenses apply.
-
-Ginkgo is published under the terms of the three clause BSD license as can
-be found in the file `phylics/local/src/ginkgo//LICENSE <./phylics/local/src/ginkgo/LICENSE>`__.
+We obtained and adapted to our needs Gingko code, which is licensed under "BSD 2-Clause "Simplified" License", we kept its license notice as needed. It be found in the file `phylics/local/src/ginkgo//LICENSE <./phylics/local/src/ginkgo/LICENSE>`__.

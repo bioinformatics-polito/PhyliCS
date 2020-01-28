@@ -2,7 +2,7 @@ Name: PhyliCS
 Author: Marilisa Montemurro <marilisa.montemurro@polito.it>
 Maintainer1: Elena Grassi <elena.grassi@ircc.it>
 Maintainer2: Gianvito Urgese <gianvito.urgese@polito.it>
-License: AGPL v3
+License: AGPL-3, we obtained and adapted to our needs Gingko code, which is licensed under "BSD 2-Clause "Simplified" License", we kept its license notice as needed.
 Copyright: Marilisa Montemurro
 2018-2020 Marilisa Montemurro and Gianvito Urgese, Politecnico di Torino, 10129 Torino, Italy
 2018-2020 Elena Grassi, Department of Oncology, University of Torino, 10060 Candiolo, Torino, Italy
