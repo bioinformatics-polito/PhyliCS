@@ -2,8 +2,7 @@ PhyliCS copyright
 ================
 ::
 
-  Copyright (c) 2018-2020, Marilisa Montemurro, Elena Grassi, and Gianvito Urgese
-  All rights reserved.
+  Copyright (c) 2018-2020, Marilisa Montemurro, Elena Grassi, and Gianvito Urgese.
 
 PhyliCS is *free software*: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
