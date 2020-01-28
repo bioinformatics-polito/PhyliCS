@@ -18,4 +18,4 @@ See the file `LICENSE-AGPL3.rst <./LICENSE-AGPL3.rst>`__ or
 http://www.gnu.org/licenses/ for a full text of the license and the
 rights and obligations implied.
 
-We obtained and adapted to our needs Gingko code, which is licensed under "BSD 2-Clause "Simplified" License", we kept its license notice as needed. It be found in the file `phylics/local/src/ginkgo//LICENSE <./phylics/local/src/ginkgo/LICENSE>`__.
+We obtained and adapted to our needs Gingko code, which is licensed under "BSD 2-Clause "Simplified" License", we kept its license notice as needed. It can be found in the file `phylics/local/src/ginkgo//LICENSE <./phylics/local/src/ginkgo/LICENSE>`__.
