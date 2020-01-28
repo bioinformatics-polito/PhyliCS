@@ -1,5 +1,24 @@
 #!/usr/bin/env python
 
+# ==========================================================================
+#                                  PhyliCS
+# ==========================================================================
+# This file is part of PhyliCS.
+#
+# TOOL is Free Software: you can redistribute it and/or modify it
+# under the terms found in the LICENSE.rst file distributed
+# together with this file.
+#
+# PhyliCS is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#
+# ==========================================================================
+# Author: Marilisa Montemurro <marilisa.montemurro@polito.it>
+# ==========================================================================
+# single_sample_post_analysis.py: Single-sample analysis module
+# ==========================================================================
+
 
 from funcs import *
 from check_funcs import *
@@ -66,7 +85,7 @@ if __name__ == "__main__":
     outdir = args.outdir[0]
     
     reclust = False
-    reinit = False
+    Ireinit = False
     verbose = False
     
     if args.seed:

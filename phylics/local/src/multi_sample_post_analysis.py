@@ -1,5 +1,25 @@
 #!/usr/bin/env python
 
+# ==========================================================================
+#                                  PhyliCS
+# ==========================================================================
+# This file is part of PhyliCS.
+#
+# TOOL is Free Software: you can redistribute it and/or modify it
+# under the terms found in the LICENSE.rst file distributed
+# together with this file.
+#
+# PhyliCS is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#
+# ==========================================================================
+# Author: Marilisa Montemurro <marilisa.montemurro@polito.it>
+# ==========================================================================
+# multi_sample_post_analysis.py: Multi-sample analysis module
+# ==========================================================================
+
+
 from funcs import *
 from check_funcs import *
 #from dicttoxml import dicttoxml

@@ -1,0 +1,11 @@
+Name: PhyliCS
+Author: Marilisa Montemurro <marilisa.montemurro@polito.it>
+Maintainer1: Elena Grassi <elena.grassi@ircc.it>
+Maintainer2: Gianvito Urgese <gianvito.urgese@polito.it>
+License: AGPL v3
+Copyright: Marilisa Montemurro
+2018-2020 Marilisa Montemurro and Gianvito Urgese, Politecnico di Torino, 10129 Torino, Italy
+2018-2020 Elena Grassi, Department of Oncology, University of Torino, 10060 Candiolo, Torino, Italy
+Status: first release
+Description: PhyliCS is a pipeline for multi-sample copy-number variation (CNV) analysis on single-cell DNA sequencing data and intra-tumor heterogeneity quantification.
+Acknowledgements: This open source software code was developed using funds deriving from: AIRC 5x1000 grant 21091 and European Research Council Consolidator Grant 724748 – BEAT. This work has been supported by the SmartData@PoliTO center on Big Data and Data Science. Computational resources were provided by HPC@POLITO, a project of Academic Computing within the Department of Control and Computer Engineering at the Politecnico di Torino (http://www.hpc.polito.it).
