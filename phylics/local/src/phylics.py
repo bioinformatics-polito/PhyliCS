@@ -20,7 +20,8 @@
 # ==========================================================================
 
 
-from check_funcs import *import os
+from check_funcs import *
+import os
 import sys
 import glob
 import argparse

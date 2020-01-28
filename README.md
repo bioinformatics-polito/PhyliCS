@@ -18,8 +18,8 @@ Download the .zip archive of the project and uncompress it or clone it via git, 
 You need to create and activate a conda environment which will contain all the packages required to run PhyliCS. Then you can build the application by executing `build.sh`:
 ```
 cd PhyliCS
-ENV=<env_name> #substitute <env_name> with your preferred environment name
-conda create --name $ENV --file phylics_env.txt
+export PHYLICS_ENV=<env_name> #substitute <env_name> with your preferred environment name
+conda create --name $PHYLICS_ENV --file phylics_env.txt
 conda activate $ENV
 
 ./build.sh
