@@ -57,36 +57,36 @@ jupyter notebook
 If you have installed it from conda, instead, then you need download the input data and the notebook from this repo and run the test. To do so, `cd` to the directory where you want to perform the test and type:
 
 ```
-    mkdir data
-    mkdir data/navin_primary data/navin_metastasis
-    mkdir data/10x_breastA data/10x_breastB data/10x_breastC
+mkdir data
+mkdir data/navin_primary data/navin_metastasis
+mkdir data/10x_breastA data/10x_breastB data/10x_breastC
 
-    cd data/navin_primary 
-    wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/navin_primary/SegCopy
-    wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/navin_primary/results.txt
+cd data/navin_primary 
+wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/navin_primary/SegCopy
+wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/navin_primary/results.txt
 
-    cd ../navin_metastasis
-    wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/navin_metastasis/SegCopy
-    wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/navin_metastasis/results.txt
+cd ../navin_metastasis
+wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/navin_metastasis/SegCopy
+wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/navin_metastasis/results.txt
 
-    cd ../..
+cd ../..
     
-    cd data/10x_breastA
-    wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/10x_breastA/SegCopy
-    wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/10x_breastA/results.txt
+cd data/10x_breastA
+wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/10x_breastA/SegCopy
+wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/10x_breastA/results.txt
     
-    cd ../10x_breastB
-    wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/10x_breastB/SegCopy
-    wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/10x_breastB/results.txt
+cd ../10x_breastB
+wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/10x_breastB/SegCopy
+wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/10x_breastB/results.txt
     
-    cd ../10x_breastC
-    wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/10x_breastC/SegCopy
-    wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/10x_breastC/results.txt
+cd ../10x_breastC
+wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/10x_breastC/SegCopy
+wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/10x_breastC/results.txt
 
-    cd ../..
+cd ../..
     
-    wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/phylics.ipynb
+wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/phylics.ipynb
 
-    #be sure you have activated phylics conda environment
-    jupyter notebook
+#be sure you have activated phylics conda environment
+jupyter notebook
 ```
