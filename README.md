@@ -37,7 +37,7 @@ Add Bioconda channel:
 
 ```conda config --add channels bioconda```
 
-Create an environment containing PhyliCS and all of its dependencies:
+Create an environment containing PhyliCS and all its dependencies:
 
 ```
 conda create --name phylics phylics
