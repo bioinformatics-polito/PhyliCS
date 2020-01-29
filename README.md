@@ -87,6 +87,6 @@ If you have installed it from conda, instead, then you need download the input d
     
     wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/phylics.ipynb
 
-    #be sure to have activated phylics conda environment
+    #be sure you have activated phylics conda environment
     jupyter notebook
 ```
