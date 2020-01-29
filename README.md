@@ -22,9 +22,8 @@ tar xvzf PhyliCS-1.0.0.tar.gz
 You need to create and activate a conda environment which will contain all the packages required to run PhyliCS. Then you can build the application by executing `build.sh`:
 ```
 cd PhyliCS
-export PHYLICS_ENV=<env_name> #substitute <env_name> with your preferred environment name
-conda create --name $PHYLICS_ENV --file phylics_env.txt
-conda activate $ENV
+conda create --name phylics --file phylics_env.txt
+conda activate phylics
 
 ./build.sh
 ```
@@ -60,17 +59,32 @@ If you have installed it from conda, instead, then you need download the input d
 ```
     mkdir data
     mkdir data/navin_primary data/navin_metastasis
+    mkdir data/10x_breastA data/10x_breastB data/10x_breastC
 
     cd data/navin_primary 
-    wget https://github.com/bioinformatics-polito/PhyliCS/blob/master/data/navin_primary/SegCopy
-    wget https://github.com/bioinformatics-polito/PhyliCS/blob/master/data/navin_primary/results.txt
+    wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/navin_primary/SegCopy
+    wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/navin_primary/results.txt
 
     cd ../navin_metastasis
-    wget https://github.com/bioinformatics-polito/PhyliCS/blob/master/data/navin_metastasis/SegCopy
-    wget https://github.com/bioinformatics-polito/PhyliCS/blob/master/data/navin_metastasis/results.txt
+    wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/navin_metastasis/SegCopy
+    wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/navin_metastasis/results.txt
 
     cd ../..
+    
+    cd data/10x_breastA
+    wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/10x_breastA/SegCopy
+    wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/10x_breastA/results.txt
+    
+    cd ../10x_breastB
+    wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/10x_breastB/SegCopy
+    wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/10x_breastB/results.txt
+    
+    cd ../10x_breastC
+    wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/10x_breastC/SegCopy
+    wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/10x_breastC/results.txt
 
+    cd ../..
+    
     wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/phylics.ipynb
 
     #be sure to have activated phylics conda environment
