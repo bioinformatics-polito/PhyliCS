@@ -489,9 +489,9 @@ if __name__ == "__main__":
 
     '''
     print_line(verbose)
-
-    df_mean = extract_clusters(Z, boundaries, n_clusters, merged_cnvs, reclust, outdir, verbose)
-    heatmap(df_mean.transpose(), boundaries, method, metric,outdir, True, verbose, sample=sample)
+    if n_clusters > 1:
+        df_mean = extract_clusters(Z, boundaries, n_clusters, merged_cnvs, reclust, outdir, verbose)
+        heatmap(df_mean.transpose(), boundaries, method, metric,outdir, True, verbose, sample=sample)
 
     """
     if meta_format == 'xml':

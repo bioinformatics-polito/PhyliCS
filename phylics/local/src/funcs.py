@@ -222,7 +222,8 @@ def tsne_pca(cnvs, tsne_iterations, metadata, outdir, verbose, perplexity=None):
 
 def my_silhouette_score(Z, cnvs, outdir, verbose):
     print_msg("Computing the optimal number of clusters", 0, verbose)
-    range_n_clusters = range(2,18)
+    n_samples = len(cnvs)
+    range_n_clusters = range(2,min(18, n_samples))
     silhouette_avgs = {}
     i = 0
     j = 0
@@ -241,7 +242,10 @@ def my_silhouette_score(Z, cnvs, outdir, verbose):
 
         #Z = h.dendrogram_row.linkage
         cluster_labels = fcluster(Z, t = n_clusters, criterion = 'maxclust')
-
+        if len(np.unique(cluster_labels)) == 1 :
+            #there are to few cells to be clustered
+            print_msg("There are to few cells to compute clusters", 0, verbose)
+            return -1
         # The silhouette_score gives the average value for all the samples.
         # This gives a perspective into the density and separation of the formed
         # clusters

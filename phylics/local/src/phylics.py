@@ -395,7 +395,6 @@ if __name__ == "__main__":
         else:
             os.system("{tool} --barcodes-csv {csv} --forbidden-tags XA,SA --min-mapq 30 --bed -o {output} {bam} &> {log}".format(tool=demux, csv=barcodes_csv, output=out_dir, bam=input_bam, log=log_file))
         
-        print_msg("Demux done", 0, verbose)
 
         # mv {input}/noise.bam {params.noisedir}/{params.newnoisebam}
         noise_bam = os.path.join(out_dir, "noise.bam")
