@@ -15,9 +15,10 @@ A pipeline for multi-sample copy-number variation (CNV) analysis on single-cell 
 Download the archive containing the release version of the project and uncompress it:
 
 ```
-wget -O PhyliCS-1.0.1.tar.gz https://github.com/bioinformatics-polito/PhyliCS/archive/v1.0.1.tar.gz
-tar xvzf PhyliCS-1.0.1.tar.gz
+wget -O PhyliCS-X.X.X.tar.gz https://github.com/bioinformatics-polito/PhyliCS/archive/vX.X.X.tar.gz
+tar xvzf PhyliCS-X.X.X.tar.gz
 ```
+Pay attenion that in the above line of code `X.X.X` should be substituted with a release version. Check the release tab to know which is the latest and most stable release (v1.0.2 at time of writing). 
 
 You need to create and activate a conda environment which will contain all the packages required to run PhyliCS. Then you can build the application by executing `build.sh`:
 ```
