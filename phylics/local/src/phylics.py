@@ -398,8 +398,13 @@ if __name__ == "__main__":
 
         # mv {input}/noise.bam {params.noisedir}/{params.newnoisebam}
         noise_bam = os.path.join(out_dir, "noise.bam")
-        noise_rename = os.path.join(out_dir, "noise.bam.noise")
-        os.rename(noise_bam, noise_rename)
+        #noise_rename = os.path.join(out_dir, "noise.bam.noise")
+        os.system("rm " + noise_bam)
+
+        noise_bed = os.path.join(out_dir, "noise.bed")
+        #noise_rename = os.path.join(out_dir, "noise.bed.noise")
+        #os.rename(noise_bed, noise_rename)
+        os.system("rm " + noise_bed)
         
         # samtools view  -u {input} | bamToBed -i - > {output}
         """
