@@ -7,18 +7,16 @@ A pipeline for multi-sample copy-number variation (CNV) analysis on single-cell 
     - linux-64
 - Software:
     - python >= 3.6
-    - conda >= 4.3
+    - conda >= 4.8.2
 
 ## Installation and setup instructions
 
 ### From source code
-Download the archive containing the release version of the project and uncompress it:
+Clone the git archive:
 
 ```
-wget -O PhyliCS-X.X.X.tar.gz https://github.com/bioinformatics-polito/PhyliCS/archive/vX.X.X.tar.gz
-tar xvzf PhyliCS-X.X.X.tar.gz
+git clone https://github.com/bioinformatics-polito/PhyliCS.git
 ```
-Pay attenion that in the above line of code `X.X.X` should be substituted with a release version. Check the release tab to know which is the latest and most stable release (v1.0.2 at time of writing). 
 
 You need to create and activate a conda environment which will contain all the packages required to run PhyliCS. Then you can build the application by executing `build.sh`:
 ```
