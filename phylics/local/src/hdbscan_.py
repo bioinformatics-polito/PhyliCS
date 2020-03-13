@@ -20,10 +20,19 @@ parser.add_argument("input", metavar='SegCopy', action='store',
 parser.add_argument("outdir", metavar='outdir', action='store',
         help='Output directory path.', type=str)
 
+parser.add_argument("n_pcs", metavar='n_pcs', action='store',
+        help='Number of principal components.', type=int)
+
+parser.add_argument("--algorithm", metavar='algorithm', action='store', choices=['best', 'generic', 'prims_kdtree', 'prims_balltree', 'boruvka_kdtree', 'boruvka_balltree'], default='best',
+        help='Number of principal components.', type=str)
+
+
 args=parser.parse_args()
 
 input_file = args.input
 outdir = args.outdir
+npcs = args.n_pcs
+algorithm = args.algorithm
 
 
 df = pd.read_csv(input_file, sep="\t")
@@ -47,7 +56,7 @@ for end in chr_limits:
     start = end+1
 
 #preliminary dimensionality reduction
-pca = PCA(n_components=17)
+pca = PCA(n_components=npcs)
 pca_results = pca.fit_transform(cnvs)
 
 #tsne
@@ -59,8 +68,8 @@ tsne_results = tsne.fit_transform(pca_results)
 
 #hdbscan
 clusterer_dict = {}
-for min_size in range(3,10+1):
-    clusterer = hdbscan.HDBSCAN(min_cluster_size=min_size, cluster_selection_epsilon=0.3, prediction_data=True).fit(tsne_results)
+for min_size in range(3,15+1):
+    clusterer = hdbscan.HDBSCAN(min_cluster_size=min_size, min_samples=1,  cluster_selection_method='eom', algorithm=algorithm).fit(pca_results)
   
     count = 0
     for p in clusterer.probabilities_:
@@ -72,8 +81,12 @@ optSize=min(clusterer_dict.items(), key=operator.itemgetter(1))[0]
 print("optimal min cluster size: " + str(optSize))
 
 
-clusterer = hdbscan.HDBSCAN(min_cluster_size=optSize, cluster_selection_epsilon=0.3, prediction_data=True).fit(tsne_results)
+clusterer = hdbscan.HDBSCAN(min_cluster_size=optSize, min_samples=1, cluster_selection_epsilon=0.5, cluster_selection_method='eom', algorithm=algorithm, prediction_data=True).fit(pca_results)
 
+#print("n probabilties: " + str(len(clusterer.probabilities_)))
+#print(clusterer.probabilities_)
+
+#print(clusterer.labels_)
 color_palette = sns.color_palette("hls", len(np.unique(clusterer.labels_)))
 cluster_colors = [color_palette[x] if x >= 0
                   else (0.5, 0.5, 0.5)
@@ -107,7 +120,7 @@ h = sns.clustermap(cnvs,
         row_colors=cluster_colors,
         cmap='RdBu_r',
         vmin=0, vmax=6,
-        center=2,
+        center = 2,
         #norm=divnorm,
         cbar_kws=cbar_kws)
 
@@ -133,7 +146,9 @@ plt.gcf().set_size_inches(37, 21)
 plt.savefig(outdir+'/clusters_heatmap.png')
 plt.clf()
 
-'''
+#cnvs[cnvs["cluster"] == 0].to_csv(outdir+"/to_be_filtered.tsv", sep="\t")
+
+"""
 #soft clustering
 soft_clusters = hdbscan.all_points_membership_vectors(clusterer)
 color_palette = sns.color_palette('hls', 20)
@@ -193,7 +208,7 @@ plt.gcf().suptitle('Cnv profiles', fontsize=16, fontweight='bold' )
 plt.gcf().set_size_inches(37, 21)
 plt.savefig(outdir+'/soft_clusters_heatmap.png')
 plt.clf()
-'''
+"""
 
 
 
