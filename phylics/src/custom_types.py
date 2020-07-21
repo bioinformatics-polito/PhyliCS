@@ -20,7 +20,7 @@
 # ==========================================================================
 
 import pandas as pd
-from typing import Union
+from typing import Union, List
 
 class CNVS:
     def __init__(self, cnvs_df: Union[pd.DataFrame, str]):
@@ -47,3 +47,8 @@ class CNVS:
 
     def transpose_cnvs(self):
         return self.cnvs.transpose()   
+    
+    def drop_cells(self, cells:List[str]):
+        cnvs_df = self.cnvs_df.drop(cells, axis=1)
+        cnvs = CNVS(cnvs_df)
+        return cnvs

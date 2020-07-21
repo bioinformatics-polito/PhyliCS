@@ -29,7 +29,7 @@ import matplotlib.ticker as ticker
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 import matplotlib.transforms as transforms
-from typing import Tuple
+from typing import Tuple, Union
 
 def heatmap(cnvs, boundaries, method='ward', metric='euclidean', outpath=None, verbose=False, sample=None,
                 vmin:int = 0, vmax:int = 12, vcenter:int=2, figsize:Tuple[int, int]=(37, 21), fontsize:int=16): 
@@ -86,22 +86,24 @@ def heatmap(cnvs, boundaries, method='ward', metric='euclidean', outpath=None, v
         plt.savefig(outpath)
     else:
         plt.show()
+    plt.clf()
     return h
 
 def dist(a:Union[list, np.array, pd.Series], kde:bool=True, rug:bool=False, vertical:bool=False, 
                 axlabel:str=None, label:str=None, figsize:Tuple[int, int]=None, outpath:str=None):
     ax = sns.distplot(a, kde=kde, rug=rug, vertical=vertical, axlabel=axlabel, label=label)
-    if fontsize != None:
+    if figsize != None:
         plt.cgf().set_size_inches(figsize)
     if outpath != None:
         plt.savefig(outpath)
     else:
         plt.show()
+    plt.clf()
     return ax
 
 _DRAWING_FUNCTIONS_ = {
     'heatmap' : heatmap,
-    'dist': dit
+    'dist': dist
 }
 
 
