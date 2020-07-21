@@ -39,7 +39,7 @@ from sklearn.manifold import TSNE
 from sklearn.metrics import silhouette_samples, silhouette_score
 from scipy.cluster.hierarchy import dendrogram, linkage, fcluster, cophenet
 from scipy.spatial.distance import pdist, cdist, squareform
-
+from typing import Tuple
 
 def multi_sample_heatmap(cnvs, boundaries, samples_dict, method, metric, outdir, verbose):
     #compute the ending position of each chromosome to draw vertical lines on the plot
@@ -97,7 +97,8 @@ def multi_sample_heatmap(cnvs, boundaries, samples_dict, method, metric, outdir,
         h.ax_row_dendrogram.bar(0, 0, color=sample_lut[label],
                             label=label, linewidth=0)
     print(h.ax_row_dendrogram)
-    h.ax_row_dendrogram.legend(title='Samples', loc='center', bbox_to_anchor=(0.5,0.9), ncol=len(samples), fontsize=14, title_fontsize='x-large', bbox_transform=plt.gcf().transFigure)
+    h.ax_row_dendrogram.legend(title='Samples', loc='center', bbox_to_anchor=(0.5,0.9), ncol=len(samples), fontsize=14, 
+            title_fontsize='x-large', bbox_transform=plt.gcf().transFigure)
     h.cax.set_position([0.05, .2, .03, .45])
     
     Z = h.dendrogram_row.linkage
@@ -129,10 +130,17 @@ def multi_sample_heatmap(cnvs, boundaries, samples_dict, method, metric, outdir,
 
     return Z
 
-def heatmap(cnvs, boundaries, method, metric, outdir, clusters, verbose, sample=None):
-    divnorm = colors.DivergingNorm(vmin=0, vcenter=2, vmax=12)
+def heatmap(cnvs, boundaries, method='ward', metric='euclidean', outpath=None, verbose=False, sample=None,
+                vmin:int = 0, vmax:int = 12, vcenter:int=2, figsize:Tuple[int, int]=(37, 21), fontsize:int=16):
+    divnorm = colors.TwoSlopeNorm(vmin=vmin, vcenter=vcenter, vmax=vmax)
     
-    chr_limits = boundaries.index[boundaries['END'].isin(boundaries.groupby('CHR', sort=False)['END'].max().values)].tolist()
+    if method == 'ward' and metric != 'euclidean':
+        raise ValueError("metric must be 'euclidean' if method is 'ward'")
+
+
+    chr_limits = []
+    for k,v in boundaries.groupby('CHR', sort=False)['END'].max().items():
+        chr_limits.append(boundaries.index[(boundaries['CHR'] == k) & (boundaries['END'] == v)].tolist()[0])
     chr_boundaries = np.append(0, chr_limits)
     chr_list = boundaries['CHR'].unique().tolist()
     chrN_list = []
@@ -148,21 +156,13 @@ def heatmap(cnvs, boundaries, method, metric, outdir, clusters, verbose, sample=
         pos_list.append((start+end)/2)
         start = end+1
 
-    if clusters:
-        yticklabels = True
-    else:
-        yticklabels = False
-
-    cbar_kws={"ticks":np.arange(0,13,1)}
-    h = sns.clustermap(cnvs, method=method, metric=metric, col_cluster=False, yticklabels = yticklabels,  cmap='RdBu_r', vmin=0, vmax=12,norm=divnorm, cbar_kws=cbar_kws)
+    
+    cbar_kws={"ticks":np.arange(vmin,vmax+1,1)}
+    h = sns.clustermap(cnvs, method=method, metric=metric, col_cluster=False, yticklabels = False,  
+                cmap='RdBu_r', vmin=vmin, vmax=vmax,norm=divnorm, figsize=figsize, cbar_kws=cbar_kws)
     Z = h.dendrogram_row.linkage
     
-    if clusters == False:
-        h.cax.set_position([0.05, .2, .03, .45])
-        c, coph_dist = cophenet(Z,pdist(cnvs, metric))
-        textstr = '(cophenet coeff= ' + str(c)+')'
-        print_msg("cophenet coefficient: " + str(c), 1, verbose)
-
+    h.cax.set_position([0.05, .2, .03, .45])
 
     ax = h.ax_heatmap
     #place vertical lines to identify chromosomes
@@ -172,27 +172,22 @@ def heatmap(cnvs, boundaries, method, metric, outdir, clusters, verbose, sample=
     #place chromosome ticks at the right position
     ax.xaxis.set_major_locator(ticker.FixedLocator((pos_list)))
     ax.xaxis.set_major_formatter(ticker.FixedFormatter((chrN_list)))
-    ax.tick_params(axis='x', rotation=0, labelsize=14)
+    ax.tick_params(axis='x', rotation=0, labelsize=fontsize)
     
     ax.xaxis.set_minor_locator(ticker.FixedLocator(chr_boundaries))
     ax.tick_params(axis='x', length=20, which='minor')
 
-    ax.set_xlabel("Chromosomes", fontweight='bold', fontsize=14)
-    if clusters:
-        ax.set_ylabel("Clusters", fontweight='bold', fontsize=14)
-    else:
-        ax.set_ylabel("cells", fontsize=14, fontweight='bold')
+    ax.set_xlabel("Chromosomes", fontweight='bold', fontsize=fontsize)
+    ax.set_ylabel("cells", fontsize=16, fontweight='bold')
 
-    plt.gcf().set_size_inches(37, 21)
-    
-    if clusters:
-        plt.gcf().suptitle("Clusters mean CNV heatmap  " + sample, fontsize=16, fontweight='bold')
-        plt.savefig(outdir+"/clusters_heatmap.png")
+    #plt.gcf().set_size_inches(37, 21)
+    plt.gcf().suptitle("CNV heatmap - Sample = " + sample, fontsize=fontsize+2, fontweight='bold')
+
+    if outpath != None:
+        plt.savefig(outpath)
     else:
-        plt.gcf().suptitle("CNV heatmap - Sample = " + sample + '\n' + textstr, fontsize=16, fontweight='bold')
-        plt.savefig(outdir+"/heatmap.png")
-    plt.clf()
-    return Z
+        plt.show()
+    
 
 
 def tsne_pca(cnvs, tsne_iterations, metadata, outdir, verbose, perplexity=None):
@@ -485,3 +480,9 @@ def print_msg(msg, level, verbose):
 def print_line(verbose):
     if verbose:
         print("-"*80)
+
+def show_image(img, outpath):
+    img.savefig(outpath)
+
+def show_image(img, outpat):
+    img.show(outpath)

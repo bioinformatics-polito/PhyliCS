@@ -20,7 +20,7 @@
 # ==========================================================================
 
 
-from check_funcs import *
+from .check_funcs import *
 import os
 import sys
 import glob
