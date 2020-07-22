@@ -19,13 +19,14 @@
 # sample.py: this module implements all methods to manage samples
 # ==========================================================================
 
+__all__ = ['Sample']
 
 from .custom_types import CNVS
 from .drawer import Drawer
 import random
 import pandas as pd
 import numpy as np
-from typing import Union, Tuple
+from typing import Union, Tuple, List
 
 _FILTER_BY_SINGLE_PLOIDY_METHODS_ = {  
                                 'EQ' :'eq', 
@@ -46,58 +47,60 @@ _FILTER_METHODS_ = {
 
 class Sample:
 
-    def __init__(self, cnv_matrix:Union[CNVS, str], mads:Union[dict, str]=None, ploidies:Union[dict, str]=None, 
-                        coverages:Union[dict, str]=None, sample_name:str="sample"):
-        if isinstance(cnv_matrix, CNVS):
-            self.df = cnv_matrix
-        elif isinstance(cnv_matrix, str):
-            self.df = CNVS(cnv_matrix)
-        
+    def __init__(self, cnvs_dataframe:CNVS, cell_mad:Union[dict, str]=None, cell_ploidy:Union[dict, str]=None, 
+                        cell_coverage:Union[dict, str]=None, sample_name:str="sample"):      
+        self.df = cnvs_dataframe
         self.cnvs = self.df.get_cnvs()
         self.boundaries = self.df.get_boundaries()
         self.cells = self.df.get_cells()
         self.name = sample_name
-
-        if ploidies != None:
-            if isinstance(ploidies, dict):
-                self.ploidies = ploidies
-            elif isinstance(ploidies, str):
-                self.ploidies = pd.read_csv(ploidies, header=0, squeeze=True, index_col=0, sep="\t").to_dict()
-        else:
-            self.ploidies = None
         
-        if coverages != None:
-            if isinstance(coverages, dict):
-                self.coverages = coverages
-            elif isinstance(ploidies, str):
-                self.coverages = pd.read_csv(coverages, header=0, squeeze=True, index_col=0, sep="\t").to_dict()
+        if cell_ploidy != None:
+            if isinstance(cell_ploidy, dict):
+                self.cell_ploidy = cell_ploidy
+            elif isinstance(cell_ploidy, str):
+                self.cell_ploidy = pd.read_csv(cell_ploidy, header=None, squeeze=True, index_col=0, sep="\t").to_dict()
         else:
-            self.coverages = None
+            self.cell_ploidy = None
         
-        if mads == None:
-            self.mads = self.df.get_mads()
-        elif isinstance(mads, dict):
-            self.mads = mads
-        elif isinstance(mads, str):
-            self.mads = pd.read_csv(mads, header=0, squeeze=True, index_col=0, sep="\t").to_dict()
-    
-    def set_mads(self, mads:Union[dict, str]):
-        if isinstance(mads, dict):
-            self.mads = mads
-        elif isinstance(mads, str):
-            self.mads = pd.read_csv(mads, header=0, squeeze=True, index_col=0, sep="\t").to_dict()
+        if cell_coverage != None:
+            if isinstance(cell_coverage, dict):
+                self.cell_coverage = cell_coverage
+            elif isinstance(cell_ploidy, str):
+                self.cell_coverage = pd.read_csv(cell_coverage, header=None, squeeze=True, index_col=0, sep="\t").to_dict()
+        else:
+            self.cell_coverage = None
+        
+        if cell_mad == None:
+            self.cell_mad = self.df.get_mads()
+        elif isinstance(cell_mad, dict):
+            self.cell_mad = cell_mad
+        elif isinstance(cell_mad, str):
+            self.cell_mad = pd.read_csv(cell_mad, header=None, squeeze=True, index_col=0, sep="\t").to_dict()
 
-    def set_ploidies(self, ploidies:Union[dict, str]):
-        if isinstance(ploidies, dict):
-            self.ploidies = ploidies
-        elif isinstance(ploidies, str):
-            self.ploidies = pd.read_csv(ploidies, header=0, squeeze=True, index_col=0, sep="\t").to_dict()
+    @classmethod
+    def from_file(cls, cnvs_dataframe:str, cell_mad:Union[dict, str]=None, cell_ploidy:Union[dict, str]=None, 
+                        cell_coverage:Union[dict, str]=None, sample_name:str="sample"):
+        return cls(CNVS.from_file(cnvs_dataframe), cell_mad, cell_ploidy, cell_coverage, sample_name)
+        
 
-    def set_coverages(self, coverages:Union[dict, str]):
-        if isinstance(coverages, dict):
-            self.coverages = coverages
-        elif isinstance(coverages, str):
-            self.coverages = pd.read_csv(coverages, header=0, squeeze=True, index_col=0, sep="\t").to_dict()        
+    def set_cell_mad(self, cell_mad:Union[dict, str]):
+        if isinstance(cell_mad, dict):
+            self.cell_mad = cell_mad
+        elif isinstance(cell_mad, str):
+            self.cell_mad = pd.read_csv(cell_mad, header=0, squeeze=True, index_col=0, sep="\t").to_dict()
+
+    def set_cell_ploidy(self, cell_ploidy:Union[dict, str]):
+        if isinstance(cell_ploidy, dict):
+            self.cell_ploidy = cell_ploidy
+        elif isinstance(cell_ploidy, str):
+            self.cell_ploidy = pd.read_csv(cell_ploidy, header=0, squeeze=True, index_col=0, sep="\t").to_dict()
+
+    def set_cell_coverage(self, cell_coverage:Union[dict, str]):
+        if isinstance(cell_coverage, dict):
+            self.cell_coverage = cell_coverage
+        elif isinstance(cell_coverage, str):
+            self.cell_coverage = pd.read_csv(cell_coverage, header=0, squeeze=True, index_col=0, sep="\t").to_dict()        
     
     def set_name(self, sample_name:str):
         self.name = sample_name
@@ -117,29 +120,29 @@ class Sample:
     def get_name(self):
         return self.name
 
-    def get_ploidies(self):
-        return self.ploidies
+    def get_cell_ploidy(self):
+        return self.cell_ploidy
     
-    def get_coverages(self):
-        return self.coverages
+    def get_cell_coverage(self):
+        return self.cell_coverage
     
-    def get_mads(self):
-        return self.mads
+    def get_cell_mad(self):
+        return self.cell_mad
 
     def count(self):
         return len(self.cells)
 
-    def plot_ploidy_dist(self, kde:bool=True, rug:bool=False, vertical:bool=False, 
-                axlabel:str=None, label:str=None, figsize:Tuple[int, int]=None, outpath:str=None):
-        Drawer.draw('dist', list(self.ploidies.values()), kde, rug, vertical, axlabel, label, figsize, outpath)
+    def plot_ploidy_dist(self, kde:bool=True, rug:bool=False, vertical:bool=False, grid:bool=False,
+                quantiles:List[float]=None, axlabel:str=None, label:str=None, figsize:Tuple[int, int]=None, outpath:str=None):
+        Drawer.draw('dist', list(self.cell_ploidy.values()), kde, rug, vertical, grid, quantiles, axlabel, label, figsize, outpath)
     
-    def plot_mad_dist(self, kde:bool=True, rug:bool=False, vertical:bool=False, 
-                axlabel:str=None, label:str=None, figsize:Tuple[int, int]=None, outpath:str=None):
-        Drawer.draw('dist', list(self.mads.values()), kde, rug, vertical, axlabel, label, figsize, outpath)
+    def plot_mad_dist(self, kde:bool=True, rug:bool=False, vertical:bool=False, grid:bool=False,
+                quantiles:List[float]=None, axlabel:str=None, label:str=None, figsize:Tuple[int, int]=None, outpath:str=None):
+        Drawer.draw('dist', list(self.cell_mad.values()), kde, rug, vertical, grid, quantiles, axlabel, label, figsize, outpath)
 
-    def plot_cell_coverage_dist(self, kde:bool=True, rug:bool=False, vertical:bool=False, 
-                axlabel:str=None, label:str=None, figsize:Tuple[int, int]=None, outpath:str=None):
-        Drawer.draw('dist', list(self.coverages.values()), kde, rug, vertical, axlabel, label, figsize, outpath)
+    def plot_cell_coverage_dist(self, kde:bool=True, rug:bool=False, vertical:bool=False, grid:bool=False,
+                quantiles:List[float]=None, axlabel:str=None, label:str=None, figsize:Tuple[int, int]=None, outpath:str=None):
+        Drawer.draw('dist', list(self.cell_coverage.values()), kde, rug, vertical, grid, quantiles, axlabel, label, figsize, outpath)
 
     def heatmap(self, method:str ='ward', metric:str ='euclidean', outpath:str=None,
                     vmin:int = 0, vmax:int = 12, vcenter:int=2, figsize:Tuple[int, int]=(37, 21), fontsize:int=16):
@@ -148,7 +151,7 @@ class Sample:
     
     #Filter functions
 
-    def filter_by_ploidy(self, method:str='eq', ploidy:Union[float, int, Tuple[float, float]]=2.0):
+    def filter_by_ploidy(self, method:str='eq', ploidy:Union[float, int, Tuple]=2.0):
         """
         Filter out group of cells based on their ploidy 
         -----------------------------------------------------
@@ -159,7 +162,7 @@ class Sample:
                     When a ploidy interval is provided, acceptable values are:
                         - 'in', 'out', 'in_eq', 'out_eq', to filter out cells with ploidy whithin or out of
                         the interval (extremes excluded and included, respectively).
-        ploidy: single value or interval of ploidies
+        ploidy: single value or interval of cell_ploidy
         """
         if (method not in list(_FILTER_BY_SINGLE_PLOIDY_METHODS_.values())) and (method not in list(_FILTER_BY_RANGE_PLOIDY_METHODS_.values())):
             raise ValueError("filter_by_ploidy: method must be one of %r or %r."
@@ -167,23 +170,23 @@ class Sample:
         cells = []
         if isinstance(ploidy, float) or isinstance(ploidy, int):
             if method == _FILTER_BY_SINGLE_PLOIDY_METHODS_['EQ']:
-                for cell, p in self.ploidies.items():
+                for cell, p in self.cell_ploidy.items():
                     if p == ploidy:
                         cells.append(cell)
             elif method == _FILTER_BY_SINGLE_PLOIDY_METHODS_['LT']:
-                for cell, p in self.ploidies.items():
+                for cell, p in self.cell_ploidy.items():
                     if p < ploidy:
                         cells.append(cell)
             elif method == _FILTER_BY_SINGLE_PLOIDY_METHODS_['LT_EQ']:
-                for cell, p in self.ploidies.items():
+                for cell, p in self.cell_ploidy.items():
                     if p <= ploidy:
                         cells.append(cell)
             elif method == _FILTER_BY_SINGLE_PLOIDY_METHODS_['GT']:
-                for cell, p in self.ploidies.items():
+                for cell, p in self.cell_ploidy.items():
                     if p > ploidy:
                         cells.append(cell)
             elif method == _FILTER_BY_SINGLE_PLOIDY_METHODS_['GT_EQ']:
-                for cell, p in self.ploidies.items():
+                for cell, p in self.cell_ploidy.items():
                     if p >= ploidy:
                         cells.append(cell)
             else:
@@ -192,35 +195,36 @@ class Sample:
             if ploidy[0] >= ploidy[1]:
                 raise ValueError("filter_by_ploidy: the first element of the ploidy tuple must be less than the second element.")
             if method == _FILTER_BY_RANGE_PLOIDY_METHODS_['IN']:
-                for cell, p in self.ploidies.items():
+                for cell, p in self.cell_ploidy.items():
                     if p > ploidy[0] and p < ploidy[1]:
                         cells.append(cell)
             elif method ==  _FILTER_BY_RANGE_PLOIDY_METHODS_['IN_EQ']:
-                for cell, p in self.ploidies.items():
+                for cell, p in self.cell_ploidy.items():
                     if p >= ploidy[0] and p <= ploidy[1]:
                         cells.append(cell)
             elif method ==  _FILTER_BY_RANGE_PLOIDY_METHODS_['OUT']:
-                for cell, p in self.ploidies.items():
+                for cell, p in self.cell_ploidy.items():
                     if p < ploidy[0] or p > ploidy[1]:
                         cells.append(cell)
             elif method ==  _FILTER_BY_RANGE_PLOIDY_METHODS_['OUT_EQ']:
-                for cell, p in self.ploidies.items():
+                for cell, p in self.cell_ploidy.items():
                     if p <= ploidy[0] or p >= ploidy[1]:
                         cells.append(cell)
             else:
                 raise ValueError("filter_by_ploidy: with a range of values, method must be one of  %r." % list(_FILTER_BY_RANGE_PLOIDY_METHODS_.values()))
-    
+        else:
+            raise TypeError("filter_by_ploidy: the ploidy must be of type int or float or tuple (e.g. (1.7, 2.0))")
         cnvs_df = self.df.drop_cells(cells)
-        filtered_mads = { cell: self.mads[cell] for cell in cells }
-        if self.ploidies != None:
-            filtered_ploidies = { cell: self.ploidies[cell] for cell in cells }
+        filtered_cell_mad = { cell: self.cell_mad[cell] for cell in cells }
+        if self.cell_ploidy != None:
+            filtered_cell_ploidy = { cell: self.cell_ploidy[cell] for cell in cells }
         else:
-            filtered_ploidies = None
-        if self.coverages != None:
-            filtered_coverages = { cell: self.coverages[cell] for cell in cells } 
+            filtered_cell_ploidy = None
+        if self.cell_coverage != None:
+            filtered_cell_coverage = { cell: self.cell_coverage[cell] for cell in cells } 
         else:
-            filtered_coverages = None
-        sample = Sample(cnvs_df, filtered_mads, filtered_ploidies, filtered_coverages, self.name)
+            filtered_cell_coverage = None
+        sample = Sample(cnvs_df, filtered_cell_mad, filtered_cell_ploidy, filtered_cell_coverage, self.name)
             
         return sample
     
@@ -239,23 +243,23 @@ class Sample:
         if method not in list(_FILTER_METHODS_.values()):
             raise ValueError("filter_by_mad: method must be one of %r." % list(_FILTER_METHODS_.values()))
         if method == _FILTER_METHODS_['PERC']:
-            mads = pd.Series(self.mads)
-            perc = mads.percentile(threshold)
-            filtered_mads = mads[mads <= perc]
+            perc = np.quantile(list(self.cell_mad.values()), float(threshold))
+            filtered_cell_mad = { cell: mad for cell, mad in self.cell_mad.items() if mad <= perc}
         elif method == _FILTER_METHODS_['VALUE']:
-            mads = pd.Series(self.mads)
-            filtered_mads = mads[mads <= threshold]
-        cells = filtered_mads.index.values
-        if self.ploidies != None:
-            filtered_ploidies = { cell: self.ploidies[cell] for cell in cells }
+            filtered_cell_mad = { cell: mad for cell, mad in self.cell_mad.items() if mad <= threshold}
+        cells = filtered_cell_mad.keys()
+        if self.cell_ploidy != None:
+            filtered_cell_ploidy = { cell: self.cell_ploidy[cell] for cell in cells }
         else:
-            filtered_ploidies = None
-        if self.coverages != None:
-            filtered_coverages = { cell: self.coverages[cell] for cell in cells }
+            filtered_cell_ploidy = None
+        if self.cell_coverage != None:
+            filtered_cell_coverage = { cell: self.cell_coverage[cell] for cell in cells }
         else:
-            filtered_coverages = None
+            filtered_cell_coverage = None
+        #TODO
+        # fix = cells must be kept and not removed
         cnvs_df = self.df.drop_cells(cells)
-        sample = Sample(cnvs_df, filtered_mads.to_dict(), filtered_ploidies, filtered_coverages, self.name)
+        sample = Sample(cnvs_df, filtered_cell_mad, filtered_cell_ploidy, filtered_cell_coverage, self.name)
         
         return sample
 
@@ -274,20 +278,18 @@ class Sample:
         if method not in list(_FILTER_METHODS_.values()):
             raise ValueError("filter_by_coverage: method must be one of %r." % list(_FILTER_METHODS_.values()))
         if method == _FILTER_METHODS_['PERC']:
-            coverages = pd.Series(self.coverages)
-            perc = coverages.percentile(threshold)
-            filtered_coverages = coverages[coverages <= perc]
+            perc = np.quantile(list(self.cell_coverage.values()), float(threshold))
+            filtered_cell_coverage = { cell: mad for cell, mad in self.cell_coverage.items() if mad <= perc}
         elif method == _FILTER_METHODS_['VALUE']:
-            coverages = pd.Series(self.coverages)
-            filtered_coverages = coverages[coverages <= threshold]
-        cells = filtered_coverages.index.values
-        filtered_mads = { cell: self.mads[cell] for cell in cells }
-        if self.ploidies != None:
-            filtered_ploidies = { cell: self.ploidies[cell] for cell in cells }        
+            filtered_cell_coverage = { cell: mad for cell, mad in self.cell_coverage.items() if mad <= threshold}
+        cells = filtered_cell_coverage.keys()
+        filtered_cell_mad = { cell: self.cell_mad[cell] for cell in cells }
+        if self.cell_ploidy != None:
+            filtered_cell_ploidy = { cell: self.cell_ploidy[cell] for cell in cells }        
         else:
-            filtered_ploidies = None        
+            filtered_cell_ploidy = None        
         cnvs_df = self.df.drop_cells(cells)
-        sample = Sample(cnvs_df, filtered_mads, filtered_ploidies, filtered_coverages.to_dict, self.name)
+        sample = Sample(cnvs_df, filtered_cell_mad, filtered_cell_ploidy, filtered_cell_coverage, self.name)
         return sample
 
     

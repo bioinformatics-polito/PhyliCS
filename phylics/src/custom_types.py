@@ -18,19 +18,22 @@
 # ==========================================================================
 # custom_types.py: this module implements phylics custom types
 # ==========================================================================
+__all__ = ['CNVS']
+
 
 import pandas as pd
 from typing import Union, List
 
 class CNVS:
-    def __init__(self, cnvs_df: Union[pd.DataFrame, str]):
-        if isinstance(cnvs_df, pd.DataFrame):
-            self.cnvs_df = cnvs_df
-        elif isinstance(cnvs_df, str):
-            self.cnvs_df = pd.read_csv(cnvs_df, sep="\t")
+    def __init__(self, cnvs_df: pd.DataFrame):
+        self.cnvs_df = cnvs_df
         self.cnvs = self.cnvs_df.drop(['CHR', 'START', 'END'], axis=1).transpose()
         self.boundaries = self.cnvs_df[['CHR', 'START', 'END']].copy()
         self.cells = self.cnvs.index.values
+    
+    @classmethod
+    def from_file(cls, cnvs_df:str):
+        return cls(pd.read_csv(cnvs_df, sep="\t"))
 
     def get_dataframe(self):
         return self.cnvs_df
@@ -52,3 +55,4 @@ class CNVS:
         cnvs_df = self.cnvs_df.drop(cells, axis=1)
         cnvs = CNVS(cnvs_df)
         return cnvs
+    

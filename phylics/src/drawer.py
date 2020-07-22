@@ -19,6 +19,9 @@
 # drawer.py: this module implements all methods to draw figures
 # ==========================================================================
 
+__all__ = ['Drawer']
+
+
 import sys
 import numpy as np
 import pandas as pd
@@ -29,7 +32,7 @@ import matplotlib.ticker as ticker
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 import matplotlib.transforms as transforms
-from typing import Tuple, Union
+from typing import Tuple, Union, List
 
 def heatmap(cnvs, boundaries, method='ward', metric='euclidean', outpath=None, verbose=False, sample=None,
                 vmin:int = 0, vmax:int = 12, vcenter:int=2, figsize:Tuple[int, int]=(37, 21), fontsize:int=16): 
@@ -89,11 +92,20 @@ def heatmap(cnvs, boundaries, method='ward', metric='euclidean', outpath=None, v
     plt.clf()
     return h
 
-def dist(a:Union[list, np.array, pd.Series], kde:bool=True, rug:bool=False, vertical:bool=False, 
-                axlabel:str=None, label:str=None, figsize:Tuple[int, int]=None, outpath:str=None):
+def dist(a:Union[list, np.array, pd.Series], kde:bool=True, rug:bool=False, vertical:bool=False, grid:bool=False,
+                quantiles:List[float]=None, axlabel:str=None, label:str=None, figsize:Tuple[int, int]=None, outpath:str=None):
+
     ax = sns.distplot(a, kde=kde, rug=rug, vertical=vertical, axlabel=axlabel, label=label)
+    
+    if quantiles != None:
+        for q in quantiles:
+            pos = np.quantile(a, q)
+            plt.axvline(pos, color='red', linestyle='--', label=q)    
+        plt.legend()
+    if grid == True:
+        plt.grid()
     if figsize != None:
-        plt.cgf().set_size_inches(figsize)
+        plt.gcf().set_size_inches(figsize)
     if outpath != None:
         plt.savefig(outpath)
     else:
@@ -108,6 +120,7 @@ _DRAWING_FUNCTIONS_ = {
 
 
 class Drawer:
+    @staticmethod
     def draw(plot_name:str, *args, **kwargs):
         func = _DRAWING_FUNCTIONS_[plot_name]
         func(*args, **kwargs)
