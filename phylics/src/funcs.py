@@ -263,7 +263,7 @@ def my_silhouette_score(Z, cnvs, outdir, verbose):
 
             size_cluster_k = kth_cluster_silhouette_values.shape[0]
             y_upper = y_lower + size_cluster_k
-            color = cm.nipy_spectral(float(k) / n_clusters)
+            color = cm.spectral(float(k) / n_clusters)
             ax[i][j].fill_betweenx(np.arange(y_lower, y_upper),
                           0, kth_cluster_silhouette_values,
                           facecolor=color, edgecolor=color, alpha=0.7)
