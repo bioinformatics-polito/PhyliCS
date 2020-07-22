@@ -484,5 +484,3 @@ def print_line(verbose):
 def show_image(img, outpath):
     img.savefig(outpath)
 
-def show_image(img, outpat):
-    img.show(outpath)

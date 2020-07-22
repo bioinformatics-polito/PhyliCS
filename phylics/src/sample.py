@@ -21,7 +21,7 @@
 
 __all__ = ['Sample']
 
-from .custom_types import CNVS
+from .custom_types import CNVS, LookUpTable
 from .drawer import Drawer
 import random
 import pandas as pd
@@ -49,34 +49,34 @@ class Sample:
 
     def __init__(self, cnvs_dataframe:CNVS, cell_mad:Union[dict, str]=None, cell_ploidy:Union[dict, str]=None, 
                         cell_coverage:Union[dict, str]=None, sample_name:str="sample"):      
-        self.df = cnvs_dataframe
-        self.cnvs = self.df.get_cnvs()
-        self.boundaries = self.df.get_boundaries()
-        self.cells = self.df.get_cells()
+        self.cnvs_df = cnvs_dataframe
+        self.cnvs = self.cnvs_df.get_cnvs()
+        self.boundaries = self.cnvs_df.get_boundaries()
+        self.cells = self.cnvs_df.get_cell_names()
         self.name = sample_name
         
         if cell_ploidy != None:
             if isinstance(cell_ploidy, dict):
-                self.cell_ploidy = cell_ploidy
+                self.cell_ploidy = LookUpTable(cell_ploidy)
             elif isinstance(cell_ploidy, str):
-                self.cell_ploidy = pd.read_csv(cell_ploidy, header=None, squeeze=True, index_col=0, sep="\t").to_dict()
+                self.cell_ploidy = LookUpTable(pd.read_csv(cell_ploidy, header=None, squeeze=True, index_col=0, sep="\t").to_dict())
         else:
             self.cell_ploidy = None
         
         if cell_coverage != None:
             if isinstance(cell_coverage, dict):
-                self.cell_coverage = cell_coverage
+                self.cell_coverage = LookUpTable(cell_coverage)
             elif isinstance(cell_ploidy, str):
-                self.cell_coverage = pd.read_csv(cell_coverage, header=None, squeeze=True, index_col=0, sep="\t").to_dict()
+                self.cell_coverage = LookUpTable(pd.read_csv(cell_coverage, header=None, squeeze=True, index_col=0, sep="\t").to_dict())
         else:
             self.cell_coverage = None
         
         if cell_mad == None:
-            self.cell_mad = self.df.get_mads()
+            self.cell_mad = LookUpTable(self.cnvs_df.get_mads())
         elif isinstance(cell_mad, dict):
-            self.cell_mad = cell_mad
+            self.cell_mad = LookUpTable(cell_mad)
         elif isinstance(cell_mad, str):
-            self.cell_mad = pd.read_csv(cell_mad, header=None, squeeze=True, index_col=0, sep="\t").to_dict()
+            self.cell_mad = LookUpTable(pd.read_csv(cell_mad, header=None, squeeze=True, index_col=0, sep="\t").to_dict())
 
     @classmethod
     def from_file(cls, cnvs_dataframe:str, cell_mad:Union[dict, str]=None, cell_ploidy:Union[dict, str]=None, 
@@ -86,32 +86,32 @@ class Sample:
 
     def set_cell_mad(self, cell_mad:Union[dict, str]):
         if isinstance(cell_mad, dict):
-            self.cell_mad = cell_mad
+            self.cell_mad = LookUpTable(cell_mad)
         elif isinstance(cell_mad, str):
-            self.cell_mad = pd.read_csv(cell_mad, header=0, squeeze=True, index_col=0, sep="\t").to_dict()
+            self.cell_mad = LookUpTable(pd.read_csv(cell_mad, header=0, squeeze=True, index_col=0, sep="\t").to_dict())
 
     def set_cell_ploidy(self, cell_ploidy:Union[dict, str]):
         if isinstance(cell_ploidy, dict):
-            self.cell_ploidy = cell_ploidy
+            self.cell_ploidy = LookUpTable(cell_ploidy)
         elif isinstance(cell_ploidy, str):
-            self.cell_ploidy = pd.read_csv(cell_ploidy, header=0, squeeze=True, index_col=0, sep="\t").to_dict()
+            self.cell_ploidy = LookUpTable(pd.read_csv(cell_ploidy, header=0, squeeze=True, index_col=0, sep="\t").to_dict())
 
     def set_cell_coverage(self, cell_coverage:Union[dict, str]):
         if isinstance(cell_coverage, dict):
-            self.cell_coverage = cell_coverage
+            self.cell_coverage = LookUpTable(cell_coverage)
         elif isinstance(cell_coverage, str):
-            self.cell_coverage = pd.read_csv(cell_coverage, header=0, squeeze=True, index_col=0, sep="\t").to_dict()        
+            self.cell_coverage = LookUpTable(pd.read_csv(cell_coverage, header=0, squeeze=True, index_col=0, sep="\t").to_dict())      
     
     def set_name(self, sample_name:str):
         self.name = sample_name
     
     def get_dataframe(self):
-        return self.df 
+        return self.cnvs_df.get_dataframe()
     
     def get_cnvs(self):
         return self.cnvs
     
-    def get_cells(self):
+    def get_cell_names(self):
         return self.cells
 
     def get_boundaries(self):
@@ -119,18 +119,44 @@ class Sample:
 
     def get_name(self):
         return self.name
+    
+    def get_cell_cnvs(self, cellid:str):
+        return self.cnvs_df.get_cell_cnvs(cellid)
 
-    def get_cell_ploidy(self):
-        return self.cell_ploidy
+    def get_cell_ploidy(self, cellid:str='all'):
+        if cellid == 'all':
+            return self.cell_ploidy.get()
+        else:
+            return self.cell_ploidy.get_by_key(cellid)
     
-    def get_cell_coverage(self):
-        return self.cell_coverage
+    def get_cell_coverage(self, cellid:str='all'):
+        if cellid == 'all':
+            return self.cell_coverage.get()
+        else:
+            return self.cell_coverage.get_by_key(cellid)
     
-    def get_cell_mad(self):
-        return self.cell_mad
+    def get_cell_mad(self, cellid:str='all'):
+        if cellid == 'all':
+            return self.cell_mad.get()
+        else:
+            return self.cell_mad.get_by_key(cellid)
 
     def count(self):
         return len(self.cells)
+    
+    def drop_cells(self, cells:list):
+        cnvs = self.cnvs_df.drop_cells(cells)
+        mads = self.cell_mad.drop_by_keys(cells)
+        ploidies = self.cell_ploidy.drop_by_keys(cells)
+        coverages = self.cell_coverage.drop_by_keys(cells)
+        return Sample(cnvs, mads, ploidies, coverages, self.name)
+    
+    def get_cells(self, cells:list):
+        cnvs = self.cnvs_df.get_cells(cells)
+        mads = self.cell_mad.get_by_keys(cells)
+        ploidies = self.cell_ploidy.get_by_keys(cells)
+        coverages = self.cell_coverage.get_by_keys(cells)
+        return Sample(cnvs, mads, ploidies, coverages, self.name)
 
     def plot_ploidy_dist(self, kde:bool=True, rug:bool=False, vertical:bool=False, grid:bool=False,
                 quantiles:List[float]=None, axlabel:str=None, label:str=None, figsize:Tuple[int, int]=None, outpath:str=None):
@@ -214,21 +240,21 @@ class Sample:
                 raise ValueError("filter_by_ploidy: with a range of values, method must be one of  %r." % list(_FILTER_BY_RANGE_PLOIDY_METHODS_.values()))
         else:
             raise TypeError("filter_by_ploidy: the ploidy must be of type int or float or tuple (e.g. (1.7, 2.0))")
-        cnvs_df = self.df.drop_cells(cells)
-        filtered_cell_mad = { cell: self.cell_mad[cell] for cell in cells }
+        cnvs_df = self.cnvs_df.drop_cells(cells)
+        mads = self.cell_mad.drop_by_keys(cells)
         if self.cell_ploidy != None:
-            filtered_cell_ploidy = { cell: self.cell_ploidy[cell] for cell in cells }
+            ploidies = self.cell_ploidy.drop_by_keys(cells)
         else:
-            filtered_cell_ploidy = None
+            ploidies = None
         if self.cell_coverage != None:
-            filtered_cell_coverage = { cell: self.cell_coverage[cell] for cell in cells } 
+            coverages = self.cell_coverage.drop_by_keys(cells) 
         else:
-            filtered_cell_coverage = None
-        sample = Sample(cnvs_df, filtered_cell_mad, filtered_cell_ploidy, filtered_cell_coverage, self.name)
+            coverages = None
+        sample = Sample(cnvs_df, mads, ploidies, coverages, self.name)
             
         return sample
     
-    def filter_by_mad(self, method:str='percentile', threshold:float='0.9'):
+    def filter_by_mad(self, method:str='percentile', threshold:float=0.9):
         """
         Filter out cells with MAD above a given threshold
         -----------------------------------------------------
@@ -243,27 +269,25 @@ class Sample:
         if method not in list(_FILTER_METHODS_.values()):
             raise ValueError("filter_by_mad: method must be one of %r." % list(_FILTER_METHODS_.values()))
         if method == _FILTER_METHODS_['PERC']:
-            perc = np.quantile(list(self.cell_mad.values()), float(threshold))
+            perc = np.quantile(self.cell_mad.values(), float(threshold))
             filtered_cell_mad = { cell: mad for cell, mad in self.cell_mad.items() if mad <= perc}
         elif method == _FILTER_METHODS_['VALUE']:
             filtered_cell_mad = { cell: mad for cell, mad in self.cell_mad.items() if mad <= threshold}
-        cells = filtered_cell_mad.keys()
+        cells = list(filtered_cell_mad.keys())
         if self.cell_ploidy != None:
-            filtered_cell_ploidy = { cell: self.cell_ploidy[cell] for cell in cells }
+            ploidies = self.cell_ploidy.get_by_keys(cells)
         else:
-            filtered_cell_ploidy = None
+            ploidies = None
         if self.cell_coverage != None:
-            filtered_cell_coverage = { cell: self.cell_coverage[cell] for cell in cells }
+            coverages = self.cell_coverage.get_by_keys(cells)
         else:
-            filtered_cell_coverage = None
-        #TODO
-        # fix = cells must be kept and not removed
-        cnvs_df = self.df.drop_cells(cells)
-        sample = Sample(cnvs_df, filtered_cell_mad, filtered_cell_ploidy, filtered_cell_coverage, self.name)
+            coverages = None
+        cnvs_df = self.cnvs_df.get_cells(cells)
+        sample = Sample(cnvs_df, filtered_cell_mad, ploidies, coverages, self.name)
         
         return sample
 
-    def filter_by_coverage(self, method:str='percentile', threshold:float='0.9'):
+    def filter_by_coverage(self, method:str='percentile', threshold:float=0.1):
         """
         Filter out cells with a read count below a given threshold
         -----------------------------------------------------
@@ -278,18 +302,18 @@ class Sample:
         if method not in list(_FILTER_METHODS_.values()):
             raise ValueError("filter_by_coverage: method must be one of %r." % list(_FILTER_METHODS_.values()))
         if method == _FILTER_METHODS_['PERC']:
-            perc = np.quantile(list(self.cell_coverage.values()), float(threshold))
-            filtered_cell_coverage = { cell: mad for cell, mad in self.cell_coverage.items() if mad <= perc}
+            perc = np.quantile(self.cell_coverage.values(), float(threshold))
+            filtered_cell_coverage = { cell: mad for cell, mad in self.cell_coverage.items() if mad >= perc}
         elif method == _FILTER_METHODS_['VALUE']:
-            filtered_cell_coverage = { cell: mad for cell, mad in self.cell_coverage.items() if mad <= threshold}
-        cells = filtered_cell_coverage.keys()
-        filtered_cell_mad = { cell: self.cell_mad[cell] for cell in cells }
+            filtered_cell_coverage = { cell: mad for cell, mad in self.cell_coverage.items() if mad >= threshold}
+        cells = list(filtered_cell_coverage.keys())
+        mads = self.cell_mad.get_by_keys(cells)
         if self.cell_ploidy != None:
-            filtered_cell_ploidy = { cell: self.cell_ploidy[cell] for cell in cells }        
+            ploidies = self.cell_ploidy.get_by_keys(cells)       
         else:
-            filtered_cell_ploidy = None        
-        cnvs_df = self.df.drop_cells(cells)
-        sample = Sample(cnvs_df, filtered_cell_mad, filtered_cell_ploidy, filtered_cell_coverage, self.name)
+            ploidies = None        
+        cnvs_df = self.cnvs_df.get_cells(cells)
+        sample = Sample(cnvs_df, mads, ploidies, filtered_cell_coverage, self.name)
         return sample
 
     
