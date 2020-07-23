@@ -77,6 +77,12 @@ class Sample:
             self.cell_mad = LookUpTable(cell_mad)
         elif isinstance(cell_mad, str):
             self.cell_mad = LookUpTable(pd.read_csv(cell_mad, header=None, squeeze=True, index_col=0, sep="\t").to_dict())
+    
+    def __repr__(self):
+        return "Sample: %s\n%r" % (self.name, self.cnvs_df)
+
+    def __str__(self):
+        return "Sample: %s\n%r" % (self.name, self.cnvs_df)
 
     @classmethod
     def from_file(cls, cnvs_dataframe:str, cell_mad:Union[dict, str]=None, cell_ploidy:Union[dict, str]=None, 
@@ -174,6 +180,9 @@ class Sample:
                     vmin:int = 0, vmax:int = 12, vcenter:int=2, figsize:Tuple[int, int]=(37, 21), fontsize:int=16):
         Drawer.draw('heatmap', self.cnvs, self.boundaries, method, metric,  outpath=outpath, sample=self.name, 
             vmin = vmin, vmax=vmax, vcenter=vcenter, figsize=figsize, fontsize=fontsize)
+
+    def umap_plot(self, **kwargs):
+
     
     #Filter functions
 
@@ -315,6 +324,8 @@ class Sample:
         cnvs_df = self.cnvs_df.get_cells(cells)
         sample = Sample(cnvs_df, mads, ploidies, filtered_cell_coverage, self.name)
         return sample
+
+        
 
     
     

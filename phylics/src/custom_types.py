@@ -24,12 +24,22 @@ import numpy as np
 import pandas as pd
 from typing import Union, List
 
+import umap
+
 class CNVS:
     def __init__(self, cnvs_df: pd.DataFrame):
         self.cnvs_df = cnvs_df
         self.cnvs = self.cnvs_df.drop(['CHR', 'START', 'END'], axis=1).transpose()
         self.boundaries = self.cnvs_df[['CHR', 'START', 'END']].copy()
         self.cells = self.cnvs.index.values
+
+    
+    def __repr__(self):
+        return repr(self.cnvs_df)
+
+    def __str__(self):
+        return repr(self.cnvs_df)
+    
     
     @classmethod
     def from_file(cls, cnvs_df:str):
@@ -65,6 +75,12 @@ class CNVS:
 class LookUpTable:
     def __init__(self, mapping:dict):
         self.lut = mapping
+    
+    def __repr__(self):
+        return repr(pd.Series(self.lut).to_frame().T)
+
+    def __str__(self):
+        return repr(pd.Series(self.lut).to_frame().T)
 
     @classmethod
     def from_lists(cls, ordered_ids:List, ordered_values:List):
@@ -110,3 +126,14 @@ class LookUpTable:
 
     def drop_by_values(self, values:list):
         return {cell : v for cell, v in self.lut.items() if v not in values}
+
+class Reducer:
+    @staticmethod
+    def umap_(X, **kwargs):
+        reducer = umap.UMAP(**kwargs)
+        return reducer.fit_transform(X)
+    
+    @staticmethod
+    def pca_(X, **kwargs):
+        return X
+        

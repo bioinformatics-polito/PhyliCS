@@ -32,7 +32,7 @@ import matplotlib.ticker as ticker
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 import matplotlib.transforms as transforms
-from typing import Tuple, Union, List
+from typing import Tuple, Union, List, Iterable, Collection
 
 def heatmap(cnvs, boundaries, method='ward', metric='euclidean', outpath=None, verbose=False, sample=None,
                 vmin:int = 0, vmax:int = 12, vcenter:int=2, figsize:Tuple[int, int]=(37, 21), fontsize:int=16): 
@@ -113,9 +113,15 @@ def dist(a:Union[list, np.array, pd.Series], kde:bool=True, rug:bool=False, vert
     plt.clf()
     return ax
 
+def scatter(x:Iterable[Union[int, float, complex]]=None, y:Iterable[Union[int, float, complex]]=None, 
+                     X:Union[np.ndarray, pd.DataFrame]=None, outpath:str=None, figsize:Tuple[int, int]=None, **kwargs):
+    sns.scatterplot(**kwargs)
+
+
 _DRAWING_FUNCTIONS_ = {
     'heatmap' : heatmap,
-    'dist': dist
+    'dist': dist,
+    'scatter':scatter
 }
 
 
