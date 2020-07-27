@@ -16,9 +16,9 @@
 # ==========================================================================
 # Author: Marilisa Montemurro <marilisa.montemurro@polito.it>
 # ==========================================================================
-# custom_types.py: this module implements phylics custom types
+# data_types.py: this module implements phylics data types
 # ==========================================================================
-__all__ = ['CNVS']
+__all__ = ['CnvData']
 
 import numpy as np
 import pandas as pd
@@ -26,13 +26,13 @@ from typing import Union, List
 
 import umap
 
-class CNVS:
+class CnvData:
     def __init__(self, cnvs_df: pd.DataFrame):
         self.cnvs_df = cnvs_df
         self.cnvs = self.cnvs_df.drop(['CHR', 'START', 'END'], axis=1).transpose()
         self.boundaries = self.cnvs_df[['CHR', 'START', 'END']].copy()
         self.cells = self.cnvs.index.values
-
+        self.features = self.cnvs.columns
     
     def __repr__(self):
         return repr(self.cnvs_df)
@@ -59,18 +59,28 @@ class CNVS:
         return self.cnvs.mad(axis=1).to_dict()
     def get_cell_cnvs(self, cellid:str):
         return self.cnvs_df[cellid].values
+    def count(self):
+        return len(self.cells)
+    
     def transpose_cnvs(self):
         return self.cnvs.transpose()   
     
     def get_cells(self, cells:List[str]):
         cnvs_df = self.cnvs_df[np.append(['CHR', 'START', 'END'], cells)]
-        cnvs = CNVS(cnvs_df)
+        cnvs = CnvData(cnvs_df)
         return cnvs
     
     def drop_cells(self, cells:List[str]):
         cnvs_df = self.cnvs_df.drop(cells, axis=1)
-        cnvs = CNVS(cnvs_df)
+        cnvs = CnvData(cnvs_df)
         return cnvs
+
+class VariableFeatures:
+    def __init__(self, highly_variable, means, dispersions, dispersions_norm):
+        self.highly_variable = highly_variable
+        self.means = means
+        self.dispersions = dispersions
+        self.dispersions_norm = dispersions_norm
     
 class LookUpTable:
     def __init__(self, mapping:dict):
@@ -127,13 +137,4 @@ class LookUpTable:
     def drop_by_values(self, values:list):
         return {cell : v for cell, v in self.lut.items() if v not in values}
 
-class Reducer:
-    @staticmethod
-    def umap_(X, **kwargs):
-        reducer = umap.UMAP(**kwargs)
-        return reducer.fit_transform(X)
-    
-    @staticmethod
-    def pca_(X, **kwargs):
-        return X
         

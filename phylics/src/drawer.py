@@ -28,11 +28,15 @@ import pandas as pd
 import seaborn as sns
 import matplotlib 
 import matplotlib.cm as cm
+from matplotlib import rcParams
 import matplotlib.ticker as ticker
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 import matplotlib.transforms as transforms
-from typing import Tuple, Union, List, Iterable, Collection
+from typing import Tuple, Union, List, Iterable, Collection, Sequence, Optional
+from .data_types import CnvData, VariableFeatures
+from ._compat import Literal
+from . import logging as logg
 
 def heatmap(cnvs, boundaries, method='ward', metric='euclidean', outpath=None, verbose=False, sample=None,
                 vmin:int = 0, vmax:int = 12, vcenter:int=2, figsize:Tuple[int, int]=(37, 21), fontsize:int=16): 
@@ -92,10 +96,9 @@ def heatmap(cnvs, boundaries, method='ward', metric='euclidean', outpath=None, v
     plt.clf()
     return h
 
-def dist(a:Union[list, np.array, pd.Series], kde:bool=True, rug:bool=False, vertical:bool=False, grid:bool=False,
-                quantiles:List[float]=None, axlabel:str=None, label:str=None, figsize:Tuple[int, int]=None, outpath:str=None):
+def dist(a:Union[list, np.array, pd.Series], grid:bool=False, quantiles:List[float]=None, figsize:Tuple[int, int]=None, outpath:str=None, **kwargs):
 
-    ax = sns.distplot(a, kde=kde, rug=rug, vertical=vertical, axlabel=axlabel, label=label)
+    ax = sns.distplot(a, **kwargs)
     
     if quantiles != None:
         for q in quantiles:
@@ -106,6 +109,7 @@ def dist(a:Union[list, np.array, pd.Series], kde:bool=True, rug:bool=False, vert
         plt.grid()
     if figsize != None:
         plt.gcf().set_size_inches(figsize)
+    plt.subplots_adjust(wspace=0.3)
     if outpath != None:
         plt.savefig(outpath)
     else:
@@ -113,15 +117,63 @@ def dist(a:Union[list, np.array, pd.Series], kde:bool=True, rug:bool=False, vert
     plt.clf()
     return ax
 
-def scatter(x:Iterable[Union[int, float, complex]]=None, y:Iterable[Union[int, float, complex]]=None, 
-                     X:Union[np.ndarray, pd.DataFrame]=None, outpath:str=None, figsize:Tuple[int, int]=None, **kwargs):
-    sns.scatterplot(**kwargs)
+def scatter(x:np.array=None, y:np.array=None, 
+                     X:np.ndarray=None, outpath:str=None, figsize:Tuple[int, int]=None, **kwargs):
+    if X.any() != None:
+        ax = sns.scatterplot(X[:,0], X[:,1], **kwargs)
+    else: 
+        ax = sns.scatterplot(x, y, **kwargs)
+    if figsize != None:
+        plt.gcf().set_size_inches(figsize)
+    plt.subplots_adjust(wspace=0.3)
+    if outpath != None:
+        plt.savefig(outpath)
+    else:
+        plt.show()
+    return ax
+
+def highly_variable_features(X: VariableFeatures, log: bool = False, outpath: str = None):
+    means = X.means
+    dispersions = X.dispersions
+    dispersions_norm = X.dispersions_norm
+    feat_subset = X.highly_variable
+    size = rcParams['figure.figsize']
+    plt.figure(figsize=(2*size[0], size[1]))
+    plt.subplots_adjust(wspace=0.3)
+    for idx, d in enumerate([dispersions_norm, dispersions]):
+        plt.subplot(1, 2, idx + 1)
+        for label, color, mask in zip(['highly variable features', 'other features'],
+                                      ['red', 'grey'],
+                                      [feat_subset, ~feat_subset]):
+            if False: means_, disps_ = np.log10(means[mask]), np.log10(d[mask])
+            else: means_, disps_ = means[mask], d[mask]
+            plt.scatter(means_, disps_, label=label, c=color, s=1)
+        if log:  # there's a bug in autoscale
+            plt.xscale('log')
+            plt.yscale('log')
+            min_dispersion = np.min(dispersions)
+            y_min = 0.95*min_dispersion if min_dispersion > 0 else 1e-1
+            plt.xlim(0.95*np.min(means), 1.05*np.max(means))
+            plt.ylim(y_min, 1.05*np.max(dispersions))
+        if idx == 0: plt.legend()
+        plt.xlabel(('$log_{10}$ ' if False else '') + 'mean copy-number of bin')
+        plt.ylabel(('$log_{10}$ ' if False else '') + 'dispersion of copy-numbers'
+                  + (' (normalized)' if idx == 0 else ' (not normalized)'))
+    if outpath != None:
+        plt.savefig(outpath)
+    else: 
+        plt.show()
+    ax = plt.gca()
+    plt.clf()
+    return ax
+
 
 
 _DRAWING_FUNCTIONS_ = {
     'heatmap' : heatmap,
     'dist': dist,
-    'scatter':scatter
+    'scatter':scatter,
+    'variable_features':highly_variable_features
 }
 
 
@@ -129,4 +181,4 @@ class Drawer:
     @staticmethod
     def draw(plot_name:str, *args, **kwargs):
         func = _DRAWING_FUNCTIONS_[plot_name]
-        func(*args, **kwargs)
+        return func(*args, **kwargs)

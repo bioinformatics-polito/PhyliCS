@@ -21,12 +21,13 @@
 
 __all__ = ['Sample']
 
-from .custom_types import CNVS, LookUpTable
+from .data_types import CnvData, LookUpTable, VariableFeatures
+from .tools import Reducer, variable_features
 from .drawer import Drawer
 import random
 import pandas as pd
 import numpy as np
-from typing import Union, Tuple, List
+from typing import Union, Tuple, List, Optional
 
 _FILTER_BY_SINGLE_PLOIDY_METHODS_ = {  
                                 'EQ' :'eq', 
@@ -47,12 +48,12 @@ _FILTER_METHODS_ = {
 
 class Sample:
 
-    def __init__(self, cnvs_dataframe:CNVS, cell_mad:Union[dict, str]=None, cell_ploidy:Union[dict, str]=None, 
+    def __init__(self, cnvs_dataframe:CnvData, cell_mad:Union[dict, str]=None, cell_ploidy:Union[dict, str]=None, 
                         cell_coverage:Union[dict, str]=None, sample_name:str="sample"):      
-        self.cnvs_df = cnvs_dataframe
-        self.cnvs = self.cnvs_df.get_cnvs()
-        self.boundaries = self.cnvs_df.get_boundaries()
-        self.cells = self.cnvs_df.get_cell_names()
+        self.cnv_data = cnvs_dataframe
+        #self.cnvs = self.cnv_data.get_cnvs()
+        #self.boundaries = self.cnv_data.get_boundaries()
+        #self.cells = self.cnv_data.get_cell_names()
         self.name = sample_name
         
         if cell_ploidy != None:
@@ -72,23 +73,22 @@ class Sample:
             self.cell_coverage = None
         
         if cell_mad == None:
-            self.cell_mad = LookUpTable(self.cnvs_df.get_mads())
+            self.cell_mad = LookUpTable(self.cnv_data.get_mads())
         elif isinstance(cell_mad, dict):
             self.cell_mad = LookUpTable(cell_mad)
         elif isinstance(cell_mad, str):
             self.cell_mad = LookUpTable(pd.read_csv(cell_mad, header=None, squeeze=True, index_col=0, sep="\t").to_dict())
     
     def __repr__(self):
-        return "Sample: %s\n%r" % (self.name, self.cnvs_df)
+        return "Sample: %s\n%r" % (self.name, self.cnv_data)
 
     def __str__(self):
-        return "Sample: %s\n%r" % (self.name, self.cnvs_df)
+        return "Sample: %s\n%r" % (self.name, self.cnv_data)
 
     @classmethod
     def from_file(cls, cnvs_dataframe:str, cell_mad:Union[dict, str]=None, cell_ploidy:Union[dict, str]=None, 
                         cell_coverage:Union[dict, str]=None, sample_name:str="sample"):
-        return cls(CNVS.from_file(cnvs_dataframe), cell_mad, cell_ploidy, cell_coverage, sample_name)
-        
+        return cls(CnvData.from_file(cnvs_dataframe), cell_mad, cell_ploidy, cell_coverage, sample_name)
 
     def set_cell_mad(self, cell_mad:Union[dict, str]):
         if isinstance(cell_mad, dict):
@@ -111,23 +111,23 @@ class Sample:
     def set_name(self, sample_name:str):
         self.name = sample_name
     
-    def get_dataframe(self):
-        return self.cnvs_df.get_dataframe()
+    def get_cnv_data(self):
+        return self.cnv_data.get_dataframe()
     
-    def get_cnvs(self):
-        return self.cnvs
+    def get_cnv_matrix(self):
+        return self.cnv_data.get_cnvs()
     
     def get_cell_names(self):
-        return self.cells
+        return self.cnv_data.get_cells()
 
     def get_boundaries(self):
-        return self.boundaries
+        return self.cnv_data.get_boundaries()
 
     def get_name(self):
         return self.name
     
     def get_cell_cnvs(self, cellid:str):
-        return self.cnvs_df.get_cell_cnvs(cellid)
+        return self.cnv_data.get_cell_cnvs(cellid)
 
     def get_cell_ploidy(self, cellid:str='all'):
         if cellid == 'all':
@@ -148,43 +148,61 @@ class Sample:
             return self.cell_mad.get_by_key(cellid)
 
     def count(self):
-        return len(self.cells)
+        return self.cnv_data.count()
     
     def drop_cells(self, cells:list):
-        cnvs = self.cnvs_df.drop_cells(cells)
+        cnvs = self.cnv_data.drop_cells(cells)
         mads = self.cell_mad.drop_by_keys(cells)
         ploidies = self.cell_ploidy.drop_by_keys(cells)
         coverages = self.cell_coverage.drop_by_keys(cells)
         return Sample(cnvs, mads, ploidies, coverages, self.name)
     
     def get_cells(self, cells:list):
-        cnvs = self.cnvs_df.get_cells(cells)
+        cnvs = self.cnv_data.get_cells(cells)
         mads = self.cell_mad.get_by_keys(cells)
         ploidies = self.cell_ploidy.get_by_keys(cells)
         coverages = self.cell_coverage.get_by_keys(cells)
         return Sample(cnvs, mads, ploidies, coverages, self.name)
 
-    def plot_ploidy_dist(self, kde:bool=True, rug:bool=False, vertical:bool=False, grid:bool=False,
-                quantiles:List[float]=None, axlabel:str=None, label:str=None, figsize:Tuple[int, int]=None, outpath:str=None):
-        Drawer.draw('dist', list(self.cell_ploidy.values()), kde, rug, vertical, grid, quantiles, axlabel, label, figsize, outpath)
+    def variable_features(self, min_disp: Optional[float] = None, max_disp: Optional[float] = None, min_mean: Optional[float] = None, 
+        max_mean: Optional[float] = None, n_top_features: Optional[int] = None, n_bins: int = 20 ):
+        """
+        Method to find highly variant features
+        """
+        highly_variable, means, dispersions, dispersions_norm = variable_features(X = self.cnv_data, min_disp=min_disp, max_disp=max_disp, min_mean=min_mean,
+            max_mean = max_mean, n_top_features = n_top_features, n_bins=n_bins)
+        self.var = VariableFeatures(highly_variable, means, dispersions, dispersions_norm)
+        return self.var
     
-    def plot_mad_dist(self, kde:bool=True, rug:bool=False, vertical:bool=False, grid:bool=False,
-                quantiles:List[float]=None, axlabel:str=None, label:str=None, figsize:Tuple[int, int]=None, outpath:str=None):
-        Drawer.draw('dist', list(self.cell_mad.values()), kde, rug, vertical, grid, quantiles, axlabel, label, figsize, outpath)
+    def dimensionality_reduction(self, method:str="pca", features:str="all", **kwargs):
+        """
+        Method to perform dimensionality reduction
+        """
+        _features = None
+        if features == "variable_features":
+            _features = self.var
+        if method == "pca":
+            self.pca = Reducer.pca_(self.cnv_data.get_cnvs(), features=_features, **kwargs)
+        else:
+            self.umap = Reducer.umap_(self.cnv_data.get_cnvs(), features=_features, **kwargs)
+    
+    def jack_straw(self):
+        assert self.pca 
+        self.js = None
+    
+    def informative_pcs(self, method:str='jackstraw'):
+        """
+        Method to find most informative PCs
+        """
+        return NotImplemented 
 
-    def plot_cell_coverage_dist(self, kde:bool=True, rug:bool=False, vertical:bool=False, grid:bool=False,
-                quantiles:List[float]=None, axlabel:str=None, label:str=None, figsize:Tuple[int, int]=None, outpath:str=None):
-        Drawer.draw('dist', list(self.cell_coverage.values()), kde, rug, vertical, grid, quantiles, axlabel, label, figsize, outpath)
+    def clusters(self):
+        return NotImplemented 
 
-    def heatmap(self, method:str ='ward', metric:str ='euclidean', outpath:str=None,
-                    vmin:int = 0, vmax:int = 12, vcenter:int=2, figsize:Tuple[int, int]=(37, 21), fontsize:int=16):
-        Drawer.draw('heatmap', self.cnvs, self.boundaries, method, metric,  outpath=outpath, sample=self.name, 
-            vmin = vmin, vmax=vmax, vcenter=vcenter, figsize=figsize, fontsize=fontsize)
-
-    def umap_plot(self, **kwargs):
 
     
     #Filter functions
+    # TODO add 'inplace' functionality
 
     def filter_by_ploidy(self, method:str='eq', ploidy:Union[float, int, Tuple]=2.0):
         """
@@ -249,7 +267,7 @@ class Sample:
                 raise ValueError("filter_by_ploidy: with a range of values, method must be one of  %r." % list(_FILTER_BY_RANGE_PLOIDY_METHODS_.values()))
         else:
             raise TypeError("filter_by_ploidy: the ploidy must be of type int or float or tuple (e.g. (1.7, 2.0))")
-        cnvs_df = self.cnvs_df.drop_cells(cells)
+        cnv_data = self.cnv_data.drop_cells(cells)
         mads = self.cell_mad.drop_by_keys(cells)
         if self.cell_ploidy != None:
             ploidies = self.cell_ploidy.drop_by_keys(cells)
@@ -259,7 +277,7 @@ class Sample:
             coverages = self.cell_coverage.drop_by_keys(cells) 
         else:
             coverages = None
-        sample = Sample(cnvs_df, mads, ploidies, coverages, self.name)
+        sample = Sample(cnv_data, mads, ploidies, coverages, self.name)
             
         return sample
     
@@ -291,8 +309,8 @@ class Sample:
             coverages = self.cell_coverage.get_by_keys(cells)
         else:
             coverages = None
-        cnvs_df = self.cnvs_df.get_cells(cells)
-        sample = Sample(cnvs_df, filtered_cell_mad, ploidies, coverages, self.name)
+        cnv_data = self.cnv_data.get_cells(cells)
+        sample = Sample(cnv_data, filtered_cell_mad, ploidies, coverages, self.name)
         
         return sample
 
@@ -321,11 +339,43 @@ class Sample:
             ploidies = self.cell_ploidy.get_by_keys(cells)       
         else:
             ploidies = None        
-        cnvs_df = self.cnvs_df.get_cells(cells)
-        sample = Sample(cnvs_df, mads, ploidies, filtered_cell_coverage, self.name)
+        cnv_data = self.cnv_data.get_cells(cells)
+        sample = Sample(cnv_data, mads, ploidies, filtered_cell_coverage, self.name)
         return sample
 
+    def plot_ploidy_dist(self, grid:bool=False, quantiles:List[float]=None, figsize:Tuple[int, int]=None, outpath:str=None, **kwargs):
+        Drawer.draw('dist', list(self.cell_ploidy.values()), grid, quantiles, figsize, outpath, **kwargs)
+    
+    def plot_mad_dist(self, grid:bool=False, quantiles:List[float]=None, figsize:Tuple[int, int]=None, outpath:str=None, **kwargs):
+        Drawer.draw('dist', list(self.cell_mad.values()), grid, quantiles, figsize, outpath, **kwargs)
+
+    def plot_coverage_dist(self, grid:bool=False, quantiles:List[float]=None, figsize:Tuple[int, int]=None, outpath:str=None, **kwargs):
+        Drawer.draw('dist', list(self.cell_coverage.values()), grid, quantiles, figsize, outpath, **kwargs)
+
+    def heatmap(self, method:str ='ward', metric:str ='euclidean', outpath:str=None,
+                    vmin:int = 0, vmax:int = 12, vcenter:int=2, figsize:Tuple[int, int]=(37, 21), fontsize:int=16):
+        Drawer.draw('heatmap', self.cnv_data.get_cnvs(), self.cnv_data.get_boundaries(), method, metric,  outpath=outpath, sample=self.name, 
+            vmin = vmin, vmax=vmax, vcenter=vcenter, figsize=figsize, fontsize=fontsize)
+
+    def scatter_plot(self, outpath:str=None, figsize:Tuple[int, int]=None, **kwargs):
+        embeddings = Reducer.umap_(self.cnv_data.get_cnvs())
+        Drawer.draw('scatter', X=embeddings, figsize=figsize, outpath=outpath, **kwargs)
+    
+    def plot_variable_features(self, log: bool = False, outpath: str = None):
+        assert self.var
+        Drawer.draw('variable_features', X=self.var, log=log, outpath=outpath)
+    
+    def plot_pca(self):
+        assert self.pca 
+    
+    def plot_variance_ratio(self):
+        assert self.pca
+    
+    def plot_jack_straw(self):
+        assert self.js 
         
+
+
 
     
     
