@@ -3,14 +3,14 @@ from typing import Optional
 
 import numpy as np
 import pandas as pd
-from ..data_types import CnvData
+from ..types import CnvData
 
 from ._utils import _get_mean_var
 from ._distributed import materialize_as_ndarray
 
 
 def _highly_variable_features(
-    cnvs: CnvData,
+    X: np.ndarray,
     min_disp: Optional[float] = None,
     max_disp: Optional[float] = None,
     min_mean: Optional[float] = None,
@@ -30,7 +30,6 @@ def _highly_variable_features(
     if max_mean is None: max_mean = 3
     if max_disp is None: max_disp = np.inf
 
-    X = cnvs.get_cnvs()
     '''
     if flavor == 'seurat':
         if 'log1p' in adata.uns_keys() and adata.uns['log1p']['base'] is not None:
@@ -102,9 +101,9 @@ def _highly_variable_features(
     if n_top_features is not None:
         dispersion_norm = dispersion_norm[~np.isnan(dispersion_norm)]
         dispersion_norm[::-1].sort()  # interestingly, np.argpartition is slightly slower
-        if n_top_features > len(cnvs.features):
+        if n_top_features > X.n_feat:
             #logg.info(f'`n_top_genes` > `adata.n_var`, returning all genes.')
-            n_top_features =len(cnvs.features)
+            n_top_features =len(X.n_feat)
         disp_cut_off = dispersion_norm[n_top_features-1]
         feat_subset = np.nan_to_num(df['dispersions_norm'].values) >= disp_cut_off
         """

@@ -22,7 +22,7 @@ from .data_types import CnvData, VariableFeatures
 from .preprocessing._highly_variant_features import _highly_variable_features
 import numpy as np
 import pandas as pd
-from typing import Union, List, Optional
+from typing import Union, List, Optional, Sequence
 from  sklearn.decomposition import PCA
 import umap
 
@@ -30,7 +30,7 @@ import umap
 def variable_features(X:CnvData, min_disp: Optional[float] = None, max_disp: Optional[float] = None,
     min_mean: Optional[float] = None, max_mean: Optional[float] = None, n_top_features: Optional[int] = None,
     n_bins: int = 20 ):
-    df = _highly_variable_features(cnvs = X, min_disp=min_disp, max_disp=max_disp, min_mean=min_mean,
+    df = _highly_variable_features(X = X, min_disp=min_disp, max_disp=max_disp, min_mean=min_mean,
             max_mean = max_mean, n_top_features = n_top_features, n_bins=n_bins)
 
     return df['highly_variable'], df['means'], df['dispersions'], df['dispersions_norm']
@@ -40,16 +40,16 @@ def informative_pcs(X):
 
 class Reducer:
     @staticmethod
-    def umap_(X, features:VariableFeatures = None, **kwargs):
+    def umap_(X, features:Union[Sequence, pd.Series, np.array] = None, **kwargs):
         if features != None:
-            X = X[[features.highly_variable]]
+            X = X[[features]]
         reducer = umap.UMAP(**kwargs)
         return pd.DataFrame(reducer.fit_transform(X), index=X.index)
     
     @staticmethod
-    def pca_(X, features:VariableFeatures = None, **kwargs):
+    def pca_(X, features:Union[Sequence, pd.Series, np.array] = None, **kwargs):
         if features != None:
-            X = X[[features.highly_variable]]
+            X = X[[features]]
         pca = PCA(**kwargs)
         return pd.DataFrame(pca.fit_transform(X), index=X.index)
     

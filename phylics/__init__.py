@@ -1,4 +1,3 @@
-from .src.data_types import CnvData, LookUpTable
+from .src.types import *
+from .src.utils import *
 from .src.drawer import Drawer 
-from .src.sample import Sample
-
