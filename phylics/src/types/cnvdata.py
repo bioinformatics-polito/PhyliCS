@@ -161,7 +161,7 @@ class CnvData:
             oidx = slice(oidx, oidx + 1, 1)
         if isinstance(fidx, (int, np.integer)):
             fidx = slice(fidx, fidx + 1, 1)
-        if data_ref.is_view:
+        if data_ref._is_view:
             prev_oidx, prev_fidx = data_ref._oidx, data_ref._fidx
             data_ref = data_ref._adata_ref
             oidx, fidx = _resolve_idxs((prev_oidx, prev_fidx), (oidx, fidx), data_ref)
@@ -169,25 +169,25 @@ class CnvData:
         self.idx = fidx
     
         obs_sub = data_ref.obs.iloc[oidx]
-        var_sub = data_ref.var.iloc[fidx]
-        
+        feat_sub = data_ref.feat.iloc[fidx]
+        self.X = data_ref.to_df().iloc[oidx, fidx].to_numpy()
         uns_new = _slice_uns_sparse_matrices(
-            copy(data_ref._uns), self.oidx, data_ref.n_obs
+            copy(data_ref.uns), self.oidx, data_ref.n_obs
         )
         # fix categories
         self._remove_unused_categories(data_ref.obs, obs_sub, uns_new)
-        self._remove_unused_categories(data_ref.var, var_sub, uns_new)
+        self._remove_unused_categories(data_ref.feat, feat_sub, uns_new)
         # set attributes
         self.obs = DataFrameView(obs_sub, view_args=(self, "obs"))
-        self.var = DataFrameView(var_sub, view_args=(self, "var"))
+        self.obs_names = list(self.obs.index.values)
+        self.feat = DataFrameView(feat_sub, view_args=(self, "feat"))
+        self.feat_names = list(self.feat.index.values)
         self.uns = DictView(uns_new, view_args=(self, "uns"))
         self.n_obs = len(self.obs)
-        self.n_vars = len(self.var)
+        self.n_feat = len(self.feat)
 
-        # set raw, easy, as it’s immutable anyways...
         if data_ref.raw is not None:
-            # slicing along variables axis is ignored
-            self.raw = self
+            self.raw = data_ref.raw
         else:
             self.raw = None
         self.shape = (self.n_obs, self.n_feat)
@@ -195,13 +195,13 @@ class CnvData:
 
     def __repr__(self) -> str:
         descr = f"CnvData object with n_obs × n_vars = {self.n_obs} × {self.n_feat}"
-        for attr in [
-            "obs",
-            "feat",
-            "uns",
-            "raw"
-        ]:
-            keys = getattr(self, attr).keys()
+        for attr in ["obs", "feat", "uns","raw"]:
+            x = getattr(self, attr)
+            keys = []
+            if isinstance(x, pd.DataFrame):
+                keys = x.to_dict().keys()
+            else:
+                keys = x.keys()
             if len(keys) > 0:
                 descr += f"\n    {attr}: {str(list(keys))[1:-1]}"
         return descr
@@ -213,14 +213,13 @@ class CnvData:
             "instead compare the desired attributes."
         )
     
-    #TODO fix
     def __getitem__(self, index: Index) -> "CnVData":
         """Returns a sliced view of the object."""
         oidx, fidx = self._normalize_indices(index)
         return CnvData(self, oidx=oidx, fidx=fidx, asview=True)
     
     def _normalize_indices(self, index: Optional[Index]) -> Tuple[slice, slice]:
-        return _normalize_indices(index, self.obs_names, self.feat_names)
+        return _normalize_indices(index, self.obs.index, self.feat.index)
     
     def _remove_unused_categories(self, df_full, df_sub, uns):
         from pandas.api.types import is_categorical

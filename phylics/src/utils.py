@@ -16,7 +16,7 @@ def from_ginkgo_to_phylics(filepath:str):
     return X, boundaries
 
 def load_annotation_(filepath:str):
-    return pd.read_csv(filepath, header=0, squeeze=True, index_col=0, sep="\t")
+    return pd.read_csv(filepath, header=None, squeeze=True, index_col=0, sep="\t")
 
 def sanitize_annotation(ann:Union[pd.Series, Mapping[str, Union[float, int]]]):
     if isinstance(ann, pd.Series):

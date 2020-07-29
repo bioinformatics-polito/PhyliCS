@@ -32,21 +32,29 @@ from typing import Union, Tuple, List, Optional, Mapping, Any, Iterable, Sequenc
 from ..utils import AnyRandom
 
 
-_FILTER_BY_SINGLE_PLOIDY_METHODS_ = {  
+_FILTER_SINGLE_METHODS_ = {  
                                 'EQ' :'eq', 
                                 'LT' : 'lt',
                                 'GT' : 'gt', 
                                 'LT_EQ' : 'lt_eq', 
-                                'GT_EQ' : 'gt_eq'}
-_FILTER_BY_RANGE_PLOIDY_METHODS_ = {
+                                'GT_EQ' : 'gt_eq',
+                                }
+_FILTER_INTERVAL_METHODS_ = {
                                 'IN' : 'in', 
                                 'OUT' : 'out', 
                                 'IN_EQ' : 'in_eq', 
                                 'OUT_EQ' : 'out_eq'}
-_FILTER_METHODS_ = {
-    'PERC':'percentile',
-    'VALUE':'value'}
 
+_FILTER_PERCENTILE_METHODS_ = {
+                                'LT' : 'lt',
+                                'GT' : 'gt', 
+                                'LT_EQ' : 'lt_eq', 
+                                'GT_EQ' : 'gt_eq',
+
+                                }
+_FILTER_LIST_METHODS_ = {
+                                'IN' : 'in', 
+                                'OUT' : 'out', }
 
 
 class Sample:
@@ -68,8 +76,12 @@ class Sample:
     def add_annotation(self, ann:Union[pd.Series, Mapping[str, Union[float, int]]], key:str, axis:int=0):
         ann = sanitize_annotation(ann)
         if axis == 0:
+            if (ann.index.equals(self.cnv_data.obs.index) == False):
+                raise ValueError("indices mismatch")
             self.cnv_data.obs[key] = ann
         elif axis == 1:
+            if (ann.index.equals(self.cnv_data.feat.index) == False):
+                raise ValueError("indices mismatch")
             self.cnv_data.feat[key] = ann
         else:
             raise ValueError("IllegalArgument: axis = {}. Accepted values are 0 and 1")
@@ -78,36 +90,13 @@ class Sample:
         ann = load_annotation_(filepath)
         self.add_annotation(ann, key, axis)
     
-    
-    """
-    def set_cell_mad(self, cell_mad:Union[dict, str]):
-        if isinstance(cell_mad, dict):
-            self.cell_mad = LookUpTable(cell_mad)
-        elif isinstance(cell_mad, str):
-            self.cell_mad = LookUpTable(pd.read_csv(cell_mad, header=0, squeeze=True, index_col=0, sep="\t").to_dict())
-
-    def set_cell_ploidy(self, cell_ploidy:Union[dict, str]):
-        if isinstance(cell_ploidy, dict):
-            self.cell_ploidy = LookUpTable(cell_ploidy)
-        elif isinstance(cell_ploidy, str):
-            self.cell_ploidy = LookUpTable(pd.read_csv(cell_ploidy, header=0, squeeze=True, index_col=0, sep="\t").to_dict())
-
-    def set_cell_coverage(self, cell_coverage:Union[dict, str]):
-        if isinstance(cell_coverage, dict):
-            self.cell_coverage = LookUpTable(cell_coverage)
-        elif isinstance(cell_coverage, str):
-            self.cell_coverage = LookUpTable(pd.read_csv(cell_coverage, header=0, squeeze=True, index_col=0, sep="\t").to_dict())      
-    
-    def set_name(self, sample_name:str):
-        self.name = sample_name
-    """
     def get_cnv_dataframe(self):
         return self.cnv_data.to_df()
     
     def get_cnv_matrix(self):
         return self.cnv_data.X
     
-    def get_cell_names(self):
+    def get_cell(self):
         return self.cnv_data.obs_names
 
     def get_boundaries(self):
@@ -129,46 +118,18 @@ class Sample:
             return self.cnv_data.feat[key]
         else:
             raise ValueError("IllegalArgument: axis = {}. Accepted values are 0 and 1")
-    
-    """
-    def get_name(self):
-        return self.name
-    
-    def get_cell_cnvs(self, cellid:str):
-        return self.cnv_data.get_cell_cnvs(cellid)
 
-    def get_cell_ploidy(self, cellid:str='all'):
-        if cellid == 'all':
-            return self.cell_ploidy.get()
-        else:
-            return self.cell_ploidy.get_by_key(cellid)
-    
-    def get_cell_coverage(self, cellid:str='all'):
-        if cellid == 'all':
-            return self.cell_coverage.get()
-        else:
-            return self.cell_coverage.get_by_key(cellid)
-    
-    def get_cell_mad(self, cellid:str='all'):
-        if cellid == 'all':
-            return self.cell_mad.get()
-        else:
-            return self.cell_mad.get_by_key(cellid)
-    """
     def count(self):
         return self.cnv_data.n_obs
     
     def drop_cells(self, cells:list, inplace:bool=False):
         cnv_data = self.cnv_data.drop_obs(select=cells, inplace=inplace)
         return cnv_data
-    """
-    def get_cells(self, cells:list):
-        cnvs = self.cnv_data.get_cells(cells)
-        mads = self.cell_mad.get_by_keys(cells)
-        ploidies = self.cell_ploidy.get_by_keys(cells)
-        coverages = self.cell_coverage.get_by_keys(cells)
-        return Sample(cnvs, mads, ploidies, coverages, self.name)
-    """
+
+    def mad(self):
+        mad = self.cnv_data.to_df().mad(axis=1)
+        self.add_annotation(mad, 'mad')
+
     def variable_features(self, min_disp: Optional[float] = None, max_disp: Optional[float] = None, min_mean: Optional[float] = None, 
         max_mean: Optional[float] = None, n_top_features: Optional[int] = None, n_bins: int = 20 ):
     
@@ -183,11 +144,11 @@ class Sample:
         return self.cnv_data.feat[['highly_variable', 'means', 'dispersions', 'dispersions_norm']]
     
     def pca(self, n_comps: Optional[int] = None, svd_solver: str = 'arpack', random_state: AnyRandom = 0, 
-            use_highly_variable: Optional[bool] = None):
-            pca_result = pca(self, n_comps, svd_solver, random_state, use_highly_variable)
+            use_highly_variable: Optional[bool] = False):
+            pca_result = pca(self.cnv_data, n_comps, svd_solver, random_state, use_highly_variable)
             self.cnv_data.uns['pca'] = {}
             self.cnv_data.uns['pca']['X'] = pca_result[0]
-            self.cnv_data.data.uns['pca']['variance'] = pca_result[1]
+            self.cnv_data.uns['pca']['variance'] = pca_result[1]
             self.cnv_data.uns['pca']['variance_ratio'] = pca_result[2]
             self.cnv_data.uns['pca']['components'] = pca_result[3]
 
@@ -200,149 +161,88 @@ class Sample:
 
     def clusters(self):
         return NotImplemented 
-    """
 
-    
+
     #Filter functions
-    # TODO add 'inplace' functionality
-    def filter_by_ploidy(self, method:str='eq', ploidy:Union[float, int, Tuple]=2.0):
-        
-        Filter out group of cells based on their ploidy 
-        -----------------------------------------------------
-        method: the method according which the cells are filtered.
-                    When a single value is specified, acceptable values are:
-                        - 'eq', 'lt', 'gt', 'lt_eq', 'gt_eq' , to filter out cells with ploidy equal, 
-                        less than, greater than, less or equal than, greater or equal then the provided values
-                    When a ploidy interval is provided, acceptable values are:
-                        - 'in', 'out', 'in_eq', 'out_eq', to filter out cells with ploidy whithin or out of
-                        the interval (extremes excluded and included, respectively).
-        ploidy: single value or interval of cell_ploidy
-        
-        if (method not in list(_FILTER_BY_SINGLE_PLOIDY_METHODS_.values())) and (method not in list(_FILTER_BY_RANGE_PLOIDY_METHODS_.values())):
-            raise ValueError("filter_by_ploidy: method must be one of %r or %r."
-            % list(_FILTER_BY_SINGLE_PLOIDY_METHODS_.values()), list(_FILTER_BY_RANGE_PLOIDY_METHODS_.values()))
-        cells = []
-        if isinstance(ploidy, float) or isinstance(ploidy, int):
-            if method == _FILTER_BY_SINGLE_PLOIDY_METHODS_['EQ']:
-                for cell, p in self.cell_ploidy.items():
-                    if p == ploidy:
-                        cells.append(cell)
-            elif method == _FILTER_BY_SINGLE_PLOIDY_METHODS_['LT']:
-                for cell, p in self.cell_ploidy.items():
-                    if p < ploidy:
-                        cells.append(cell)
-            elif method == _FILTER_BY_SINGLE_PLOIDY_METHODS_['LT_EQ']:
-                for cell, p in self.cell_ploidy.items():
-                    if p <= ploidy:
-                        cells.append(cell)
-            elif method == _FILTER_BY_SINGLE_PLOIDY_METHODS_['GT']:
-                for cell, p in self.cell_ploidy.items():
-                    if p > ploidy:
-                        cells.append(cell)
-            elif method == _FILTER_BY_SINGLE_PLOIDY_METHODS_['GT_EQ']:
-                for cell, p in self.cell_ploidy.items():
-                    if p >= ploidy:
-                        cells.append(cell)
-            else:
-                raise ValueError("filter_by_ploidy: with a single value, method must be one of  %r." % list(_FILTER_BY_SINGLE_PLOIDY_METHODS_.values()))
-        elif isinstance(ploidy, Tuple):
-            if ploidy[0] >= ploidy[1]:
-                raise ValueError("filter_by_ploidy: the first element of the ploidy tuple must be less than the second element.")
-            if method == _FILTER_BY_RANGE_PLOIDY_METHODS_['IN']:
-                for cell, p in self.cell_ploidy.items():
-                    if p > ploidy[0] and p < ploidy[1]:
-                        cells.append(cell)
-            elif method ==  _FILTER_BY_RANGE_PLOIDY_METHODS_['IN_EQ']:
-                for cell, p in self.cell_ploidy.items():
-                    if p >= ploidy[0] and p <= ploidy[1]:
-                        cells.append(cell)
-            elif method ==  _FILTER_BY_RANGE_PLOIDY_METHODS_['OUT']:
-                for cell, p in self.cell_ploidy.items():
-                    if p < ploidy[0] or p > ploidy[1]:
-                        cells.append(cell)
-            elif method ==  _FILTER_BY_RANGE_PLOIDY_METHODS_['OUT_EQ']:
-                for cell, p in self.cell_ploidy.items():
-                    if p <= ploidy[0] or p >= ploidy[1]:
-                        cells.append(cell)
-            else:
-                raise ValueError("filter_by_ploidy: with a range of values, method must be one of  %r." % list(_FILTER_BY_RANGE_PLOIDY_METHODS_.values()))
+    def filter(self, key:str, method:str,
+                    value:Union[int, float, Sequence[Union[float, int]], Tuple[Union[int, float], Union[int, float]]], 
+                    percentile:bool=False, inplace:bool=False):
+        if key not in self.cnv_data.obs.columns:
+            raise ValueError('Did not find cnv_data.obs[\'{}\']. '.format(key))
+        if isinstance(value, tuple):
+            return self._filter_interval(key, method, value, inplace=inplace)
+        elif isinstance(value, Union[int, float]):
+            return self._filter_value(key, method, value, percentile=percentile, inplace=inplace)
+        elif isinstance(value, cabc.Sequence):
+            return self._filter_list(key, method, value, inplace=inplace)
         else:
-            raise TypeError("filter_by_ploidy: the ploidy must be of type int or float or tuple (e.g. (1.7, 2.0))")
-        cnv_data = self.cnv_data.drop_cells(cells)
-        mads = self.cell_mad.drop_by_keys(cells)
-        if self.cell_ploidy != None:
-            ploidies = self.cell_ploidy.drop_by_keys(cells)
-        else:
-            ploidies = None
-        if self.cell_coverage != None:
-            coverages = self.cell_coverage.drop_by_keys(cells) 
-        else:
-            coverages = None
-        sample = Sample(cnv_data, mads, ploidies, coverages, self.name)
-            
-        return sample
-    """
-    """
-    def filter_by_mad(self, method:str='percentile', threshold:float=0.9):
-        
-        Filter out cells with MAD above a given threshold
-        -----------------------------------------------------
-        method: the method according which the cells are filtered. 
-                        'percentile' and 'value' are accepted values.
-        threshold: the MAD value above which cells are filtered out. 
-                    This values has two interpretations: if method is 'percentile', 
-                    means that cells with MAD up to that percentile are kept; if 
-                    method is 'value', then this parameter is interpreted as the exact
-                    MAD value above which cells must be removed.
-        
-        if method not in list(_FILTER_METHODS_.values()):
-            raise ValueError("filter_by_mad: method must be one of %r." % list(_FILTER_METHODS_.values()))
-        if method == _FILTER_METHODS_['PERC']:
-            perc = np.quantile(self.cell_mad.values(), float(threshold))
-            filtered_cell_mad = { cell: mad for cell, mad in self.cell_mad.items() if mad <= perc}
-        elif method == _FILTER_METHODS_['VALUE']:
-            filtered_cell_mad = { cell: mad for cell, mad in self.cell_mad.items() if mad <= threshold}
-        cells = list(filtered_cell_mad.keys())
-        if self.cell_ploidy != None:
-            ploidies = self.cell_ploidy.get_by_keys(cells)
-        else:
-            ploidies = None
-        if self.cell_coverage != None:
-            coverages = self.cell_coverage.get_by_keys(cells)
-        else:
-            coverages = None
-        cnv_data = self.cnv_data.get_cells(cells)
-        sample = Sample(cnv_data, filtered_cell_mad, ploidies, coverages, self.name)
-        
-        return sample
+            raise TypeError("value: expected int, string, sequence or tuple but got {}".format(type(value)))
 
-    def filter_by_coverage(self, method:str='percentile', threshold:float=0.1):
-        Filter out cells with a read count below a given threshold
-        -----------------------------------------------------
-        method: the method according which the cells are filtered. 
-                        'percentile' and 'value' are accepted values.
-        threshold: the read count below which cells are filtered out. 
-                    This values has two interpretations: if method is 'percentile', 
-                    means that cells with read count up to that percentile are filtered out; if 
-                    method is 'value', then this parameter is interpreted as the exact
-                    read count below which cells must be removed.
-        if method not in list(_FILTER_METHODS_.values()):
-            raise ValueError("filter_by_coverage: method must be one of %r." % list(_FILTER_METHODS_.values()))
-        if method == _FILTER_METHODS_['PERC']:
-            perc = np.quantile(self.cell_coverage.values(), float(threshold))
-            filtered_cell_coverage = { cell: mad for cell, mad in self.cell_coverage.items() if mad >= perc}
-        elif method == _FILTER_METHODS_['VALUE']:
-            filtered_cell_coverage = { cell: mad for cell, mad in self.cell_coverage.items() if mad >= threshold}
-        cells = list(filtered_cell_coverage.keys())
-        mads = self.cell_mad.get_by_keys(cells)
-        if self.cell_ploidy != None:
-            ploidies = self.cell_ploidy.get_by_keys(cells)       
+    def _filter_interval(self, key:str, method:str, value: Tuple[Union[int, float], Union[int, float]], inplace:bool=False):
+        if method not in list(_FILTER_INTERVAL_METHODS_.values()):
+            raise ValueError("'method' must be one of %r"% list(_FILTER_INTERVAL_METHODS_.values()))
+        if value[0] >= value[1]:
+            raise ValueError("Wrong interval of values: value_0 must be smaller than value_1")
+        annotation = self.get_annotation(key)
+        if method == _FILTER_INTERVAL_METHODS_['IN']:
+            subset = self.cnv_data[annotation > value[0] and annotation < value[1], :]
+        elif method ==  _FILTER_INTERVAL_METHODS_['IN_EQ']:
+            subset = self.cnv_data[annotation >= value[0] and annotation <= value[1], :]
+        elif method ==  _FILTER_INTERVAL_METHODS_['OUT']:
+            subset = self.cnv_data[annotation < value[0] or annotation > value[1], :]
+        elif method ==  _FILTER_INTERVAL_METHODS_['OUT_EQ']:
+            subset = self.cnv_data[annotation < value[0] or annotation >= value[1], :]
+        
+        if inplace == True:
+            self.cnv_data = subset
         else:
-            ploidies = None        
-        cnv_data = self.cnv_data.get_cells(cells)
-        sample = Sample(cnv_data, mads, ploidies, filtered_cell_coverage, self.name)
-        return sample
-    """
+            return Sample(subset, self.name)
+
+    def _filter_value(self, key:str, method:str, value:Union[int, float], percentile:bool=False, inplace:bool=False):
+        annotation = self.get_annotation(key)
+        if percentile == False: 
+            if method not in list(_FILTER_SINGLE_METHODS_.values()):
+                raise ValueError("'method' must be one of %r"% list(_FILTER_SINGLE_METHODS_.values()))
+            if method == _FILTER_SINGLE_METHODS_["EQ"]:
+                subset = self.cnv_data[annotation == value, :]
+            elif method == _FILTER_SINGLE_METHODS_["LT"]:
+                subset = self.cnv_data[annotation < value, :]
+            elif method == _FILTER_SINGLE_METHODS_["LT_EQ"]:
+                subset = self.cnv_data[annotation <= value, :]
+            elif method == _FILTER_SINGLE_METHODS_["GT"]:
+                subset = self.cnv_data[annotation > value, :]
+            elif method == _FILTER_SINGLE_METHODS_["GT_EQ"]:
+                subset = self.cnv_data[annotation >= value, :]
+        else:
+            if method not in list(_FILTER_PERCENTILE_METHODS_.values()):
+                raise ValueError("'method' must be one of %r"% list(_FILTER_PERCENTILE_METHODS_.values()))
+            threshold = annotation.quantile(value)
+            if method == _FILTER_SINGLE_METHODS_["LT"]:
+                subset = self.cnv_data[annotation < threshold, :]
+            elif method == _FILTER_SINGLE_METHODS_["LT_EQ"]:
+                subset = self.cnv_data[annotation <= threshold, :]
+            elif method == _FILTER_SINGLE_METHODS_["GT"]:
+                subset = self.cnv_data[annotation > threshold, :]
+            elif method == _FILTER_SINGLE_METHODS_["GT_EQ"]:
+                subset = self.cnv_data[annotation >= threshold, :]
+        if inplace == True:
+            self.cnv_data = subset
+        else:
+            return Sample(subset, self.name)
+
+    def _filter_list(self, key:str, method:str, value: Sequence[Union[int, float]], inplace:bool=False):
+        if method not in list(_FILTER_LIST_METHODS_.values()):
+            raise ValueError("'method' must be one of %r"% list(_FILTER_LIST_METHODS_.values()))
+        annotation = self.get_annotation(key)
+        if method == _FILTER_LIST_METHODS_['IN']:
+            subset = self.cnv_data[annotation.isin(value), :]
+        elif method ==  _FILTER_LIST_METHODS_['OUT']:
+            subset = self.cnv_data[~annotation.isin(value), :]
+
+        if inplace == True:
+            self.cnv_data = subset
+        else:
+            return Sample(subset, self.name)    
 
     def plot_annotation_dist(self, ann:str, axis:int=0, grid:bool=False, quantiles:List[float]=None, figsize:Tuple[int, int]=None, 
                                 outpath:str=None, **kwargs):
@@ -364,6 +264,9 @@ class Sample:
             Drawer.draw('variable_features', X=self.get_variable_features(), log=log, outpath=outpath)
         else:
             raise AttributeError("{} object has no attribute 'highly_variable'".format(self.cnv_data.feat))
+    
+    def plot_pca(self):
+        return NotImplemented
     
     
 

@@ -41,7 +41,7 @@ def informative_pcs(X):
     return NotImplemented
 
 def pca(data: Union[CnvData, np.ndarray], n_comps: Optional[int] = None, svd_solver: str = 'arpack', random_state: AnyRandom = 0, 
-            use_highly_variable: Optional[bool] = None):
+            use_highly_variable: Optional[bool] = False):
     return _pca(data, n_comps, svd_solver, random_state, use_highly_variable)
 
 class Reducer:

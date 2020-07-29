@@ -13,7 +13,7 @@ def _pca(
     n_comps: Optional[int] = None,
     svd_solver: str = 'arpack',
     random_state: AnyRandom = 0,
-    use_highly_variable: Optional[bool] = None
+    use_highly_variable: Optional[bool] = False
 ) -> np.ndarray:
     if svd_solver in {'auto', 'randomized'}:
         logg.info(
@@ -37,7 +37,7 @@ def _pca(
     )
 
     if n_comps is None:
-        min_dim = min(data_comp.n_feats, data_comp.n_obs)
+        min_dim = min(data_comp.n_feat, data_comp.n_obs)
         if settings.N_PCS >= min_dim:
             n_comps = min_dim - 1
         else:
