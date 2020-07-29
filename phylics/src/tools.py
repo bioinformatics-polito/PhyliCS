@@ -18,13 +18,15 @@
 # ==========================================================================
 # custom_types.py: this module implements phylics worker types
 # ==========================================================================
-from .data_types import CnvData, VariableFeatures
 from .preprocessing._highly_variant_features import _highly_variable_features
+from .types import CnvData
+from .preprocessing._pca import _pca
 import numpy as np
 import pandas as pd
 from typing import Union, List, Optional, Sequence
 from  sklearn.decomposition import PCA
 import umap
+from .utils import AnyRandom
 
 
 def variable_features(X:CnvData, min_disp: Optional[float] = None, max_disp: Optional[float] = None,
@@ -37,6 +39,10 @@ def variable_features(X:CnvData, min_disp: Optional[float] = None, max_disp: Opt
        
 def informative_pcs(X):
     return NotImplemented
+
+def pca(data: Union[CnvData, np.ndarray], n_comps: Optional[int] = None, svd_solver: str = 'arpack', random_state: AnyRandom = 0, 
+            use_highly_variable: Optional[bool] = None):
+    return _pca(data, n_comps, svd_solver, random_state, use_highly_variable)
 
 class Reducer:
     @staticmethod

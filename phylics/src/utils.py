@@ -1,10 +1,14 @@
 import pandas as pd
+from numpy import random
 from typing import Union, Mapping
 import collections.abc as cabc 
 
 __all__ = ["from_ginkgo_to_phylics", 
             "load_annotation_",
             "sanitize_annotation"]
+
+AnyRandom = Union[None, int, random.Generator] 
+
 def from_ginkgo_to_phylics(filepath:str): 
     df = pd.read_csv(filepath, sep="\t")
     X = df.drop(['CHR', 'START', 'END'], axis=1).transpose()

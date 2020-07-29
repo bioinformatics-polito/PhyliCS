@@ -23,12 +23,14 @@ __all__ = ['Sample']
 
 from .cnvdata import CnvData 
 from ..utils import *
-from ..tools import Reducer, variable_features
+from ..tools import Reducer, variable_features, pca
 from ..drawer import Drawer
 import random
 import pandas as pd
 import numpy as np
 from typing import Union, Tuple, List, Optional, Mapping, Any, Iterable, Sequence
+from ..utils import AnyRandom
+
 
 _FILTER_BY_SINGLE_PLOIDY_METHODS_ = {  
                                 'EQ' :'eq', 
@@ -170,7 +172,7 @@ class Sample:
     def variable_features(self, min_disp: Optional[float] = None, max_disp: Optional[float] = None, min_mean: Optional[float] = None, 
         max_mean: Optional[float] = None, n_top_features: Optional[int] = None, n_bins: int = 20 ):
     
-        highly_variable, means, dispersions, dispersions_norm = variable_features(X = self.cnv_data.X, min_disp=min_disp, max_disp=max_disp, min_mean=min_mean,
+        highly_variable, means, dispersions, dispersions_norm = variable_features(X = self.cnv_data.to_df(), min_disp=min_disp, max_disp=max_disp, min_mean=min_mean,
             max_mean = max_mean, n_top_features = n_top_features, n_bins=n_bins)
         self.cnv_data.feat['highly_variable'] = highly_variable
         self.cnv_data.feat['means'] = means
@@ -180,16 +182,15 @@ class Sample:
     def get_variable_features(self):
         return self.cnv_data.feat[['highly_variable', 'means', 'dispersions', 'dispersions_norm']]
     
-    def dimensionality_reduction(self, method:str="pca", features:str="all", **kwargs):
-        
-        _features = None
-        if features == "variable_features":
-            _features = self.cnv_data.feat["highly_variable"]
-        if method == "pca":
-            self.cnv_data.uns['pca'] = Reducer.pca_(self.cnv_data.get_cnvs(), features=_features, **kwargs)
-        else:
-            self.cnv_data.uns['umap'] = Reducer.umap_(self.cnv_data.get_cnvs(), features=_features, **kwargs)
-    
+    def pca(self, n_comps: Optional[int] = None, svd_solver: str = 'arpack', random_state: AnyRandom = 0, 
+            use_highly_variable: Optional[bool] = None):
+            pca_result = pca(self, n_comps, svd_solver, random_state, use_highly_variable)
+            self.cnv_data.uns['pca'] = {}
+            self.cnv_data.uns['pca']['X'] = pca_result[0]
+            self.cnv_data.data.uns['pca']['variance'] = pca_result[1]
+            self.cnv_data.uns['pca']['variance_ratio'] = pca_result[2]
+            self.cnv_data.uns['pca']['components'] = pca_result[3]
+
     def jack_straw(self):
         return NotImplemented
 
@@ -359,8 +360,10 @@ class Sample:
     """
     
     def plot_variable_features(self, log: bool = False, outpath: str = None):
-        assert self.cnv_data.feat['highly_variable']
-        Drawer.draw('variable_features', X=self.get_variable_features(), log=log, outpath=outpath)
+        if hasattr(self.cnv_data.feat, 'highly_variable'):
+            Drawer.draw('variable_features', X=self.get_variable_features(), log=log, outpath=outpath)
+        else:
+            raise AttributeError("{} object has no attribute 'highly_variable'".format(self.cnv_data.feat))
     
     
 
