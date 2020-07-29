@@ -37,30 +37,10 @@ def variable_features(X:CnvData, min_disp: Optional[float] = None, max_disp: Opt
 
     return df['highly_variable'], df['means'], df['dispersions'], df['dispersions_norm']
        
-def informative_pcs(X):
-    return NotImplemented
 
 def pca(data: Union[CnvData, np.ndarray], n_comps: Optional[int] = None, svd_solver: str = 'arpack', random_state: AnyRandom = 0, 
             use_highly_variable: Optional[bool] = False):
     return _pca(data, n_comps, svd_solver, random_state, use_highly_variable)
 
-class Reducer:
-    @staticmethod
-    def umap_(X, features:Union[Sequence, pd.Series, np.array] = None, **kwargs):
-        if features != None:
-            X = X[[features]]
-        reducer = umap.UMAP(**kwargs)
-        return pd.DataFrame(reducer.fit_transform(X), index=X.index)
-    
-    @staticmethod
-    def pca_(X, features:Union[Sequence, pd.Series, np.array] = None, **kwargs):
-        if features != None:
-            X = X[[features]]
-        pca = PCA(**kwargs)
-        return pd.DataFrame(pca.fit_transform(X), index=X.index)
-    
 
     
-
-
-#class Clusterer:
