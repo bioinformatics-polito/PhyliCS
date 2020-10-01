@@ -1,5 +1,6 @@
 import pandas as pd
 from numpy import random
+from ._compat import Literal
 from typing import Union, Mapping
 import collections.abc as cabc 
 
@@ -8,6 +9,10 @@ __all__ = ["from_ginkgo_to_phylics",
             "sanitize_annotation"]
 
 AnyRandom = Union[None, int, random.Generator] 
+
+_InitPos = Literal['spectral', 'random']
+
+
 
 def from_ginkgo_to_phylics(filepath:str): 
     df = pd.read_csv(filepath, sep="\t")

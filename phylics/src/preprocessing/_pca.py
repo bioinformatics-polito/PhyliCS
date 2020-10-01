@@ -1,4 +1,3 @@
-from ..types import CnvData
 import numpy as np
 import pandas as pd
 from typing import Union, List, Optional, Sequence
@@ -7,6 +6,8 @@ from sklearn.utils import check_array, check_random_state
 from .. import logging as logg
 from .._settings import settings
 from ..utils import AnyRandom
+from ..types import CnvData
+
 
 def _pca(
     data: Union[CnvData, np.ndarray],

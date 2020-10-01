@@ -23,13 +23,13 @@ __all__ = ['Sample']
 
 from .cnvdata import CnvData 
 from ..utils import *
-from ..tools import Reducer, variable_features, pca
+from ..tools import variable_features, pca, umap
 from ..drawer import Drawer
 import random
 import pandas as pd
 import numpy as np
-from typing import Union, Tuple, List, Optional, Mapping, Any, Iterable, Sequence
-from ..utils import AnyRandom
+from typing import Union, Tuple, List, Optional, Mapping, Any, Iterable, Sequence, Dict
+from ..utils import AnyRandom, _InitPos
 
 
 _FILTER_SINGLE_METHODS_ = {  
@@ -158,6 +158,17 @@ class Sample:
     def informative_pcs(self, method:str='jackstraw'):
        
         return NotImplemented 
+
+    def umap(self, n_neighbors: int = 15, n_components: int = 2, metric: str = 'euclidean', metric_kwds: Dict = None,
+                min_dist: float = 0.5, spread: float = 1.0, maxiter: Optional[int] = None, alpha: float = 1.0, gamma: float = 1.0,
+                fast: Union[bool, None] = False, negative_sample_rate: int = 5, local_connectivity: Union[int, None] = 1,
+                init_pos: Union[_InitPos, np.ndarray, None] = 'spectral', random_state: AnyRandom = 0, a: Optional[float] = None,
+                b: Optional[float] = None):
+                umap_result = umap(self.cnv_data, n_neighbors, n_components, metric, metric_kwds, min_dist, spread, maxiter, alpha, gamma,
+                                fast, negative_sample_rate, local_connectivity, init_pos, random_state, a, b)
+                self.cnv_data.uns['umap'] = {}
+                self.cnv_data.uns['umap']['X'] = umap_result
+
 
     def clusters(self):
         return NotImplemented 

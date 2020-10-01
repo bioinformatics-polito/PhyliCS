@@ -34,7 +34,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 import matplotlib.transforms as transforms
 from typing import Tuple, Union, List, Iterable, Collection, Sequence, Optional
-from .data_types import CnvData, VariableFeatures
+from .types import CnvData
 from ._compat import Literal
 from . import logging as logg
 
@@ -132,7 +132,7 @@ def scatter(x:np.array=None, y:np.array=None,
         plt.show()
     return ax
 
-def highly_variable_features(X: VariableFeatures, log: bool = False, outpath: str = None):
+def highly_variable_features(X: CnvData, log: bool = False, outpath: str = None):
     means = X.means
     dispersions = X.dispersions
     dispersions_norm = X.dispersions_norm
