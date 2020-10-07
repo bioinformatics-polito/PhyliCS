@@ -30,6 +30,8 @@ import pandas as pd
 import numpy as np
 from typing import Union, Tuple, List, Optional, Mapping, Any, Iterable, Sequence, Dict
 from ..utils import AnyRandom, _InitPos
+from ..plotting._utils import _Dimensions
+from .. import logging as logg
 
 
 _FILTER_SINGLE_METHODS_ = {  
@@ -72,6 +74,9 @@ class Sample:
             return cls(cnv_data=CnvData(X, feat=boundaries, obs_names='row_names', feat_names='col_names'), sample_name=sample_name)
         else:
             raise ValueError("Implemented only for ginkgo-like files")
+        
+    def shape(self):
+        return self.cnv_data.shape
         
     def add_annotation(self, ann:Union[pd.Series, Mapping[str, Union[float, int]]], key:str, axis:int=0):
         ann = sanitize_annotation(ann)
@@ -143,14 +148,37 @@ class Sample:
     def get_variable_features(self):
         return self.cnv_data.feat[['highly_variable', 'means', 'dispersions', 'dispersions_norm']]
     
-    def pca(self, n_comps: Optional[int] = None, svd_solver: str = 'arpack', random_state: AnyRandom = 0, 
-            use_highly_variable: Optional[bool] = False):
-            pca_result = pca(self.cnv_data, n_comps, svd_solver, random_state, use_highly_variable)
+    def pca(self, n_comps: Optional[int] = None, jackstraw_perms: Optional[int] = None, 
+        svd_solver: str = 'arpack', random_state: AnyRandom = 0, 
+        use_highly_variable: Optional[bool] = False):
+            pca_result = pca(self.cnv_data, n_comps,  jackstraw_perms, svd_solver, random_state, use_highly_variable)
             self.cnv_data.uns['pca'] = {}
             self.cnv_data.uns['pca']['X'] = pca_result[0]
             self.cnv_data.uns['pca']['variance'] = pca_result[1]
             self.cnv_data.uns['pca']['variance_ratio'] = pca_result[2]
             self.cnv_data.uns['pca']['components'] = pca_result[3]
+            self.cnv_data.uns['pca']['perm_variance_ratio'] = pca_result[4]
+
+    def get_pca(self, sub_field: Union[str, None]=None):
+        if sub_field is None:
+            return self.cnv_data.uns['pca']
+        else:
+            if sub_field == 'X':
+                return self.cnv_data.uns['pca']['X']
+            elif sub_field == 'variance':
+                return self.cnv_data.uns['pca']['variance']
+            elif sub_field == 'variance_ratio':
+                return self.cnv_data.uns['pca']['variance_ratio']
+            elif sub_field == 'components':
+                return self.cnv_data.uns['pca']['components']
+            elif sub_field == 'perm_variance_ratio':
+                return self.cnv_data.uns['pca']['perm_variance_ratio']
+            else:
+                logg.warning(
+                    f"InvalidArgument: sub_field={sub_field} is not valid. "
+                )
+                return self.cnv_data.uns['pca']
+    
 
     def jack_straw(self):
         return NotImplemented
@@ -168,6 +196,17 @@ class Sample:
                                 fast, negative_sample_rate, local_connectivity, init_pos, random_state, a, b)
                 self.cnv_data.uns['umap'] = {}
                 self.cnv_data.uns['umap']['X'] = umap_result
+    def get_umap(self, sub_field: Union[str, None]=None):
+        if sub_field is None:
+            return self.cnv_data.uns['umap']
+        else:
+            if sub_field == 'X':
+                return self.cnv_data.uns['umap']['X']
+            else:
+                logg.warning(
+                    f"InvalidArgument: sub_field={sub_field} is not valid. "
+                )
+                return self.cnv_data.uns['umap']
 
 
     def clusters(self):
@@ -276,8 +315,42 @@ class Sample:
         else:
             raise AttributeError("{} object has no attribute 'highly_variable'".format(self.cnv_data.feat))
     
-    def plot_pca(self):
-        return NotImplemented
+    def plot_pca(self, projection: _Dimensions = "2d", outpath:str=None, 
+                figsize:Tuple[int, int]=None, **kwargs):
+        if 'pca' in self.cnv_data.uns:
+            if projection == '3d':
+                z_label = 'PC3'
+            else:
+                z_label = None
+            Drawer.draw('scatter', data=self.get_pca('X'), title = 'PCA projection', x_label='PC1', y_label='PC2', z_label=z_label,
+                projection = projection, outpath=outpath,  
+                figsize = figsize, **kwargs)
+        else:
+            logg.error("{} object has no attribute 'pca'".format(self.cnv_data.uns))
+
+    
+    def plot_explained_variance(self, n_pcs:int = 50, figsize:Tuple[int, int]=None,
+                show: bool=False, outpath: str = None):
+        if 'pca' in self.cnv_data.uns:
+            Drawer.draw('jackstraw', explained_variance_ratio= self.get_pca('variance_ratio'), 
+                        mean_expl_var_ratio_perm=self.get_pca('perm_variance_ratio'), n_pcs = n_pcs, figsize=figsize,
+                        show = show, outpath = outpath)
+        else:
+            logg.error("{} object has no attribute 'pca'".format(self.cnv_data.uns))
+        
+    def plot_umap(self, projection: _Dimensions = "2d", outpath:str=None, 
+                figsize:Tuple[int, int]=None, **kwargs):
+        if 'umap' in self.cnv_data.uns:
+            if projection == '3d':
+                z_label = 'Z'
+            else:
+                z_label = None
+            Drawer.draw('scatter', data=self.get_umap('X'), title = 'UMAP embeddings', x_label='X', y_label='Y', z_label=z_label,
+                projection = projection, outpath=outpath,  
+                figsize = figsize, **kwargs)
+        else:
+            logg.error("{} object has no attribute 'umap'".format(self.cnv_data.uns))
+
     
     
 

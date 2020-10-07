@@ -38,9 +38,9 @@ def variable_features(X:CnvData, min_disp: Optional[float] = None, max_disp: Opt
     return df['highly_variable'], df['means'], df['dispersions'], df['dispersions_norm']
        
 
-def pca(data: Union[CnvData, np.ndarray], n_comps: Optional[int] = None, svd_solver: str = 'arpack', random_state: AnyRandom = 0, 
+def pca(data: Union[CnvData, np.ndarray], n_comps: Optional[int] = None, jackstraw_perms: Optional[int] = None, svd_solver: str = 'arpack', random_state: AnyRandom = 0, 
             use_highly_variable: Optional[bool] = False):
-    return _pca(data, n_comps, svd_solver, random_state, use_highly_variable)
+    return _pca(data, n_comps, jackstraw_perms, svd_solver, random_state, use_highly_variable)
 
 def umap(data: Union[CnvData, np.ndarray], n_neighbors: int = 15, n_components: int = 2, metric: str = 'euclidean', metric_kwds: Dict = None,
                 min_dist: float = 0.5, spread: float = 1.0, maxiter: Optional[int] = None, alpha: float = 1.0, gamma: float = 1.0,

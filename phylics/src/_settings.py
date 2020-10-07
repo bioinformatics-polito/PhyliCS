@@ -86,6 +86,7 @@ class PhylicsConfig:
         _vector_friendly: bool = False,
         _low_resolution_warning: bool = True,
         n_pcs=50,
+        jack_straw_perms = 50,
     ):
         # logging
         self._root_logger = _RootLogger(logging.INFO)  # level will be replaced
@@ -125,6 +126,9 @@ class PhylicsConfig:
 
         self.N_PCS = n_pcs
         """Default number of principal components to use."""
+
+        self.JS_PERMS = jack_straw_perms
+        """Default number of permutations for jackstraw method (PCA)."""
 
     @property
     def verbosity(self) -> Verbosity:

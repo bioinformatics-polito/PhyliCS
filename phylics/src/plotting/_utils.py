@@ -3,6 +3,7 @@ import collections.abc as cabc
 from abc import ABC
 from functools import lru_cache
 from typing import Union, List, Sequence, Tuple, Collection, Optional
+from .._compat import Literal
 
 import numpy as np
 from matplotlib import pyplot as pl
@@ -13,6 +14,16 @@ from matplotlib.figure import SubplotParams as sppars, Figure
 from matplotlib.patches import Circle
 from matplotlib.collections import PatchCollection
 from cycler import Cycler, cycler
+
+ColorLike = Union[str, Tuple[float, ...]]
+_IGraphLayout = Literal['fa', 'fr', 'rt', 'rt_circular', 'drl', 'eq_tree', ...]
+_FontWeight = Literal['light', 'normal', 'medium', 'semibold', 'bold', 'heavy', 'black']
+_FontSize = Literal[
+    'xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large'
+]
+
+_Dimensions = Literal["2d", "3d"]
+
 
 def make_projection_available(projection):
     avail_projections = {'2d', '3d'}

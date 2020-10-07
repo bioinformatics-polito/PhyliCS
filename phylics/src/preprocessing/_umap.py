@@ -164,13 +164,12 @@ def _umap(
     
     # the data matrix X is really only used for determining the number of connected components
     # for the init condition in the UMAP embedding
-    n_epochs = 0 if maxiter is None else maxiter
     umap_ = UMAP(
             n_neighbors = n_neighbors, 
             n_components = n_components, 
             metric=metric, 
             metric_kwds=metric_kwds, 
-            n_epochs=n_epochs, 
+            n_epochs=maxiter, 
             learning_rate=alpha, 
             init = init_pos, 
             min_dist = min_dist, 

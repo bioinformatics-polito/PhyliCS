@@ -8,10 +8,15 @@ from .._settings import settings
 from ..utils import AnyRandom
 from ..types import CnvData
 
+def shuffle_columns(X:np.ndarray):
+    for i in range(X.shape[1]):
+        np.random.shuffle(X[:,i])
+    return X
 
 def _pca(
     data: Union[CnvData, np.ndarray],
     n_comps: Optional[int] = None,
+    jackstraw_perms: Optional[int] = None,
     svd_solver: str = 'arpack',
     random_state: AnyRandom = 0,
     use_highly_variable: Optional[bool] = False
@@ -51,4 +56,24 @@ def _pca(
     X = data_comp.X
     pca_ = PCA(n_components=n_comps, svd_solver=svd_solver, random_state=random_state)
     X_pca = pca_.fit_transform(X)
-    return (X_pca, pca_.components_, pca_.explained_variance_ratio_, pca_.explained_variance_)
+    pca_components = pca_.components_
+    pca_explained_variance_ratio = pca_.explained_variance_ratio_
+    pca_explained_variance = pca_.explained_variance_
+
+    
+    #jackstraw
+    expl_var_ratio_perm = pd.DataFrame()
+    if jackstraw_perms is not None:
+        n_perm = jackstraw_perms
+    else:
+        n_perm = settings.JS_PERMS
+    for k in range(n_perm):
+        perm = shuffle_columns(X)
+        pca_perm = pca_.fit_transform(perm)
+        expl_var_ratio_df = pd.DataFrame(data=pca_.explained_variance_ratio_.reshape(-1, len(pca_.explained_variance_ratio_)))
+        expl_var_ratio_perm = expl_var_ratio_perm.append(expl_var_ratio_df)
+
+    mean_expl_var_ratio_perm = expl_var_ratio_df.mean().values
+
+
+    return (X_pca, pca_components, pca_explained_variance_ratio, pca_explained_variance, mean_expl_var_ratio_perm)

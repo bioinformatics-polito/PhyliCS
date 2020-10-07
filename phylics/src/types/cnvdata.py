@@ -298,6 +298,3 @@ class CnvData:
                 uns=self.uns.copy() if self.uns is not None else None,
                 raw=self.raw.copy() if self.raw is not None else None,
             )
-
-   
-
