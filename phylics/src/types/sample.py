@@ -340,6 +340,7 @@ class Sample:
         
     def plot_umap(self, projection: _Dimensions = "2d", outpath:str=None, 
                 figsize:Tuple[int, int]=None, **kwargs):
+        #TODO remove 3rd dimension
         if 'umap' in self.cnv_data.uns:
             if projection == '3d':
                 z_label = 'Z'

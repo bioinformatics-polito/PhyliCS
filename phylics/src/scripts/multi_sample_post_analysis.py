@@ -21,7 +21,7 @@
 
 
 from funcs import *
-from check_funcs import *
+#from check_funcs import *
 #from dicttoxml import dicttoxml
 #from xml.dom.minidom import parseString
 import time
@@ -56,7 +56,7 @@ def silhouette_(df, labels, i):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Multi-sample analysis.")
-    parser.add_argument("samples", metavar='sample_name:SegCopy', action=check_valid_sample(2),
+    parser.add_argument("samples", metavar='sample_name:SegCopy', 
             help='Sample name and cnvs filepath separated by ":". At least two samples must be provided.',
             nargs='+', type=str)
 
@@ -95,7 +95,7 @@ if __name__ == "__main__":
             help='Perplexity value for tSNE computation.',
             nargs=1, type=int)
     '''
-    parser.add_argument("--reclust", metavar='N', action=check_valid_N_clust(),
+    parser.add_argument("--reclust", metavar='N', 
             help='If this option is specified, only the clustering part is executed with the specified number of clusters, unless --reinit option is specified (see below).',
             nargs=1, type=int)
 
@@ -437,7 +437,8 @@ if __name__ == "__main__":
             fig2, ax1 = plt.subplots()
             fig2.set_size_inches(18, 7)
             
-            colors = cm.rainbow(np.linspace(0, 1, len(coesion_score.keys())))
+            cmap = cm.get_cmap("Rainbow")
+            colors = cmap(np.linspace(0, 1, len(coesion_score.keys())))
             for i in range(len(coesion_score.keys())):
                 ax1.plot(list(coesion_score.keys())[i], list(coesion_score.values())[i], 'o', color=colors[i], label=list(coesion_score.keys())[i])
 
@@ -491,7 +492,7 @@ if __name__ == "__main__":
     print_line(verbose)
     if n_clusters > 1:
         df_mean = extract_clusters(Z, boundaries, n_clusters, merged_cnvs, reclust, outdir, verbose)
-        heatmap(df_mean.transpose(), boundaries, method, metric,outdir, True, verbose, sample=sample)
+        heatmap(df_mean.transpose(), boundaries, method, metric,outdir, verbose, sample)
 
     """
     if meta_format == 'xml':
