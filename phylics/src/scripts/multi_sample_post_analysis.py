@@ -21,7 +21,7 @@
 
 
 from funcs import *
-#from check_funcs import *
+from check_funcs import *
 #from dicttoxml import dicttoxml
 #from xml.dom.minidom import parseString
 import time
@@ -115,7 +115,7 @@ if __name__ == "__main__":
 
     # default params
     n_jobs = 1
-    n_permutations = 1000
+    n_permutations = 10
     #tsne_iterations = 5000
 
     #tnse_perplexity is computed afterwards if not specified as parameter
@@ -126,6 +126,7 @@ if __name__ == "__main__":
 
     if args.n_jobs:
         n_jobs = args.n_jobs
+    
     if args.n_permutations:
         n_permutations = args.n_permutations[0]
 
@@ -251,7 +252,7 @@ if __name__ == "__main__":
         #n_samples = sample_count
         silhouettes = []
 
-        print_msg("Permutation test (n_permutations = %d)"%n_permutations, 1, verbose)
+        #print_msg("Permutation test (n_permutations = %d)"%n_permutations, 1, verbose)
        
         t0 = time.time()
         
@@ -279,7 +280,7 @@ if __name__ == "__main__":
 
         pvalue = pvalue/len(silhouettes)
         coesion_df = coesion_df.append(pd.DataFrame([[str(list(set(sample_labels))), silhouette_avg, pvalue, n_permutations]], columns=['samples', 'het_score', 'pvalue', 'n_permutations']), ignore_index=True)
-
+        print(coesion_df)
         print_msg("Samples: " + str(list(set(sample_labels))), 1, verbose)
         print_msg("The average heterogenity score is: %f (pvalue=%.4f)"%(silhouette_avg, pvalue), 1, verbose)
 
@@ -434,6 +435,8 @@ if __name__ == "__main__":
             coesion_df.to_csv(outdir+'/heterogeneity_scores.csv', index=False, sep='\t')
             #print(coesion_score.keys())
 
+            exit(0) 
+
             fig2, ax1 = plt.subplots()
             fig2.set_size_inches(18, 7)
             
@@ -457,7 +460,7 @@ if __name__ == "__main__":
             fig2.suptitle("Heterogeneity scores for different sample aggragation", fontsize=14, fontweight='bold')        
             fig2.savefig(outdir+"/multi_aggregation_het_score.png")
             fig2.clf()
-
+        coesion_df.to_csv(outdir+'/heterogeneity_scores.csv', index=False, sep='\t')
         '''
             Heatmap
         '''

@@ -20,7 +20,7 @@
 # ==========================================================================
 
 
-from .check_funcs import *
+from check_funcs import *
 import os
 import sys
 import glob
@@ -308,7 +308,7 @@ if __name__ == "__main__":
 
             cnvs_files = []
             for sample in samples:
-                cnvs_file = os.path.join(input_dirs[sample], "SegCopy")
+                cnvs_file = input_dirs[sample]
                 if os.path.exists(os.path.expanduser(cnvs_file)) == False:
                     print("FilePathError: {} does not  exist".format(cnvs_file))
                     sys.exit(1)
@@ -317,8 +317,8 @@ if __name__ == "__main__":
 
             sample_cnvs_files  = ' '.join(cnvs_files)
                         
-            tool =  "multi_sample_post_analysis"
-            cmd = "{} {} {} {} {}".format(tool, sample_cnvs_files, args.method, args.metric,  out_dir)
+            tool =  "/scratch/trcanmed/phylics/local/PhyliCS/phylics/src/scripts/multi_sample_post_analysis.py"
+            cmd = "python {} {} {} {} {}".format(tool, sample_cnvs_files, args.method, args.metric,  out_dir)
             if args.tasks:
                 cmd = "{} --n_jobs {}".format(cmd, args.tasks)
             if args.n_permutations:
@@ -343,7 +343,7 @@ if __name__ == "__main__":
         """
            {params.tool} --barcodes-csv {input.csv} --forbidden-tags XA,SA --min-mapq 30 -o {output} {input.bam}  &> {log}
 
-            mv {input}/noise.bam {params.noisedir}/{params.newnoisebam}
+            mv {input}/noise.bam {params.noisedir}/{params.newnoimulti_sample_post_analysis.pysebam}
                 
             samtools view  -u {input} | bamToBed -i - > {output}
           
