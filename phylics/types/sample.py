@@ -23,7 +23,7 @@ __all__ = ['Sample']
 
 from .cnvdata import CnvData 
 from .. import utils
-from ..tools import variable_features, pca, umap
+from ..tools import variable_features, pca, umap, nk_clust, consensus_clustering
 from ..drawer import Drawer
 import random
 import pandas as pd
@@ -33,6 +33,7 @@ from ..utils import AnyRandom, _InitPos
 from ..plotting._utils import _Dimensions
 from .. import logging as logg
 import collections.abc as cabc
+from ..clustering.utils import ClusterConfig
 
 
 _FILTER_SINGLE_METHODS_ = {  
@@ -209,12 +210,21 @@ class Sample:
                 )
                 return self.cnv_data.uns['umap']
 
+    # clustering
+    def nk_clust(self, method:str, metric:Optional[Union[str, None]]=None, 
+            linkage:Optional[Union[str, None]]=None, embeddings:Optional[Union[str, None]]=None, 
+            min_k:Optional[int]=2, max_k:Optional[int]=15, index:Optional[Union[str, List[str]]]="all",
+            n_jobs:Optional[int]=1):
+        results = nk_clust(self.cnv_data , method, metric, linkage, embeddings, min_k, max_k, index, n_jobs) 
+        scores_df = pd.DataFrame(results)
+        scores_df.index.name = "k"
+        print(scores_df.to_string())
+        self.cnv_data.uns['nk_clust'] = scores_df
 
-    def cluster(self, method, metric, highly_variable, embeddings, **kwargs):
-
-        return NotImplemented 
-
-
+    def consensus(self, method:str, cluster_configs:List[ClusterConfig], n_iter=Optional[int]=5,
+                    embeddings:Optional[Union[str, None]]=None, n_jobs:Optional[int]=1):
+        return consensus_clustering(self.cnv_data, method, cluster_configs, embeddings, n_jobs)
+        
     #Filter functions
     def filter(self, key:str, method:str,
                     value:Union[int, float, Sequence[Union[float, int]], Tuple[Union[int, float], Union[int, float]]], 
@@ -243,10 +253,7 @@ class Sample:
         elif method ==  _FILTER_INTERVAL_METHODS_['OUT']:
             subset = self.cnv_data[annotation < value[0] or annotation > value[1], :]
         elif method ==  _FILTER_INTERVAL_METHODS_['OUT_EQ']:
-            subset = self.cnv_data[annotation < value[0] or annotation >= value[1], :]
-        
-        if inplace == True:
-            self.cnv_data = subset
+            subset = self.cnv_data[annotatin_iter=Optional[int]=5,
         else:
             return Sample(subset, self.name)
 

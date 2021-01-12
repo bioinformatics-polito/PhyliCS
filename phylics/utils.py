@@ -3,6 +3,8 @@ from numpy import random
 from ._compat import Literal
 from typing import Union, Mapping
 import collections.abc as cabc 
+from sklearn.cluster import KMeans, AgglomerativeClustering, Birch, AffinityPropagation, DBSCAN
+from hdbscan import HDBSCAN
 
 __all__ = ["from_ginkgo_to_phylics", 
             "load_annotation_",
@@ -12,7 +14,20 @@ AnyRandom = Union[None, int, random.Generator]
 
 _InitPos = Literal['spectral', 'random']
 
+clustering_func = {
+    "kmeans" : KMeans,
+    "agglomerative": AgglomerativeClustering,
+    "birch": Birch,
+    "affinity": AffinityPropagation, 
+    "dbscan": DBSCAN,
+    "hdbscan": HDBSCAN
+}
 
+class dotdict(dict):
+    """dot.notation access to dictionary attributes"""
+    __getattr__ = dict.get
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__
 
 def from_ginkgo_to_phylics(filepath:str): 
     df = pd.read_csv(filepath, sep="\t")

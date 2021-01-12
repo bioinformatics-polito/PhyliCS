@@ -1,3 +1,3 @@
-from .src.types import *
-from .src.utils import *
-from .src.drawer import Drawer 
+from .types import *
+from .utils import *
+from .drawer import Drawer 

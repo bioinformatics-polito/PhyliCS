@@ -11,3 +11,4 @@ anndata
 typing
 umap-learn
 IPython
+hdbscan

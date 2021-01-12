@@ -22,16 +22,18 @@ from .preprocessing._highly_variant_features import _highly_variable_features
 from .types import CnvData
 from .preprocessing._pca import _pca
 from .preprocessing._umap import _umap
-from .clustering.clustering_stats import silhouette_, davies_bouldin_, calinski_harabasz_
+from .clustering.clustering_opt import silhouette_, davies_bouldin_, calinski_harabasz_
+from .clustering.consensus_clustering import ConsensusCluster
+from .clustering.utils import ClusterConfig
 import numpy as np
 import pandas as pd
 from typing import Union, List, Optional, Sequence, Dict
 from  sklearn.decomposition import PCA
-from .utils import AnyRandom, _InitPos
+from .utils import AnyRandom, _InitPos, clustering_func
+from .constants import K_METHODS, LINKAGE, EMBEDDINGS
 from . import logging as logg
 
-K_METHODS = ["kmeans", "agglomerative", "birch"]
-LINKAGE = ["average", "complete", "single", "ward"]
+
 METRICS = ["euclidean", "l1", "l2", "manhattan", "cosine"]
 
 def variable_features(X:CnvData, min_disp: Optional[float] = None, max_disp: Optional[float] = None,
@@ -58,24 +60,56 @@ def cluster(data: Union[CnvData, np.ndarray],method:Optional[str]="hdbscan", met
             embeddings:Optional[Union[str, None]]=None, **kwargs):
             return NotImplemented
 
-def clust_stats(data: Union[CnvData, np.ndarray], method:str, metric:Optional[Union[str, None]]=None, 
+def nk_clust(data: Union[CnvData, np.ndarray], method:str, metric:Optional[Union[str, None]]="euclidean", 
             linkage:Optional[Union[str, None]]=None, embeddings:Optional[Union[str, None]]=None, 
-            min_k:Optional[int]=2, max_k:Optional[int]=15, index:Optional[Union[str, Sequence[str]]]="all"):
+            min_k:Optional[int]=2, max_k:Optional[int]=15, index:Optional[Union[str, List[str]]]="all",
+            n_jobs:Optional[int]=1):
         """
         Calculate clustering statistics to propose to the user the best k for kmeans, agglomerative clustering and birch,
         according to three internal validation indices (silhoette, calinski-harabasz, davies-bouldin).
 
         It allows also to select the distance metric and the linkage method, for agglomerative clustering.
         """
-        if method not in K_METHODS:
-                raise ValueError("method must be one of [" + ', '.join(K_METHODS) +"]")
-        if linkage is not None and not in LINKAGE:
-                raise ValueError("linkage must be one of [" + ', '.join(LINKAGE) +"]")
-        if metric 
+        cnvdata = data if isinstance(data, CnvData) else CnvData(data)
 
-        if method == "agglomerative" and linkage != "l2":
-                logg.error("agglomerative clustering with ward linkage can accept only l2 distance")
-                metric = "l2"
+        if method not in K_METHODS.values():
+                raise ValueError("Accepted values for method are [" + ', '.join(K_METHODS.values()) +"]")
+        if (linkage is not None) and (linkage not in LINKAGE.values()):
+                raise ValueError("Accepted values for linkage are [" + ', '.join(LINKAGE.values()) +"]")
+        if (metric is not None) and (metric not in METRICS):
+                raise ValueError("Accepted values for metric are [" + ', '.join(METRICS) +"]")
+
+        if embeddings is not None:
+            if embeddings == EMBEDDINGS.PCA:
+                if "pca" not in cnvdata.uns.keys():
+                    raise ValueError(
+                        'Did not find cnv.uns[\'pca\']. '
+                        'Consider running `Sample.pca()` first.'
+                    )
+                else:
+                    data_comp = (cnvdata[:, cnvdata.uns['pca']["X"] ])
+            elif embeddings == EMBEDDINGS.UMAP:
+                if "umap" not in cnvdata.uns.keys():
+                    raise ValueError(
+                        'Did not find cnv.uns[\'umap\']. '
+                        'Consider running `Sample.umap()` first.'
+                    )
+                else:
+                    data_comp = (cnvdata[:, cnvdata.uns['umap']["X"] ])
+            else:
+                raise ValueError("Accepted values for embeggings are ['umap', 'pca']")
+        else: 
+            data_comp = (cnvdata.X)
+
+        if min_k < 2:
+                raise ValueError("min_k must be at least equal to 2")
+
+        if max_k < min_k:
+                raise ValueError("max_k must be greater or equal to min_k")
+
+        if method == K_METHODS.AGGLOMERATIVE and linkage == LINKAGE.WARD and metric != "euclidean":
+                logg.warning("agglomerative clustering with ward linkage can accept only euclidean distance.\nFixed by default.")
+                metric = "euclidean"
         silhouette = False
         db = False
         ch = False
@@ -86,21 +120,50 @@ def clust_stats(data: Union[CnvData, np.ndarray], method:str, metric:Optional[Un
                         db = True
                 if index == "ch" or index == "all":
                         ch = True 
-        elif isinstance(index, Sequence[str]):
+        elif isinstance(index, List):
                 if "silhouette" in index:
                         silhouette = True 
                 if "db" in index:
                         db = True 
                 if "ch" in index:
                         ch = True
-        indices = {"silhouette":{}, "db":{}, "ch":{}}
+        indices = {}
         if silhouette == True:
-                indices["silhouette"] = silhouette_(data, method, metric, linkage, min_k, max_k)
+                indices["silhouette"] = silhouette_(data_comp, method, metric, linkage, min_k, max_k, n_jobs)
         if db == True:
-                indices["db"] = davies_bouldin_(data, method, metric, linkage, min_k, max_k)
+                indices["db"] = davies_bouldin_(data_comp, method, metric, linkage,  min_k, max_k, n_jobs)
         if ch == True:
-                indices["ch"] = calinski_harabasz_(data, method, metric, linkage, min_k, max_k)
+                indices["ch"] = calinski_harabasz_(data_comp, method, metric, linkage, min_k, max_k, n_jobs)
 
         return indices
+
+def consensus_clustering(data: Union[CnvData, np.ndarray], method:str, cluster_configs:List[ClusterConfig],
+                n_iter=Optional[int]=5, embeddings:Optional[Union[str, None]]=None, n_jobs:Optional[int]=1):
+        cnvdata = data if isinstance(data, CnvData) else CnvData(data)
+
+        if method not in clustering_func.keys():
+                raise ValueError("Accepted values for method are [" + ', '.join(clustering_func.keys()) +"]")
         
-    
+        if embeddings is not None:
+            if embeddings == EMBEDDINGS.PCA:
+                if "pca" not in cnvdata.uns.keys():
+                    raise ValueError(
+                        'Did not find cnv.uns[\'pca\']. '
+                        'Consider running `Sample.pca()` first.'
+                    )
+                else:
+                    data_comp = (cnvdata[:, cnvdata.uns['pca']["X"] ])
+            elif embeddings == EMBEDDINGS.UMAP:
+                if "umap" not in cnvdata.uns.keys():
+                    raise ValueError(
+                        'Did not find cnv.uns[\'umap\']. '
+                        'Consider running `Sample.umap()` first.'
+                    )
+                else:
+                    data_comp = (cnvdata[:, cnvdata.uns['umap']["X"] ])
+            else:
+                raise ValueError("Accepted values for embeggings are ['umap', 'pca']")
+        else: 
+            data_comp = (cnvdata.X)
+
+        return ConsensusCluster(clustering_func, configurations, n_iter).fit(data_comp)

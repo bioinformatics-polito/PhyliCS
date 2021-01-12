@@ -19,12 +19,14 @@
 # custom_types.py: this module implements phylics worker types
 # ==========================================================================
 
-def silhouette_(data, method, metric, linkage, min_k, max_k):
-    return NotImplemented
+__all__ = ["ClusterConfig"]
 
-def davies_bouldin_(data, method, metric, linkage, min_k, max_k):
-    return NotImplemented
-
-def calinski_harabasz_(data, method, metric, linkage, min_k, max_k):
-    return NotImplemented
-
+class ClusterConfig:
+    """
+        Utility class which holds the clustering schema to be used with a given algorithm.        
+    """
+    def __init__(self,**kwargs):
+        for attr in kwargs.keys():
+            self.__dict__[attr] = kwargs[attr]
+    def get_attr_dict(self):
+        return self.__dict__
