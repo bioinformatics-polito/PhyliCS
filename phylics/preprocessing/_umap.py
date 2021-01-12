@@ -30,6 +30,7 @@ def _umap(
     random_state: AnyRandom = 0,
     a: Optional[float] = None,
     b: Optional[float] = None,
+    use_highly_variable: Optional[bool] = False,
 ) -> np.ndarray:
     """\
     Embed the neighborhood graph using UMAP [McInnes18]_.
@@ -152,6 +153,18 @@ def _umap(
         UMAP coordinates of data.
     """
     data = data if isinstance(data, CnvData) else CnvData(data)
+
+    if use_highly_variable is True and 'highly_variable' not in data.feat.columns:
+        raise ValueError(
+            'Did not find cnv.feat[\'highly_variable\']. '
+            'Either your data already only consists of highly-variable features '
+            'or consider running `Sample.variable_features()` first.'
+        )
+    if use_highly_variable:
+        logg.info('    on highly variable features')
+    data_comp = (
+        data[:, data.feat['highly_variable']] if use_highly_variable else data
+    )
     
     start = logg.info('computing UMAP') 
     from umap.umap_ import find_ab_params, simplicial_set_embedding
@@ -183,7 +196,7 @@ def _umap(
             random_state=random_state,  
             verbose=settings.verbosity > 3,
     )
-    X_umap = umap_.fit_transform(data.X)
+    X_umap = umap_.fit_transform(data_comp)
     logg.info(
         '    finished',
         time=start,

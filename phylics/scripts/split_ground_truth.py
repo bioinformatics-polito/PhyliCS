@@ -67,7 +67,7 @@ def Heatmap(segcopy, outprefix):
     plt.clf()
     
 
-def SplitSamplesHet(cnvs, clusters, outprefix):
+def SplitSamplesHom(cnvs, clusters, outprefix):
 
     #labels = clusters['ClusterNumber'].unique()
 
@@ -122,7 +122,7 @@ def SplitSamplesHet(cnvs, clusters, outprefix):
 
     return subsamples, new_sizes
 
-def SplitSamplesHom(cnvs, new_sizes, outprefix):
+def SplitSamplesHet(cnvs, new_sizes):
     boundaries = pd.DataFrame(cnvs[['CHR', 'START', 'END']])
     cnvs = cnvs.drop(['CHR', 'START', 'END'], axis=1).transpose()
 
@@ -153,24 +153,30 @@ def SplitSamplesHom(cnvs, new_sizes, outprefix):
 def main():
     parser = argparse.ArgumentParser(description="Splits simulations in subsamples.")
     parser.add_argument("-f", "--file", required=True, type=str, help="SegCopy")
-    parser.add_argument("-c", "--clusters", required=True,type=str, help="Newick clusters")
+    parser.add_argument("-n", "--npy", required=True,type=str, help="Subtrees npy")
     parser.add_argument("-o", "--outprefix", required=True,type=str, help="Output path prefix")
     
     args = parser.parse_args()
 
     segcopy = pd.read_csv(args.file, sep="\t")
-    clusters = pd.read_csv(args.clusters, sep="\t", index_col=0)
+    #clusters = pd.read_csv(args.clusters, sep="\t", index_col=0)
+    clones = np.load(args.npy)
+    sizes = []
+
+    for v in np.unique(clones):
+        sizes.append(np.count_nonzero(clones == v))
 
     # 1. heterogeneous samples
-    outdir = os.path.join(args.outprefix, "het")
-    if os.path.exists(outdir) == False:
-        os.mkdir(outdir)
-    subsamples_het, new_sizes = SplitSamplesHet(segcopy, clusters, outdir)
+    #outdir = os.path.join(args.outprefix, "het")
+    if os.path.exists(args.outprefix) == False:
+        os.mkdir(args.outprefix)
+    subsamples_het = SplitSamplesHet(segcopy, sizes)
     for label in subsamples_het.keys():
-        Heatmap(subsamples_het[label], os.path.join(outdir, "sample"+str(label)))
-        subsamples_het[label].to_csv(os.path.join(outdir, "sample"+str(label)+"_SegCopy"), sep="\t", index=False)
+        Heatmap(subsamples_het[label], os.path.join(args.outprefix, "SegCopy_"+str(label)))
+        subsamples_het[label].to_csv(os.path.join(args.outprefix, "SegCopy_" + str(label)), sep="\t", index=False)
 
     # 2. homogeneous samples
+    """
     outdir = os.path.join(args.outprefix, "hom")
     if os.path.exists(outdir) == False:
         os.mkdir(outdir)
@@ -178,7 +184,7 @@ def main():
     for label in subsamples_hom.keys():
         Heatmap(subsamples_hom[label], os.path.join(outdir, "sample"+str(label)))
         subsamples_hom[label].to_csv(os.path.join(outdir, "sample"+str(label)+"_SegCopy"), sep="\t", index=False)
-    
+    """
 
 if __name__ == "__main__":
     sys.exit(main())

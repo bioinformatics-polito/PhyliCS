@@ -1,0 +1,13 @@
+python=3.8
+sctools
+numpy
+scipy
+pandas
+matplotlib
+seaborn
+scikit-learn
+statsmodels
+anndata
+typing
+umap-learn
+IPython

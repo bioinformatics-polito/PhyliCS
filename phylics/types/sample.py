@@ -22,7 +22,7 @@
 __all__ = ['Sample']
 
 from .cnvdata import CnvData 
-from ..utils import *
+from .. import utils
 from ..tools import variable_features, pca, umap
 from ..drawer import Drawer
 import random
@@ -32,6 +32,7 @@ from typing import Union, Tuple, List, Optional, Mapping, Any, Iterable, Sequenc
 from ..utils import AnyRandom, _InitPos
 from ..plotting._utils import _Dimensions
 from .. import logging as logg
+import collections.abc as cabc
 
 
 _FILTER_SINGLE_METHODS_ = {  
@@ -70,7 +71,7 @@ class Sample:
     @classmethod
     def from_file(cls, filepath:str, flavour:str="ginkgo", sample_name:str="sample"):
         if flavour == "ginkgo":
-            X, boundaries = from_ginkgo_to_phylics(filepath)
+            X, boundaries = utils.from_ginkgo_to_phylics(filepath)
             return cls(cnv_data=CnvData(X, feat=boundaries, obs_names='row_names', feat_names='col_names'), sample_name=sample_name)
         else:
             raise ValueError("Implemented only for ginkgo-like files")
@@ -79,7 +80,7 @@ class Sample:
         return self.cnv_data.shape
         
     def add_annotation(self, ann:Union[pd.Series, Mapping[str, Union[float, int]]], key:str, axis:int=0):
-        ann = sanitize_annotation(ann)
+        ann = utils.sanitize_annotation(ann)
         if axis == 0:
             if (ann.index.equals(self.cnv_data.obs.index) == False):
                 raise ValueError("indices mismatch")
@@ -92,7 +93,7 @@ class Sample:
             raise ValueError("IllegalArgument: axis = {}. Accepted values are 0 and 1")
     
     def load_annotation(self, filepath:str, key:str, axis:int=0):
-        ann = load_annotation_(filepath)
+        ann = utils.load_annotation_(filepath)
         self.add_annotation(ann, key, axis)
     
     def get_cnv_dataframe(self):
@@ -191,9 +192,9 @@ class Sample:
                 min_dist: float = 0.5, spread: float = 1.0, maxiter: Optional[int] = None, alpha: float = 1.0, gamma: float = 1.0,
                 fast: Union[bool, None] = False, negative_sample_rate: int = 5, local_connectivity: Union[int, None] = 1,
                 init_pos: Union[_InitPos, np.ndarray, None] = 'spectral', random_state: AnyRandom = 0, a: Optional[float] = None,
-                b: Optional[float] = None):
+                b: Optional[float] = None, use_highly_variable: Optional[bool] = False):
                 umap_result = umap(self.cnv_data, n_neighbors, n_components, metric, metric_kwds, min_dist, spread, maxiter, alpha, gamma,
-                                fast, negative_sample_rate, local_connectivity, init_pos, random_state, a, b)
+                                fast, negative_sample_rate, local_connectivity, init_pos, random_state, a, b, use_highly_variable)
                 self.cnv_data.uns['umap'] = {}
                 self.cnv_data.uns['umap']['X'] = umap_result
     def get_umap(self, sub_field: Union[str, None]=None):
@@ -209,7 +210,8 @@ class Sample:
                 return self.cnv_data.uns['umap']
 
 
-    def clusters(self):
+    def cluster(self, method, metric, highly_variable, embeddings, **kwargs):
+
         return NotImplemented 
 
 
