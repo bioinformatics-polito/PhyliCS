@@ -8,7 +8,7 @@ from ..types import CnvData
 from joblib import Parallel, delayed
 from ..utils import clustering_func
 from ..constants import K_METHODS
-from sklearn.metrics import silhouette_score, davies_bouldin_score, calinski_harabasz_score
+from sklearn.metrics import silhouette_score, davies_bouldin_score, calinski_harabasz_score, adjusted_mutual_info_score, adjusted_rand_score, v_measure_score, fowlkes_mallows_score
 # ==========================================================================
 #                                  PhyliCS
 # ==========================================================================
@@ -71,3 +71,10 @@ def calinski_harabasz_(data: np.ndarray, method:str, metric:Optional[Union[str, 
         scores_dict[k] = score
     return scores_dict
 
+def cluster_accuracy_(clusterer_:object, data:np.ndarray, true_labels:Union(list, np.array)):
+    pred_labels = clusterer_.fit_predict(data)
+    ari = adjusted_rand_score(true_labels, pred_labels)
+    ami = adjusted_mutual_info_score(true_labels, pred_labels)
+    vm = v_measure_score(true_labels, pred_labels)
+    fm = fowlkes_mallows_score(true_labels, pred_labels)
+    return pd.DataFrame({'method':[clusterer_.method], 'ari':[ari], 'ami':[ami], 'vm':[vm], 'fm':[fm]})

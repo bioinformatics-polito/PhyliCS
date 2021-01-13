@@ -293,7 +293,6 @@ def jackstraw(explained_variance_ratio: np.array, mean_expl_var_ratio_perm: np.a
     return ax
 
 
-
 _DRAWING_FUNCTIONS_ = {
     'heatmap' : heatmap,
     'dist': dist,

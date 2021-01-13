@@ -23,7 +23,7 @@ __all__ = ['Sample']
 
 from .cnvdata import CnvData 
 from .. import utils
-from ..tools import variable_features, pca, umap, nk_clust, consensus_clustering
+from ..tools import variable_features, pca, umap, nk_clust, clust_accuracy_ranking, cluster
 from ..drawer import Drawer
 import random
 import pandas as pd
@@ -221,10 +221,15 @@ class Sample:
         print(scores_df.to_string())
         self.cnv_data.uns['nk_clust'] = scores_df
 
-    def consensus(self, method:str, cluster_configs:List[ClusterConfig], n_iter=Optional[int]=5,
-                    embeddings:Optional[Union[str, None]]=None, n_jobs:Optional[int]=1):
-        return consensus_clustering(self.cnv_data, method, cluster_configs, embeddings, n_jobs)
-        
+    def cluster_benchmark(self, methods:Sequence[object], cluster_configurations:ClusterConfig, labels:Union[list, np.array], 
+                        embeddings:Optional[Union[str, None]]=None, n_jobs:Optional[int]=1):
+        ranking = clust_accuracy_ranking(self.cnv_data, cluster_configurations, labels, embeddings, n_jobs)
+        print(ranking.to_string())
+        self.cnv_data.uns['cluster_benchmark'] = ranking
+
+    def cluster(self, method:str, embeddings:Optional[Union[str, None]]=None, **kwargs):
+        self.cnv_data.feat['label'] = cluster(self.cnv_data, method, embeddings, **kwargs)
+
     #Filter functions
     def filter(self, key:str, method:str,
                     value:Union[int, float, Sequence[Union[float, int]], Tuple[Union[int, float], Union[int, float]]], 
@@ -253,7 +258,7 @@ class Sample:
         elif method ==  _FILTER_INTERVAL_METHODS_['OUT']:
             subset = self.cnv_data[annotation < value[0] or annotation > value[1], :]
         elif method ==  _FILTER_INTERVAL_METHODS_['OUT_EQ']:
-            subset = self.cnv_data[annotatin_iter=Optional[int]=5,
+            subset = self.cnv_data[annotation <= value[0] or annotation >= value[1], :]
         else:
             return Sample(subset, self.name)
 
@@ -347,21 +352,24 @@ class Sample:
         else:
             logg.error("{} object has no attribute 'pca'".format(self.cnv_data.uns))
         
-    def plot_umap(self, projection: _Dimensions = "2d", outpath:str=None, 
+    def plot_umap(self, outpath:str=None, 
                 figsize:Tuple[int, int]=None, **kwargs):
-        #TODO remove 3rd dimension
         if 'umap' in self.cnv_data.uns:
-            if projection == '3d':
-                z_label = 'Z'
-            else:
-                z_label = None
-            Drawer.draw('scatter', data=self.get_umap('X'), title = 'UMAP embeddings', x_label='X', y_label='Y', z_label=z_label,
-                projection = projection, outpath=outpath,  
-                figsize = figsize, **kwargs)
+            Drawer.draw('scatter', data=self.get_umap('X'), title = 'UMAP embeddings', x_label='X', y_label='Y', 
+                outpath=outpath, figsize = figsize, **kwargs)
         else:
             logg.error("{} object has no attribute 'umap'".format(self.cnv_data.uns))
 
-    
+    def plot_clusters(self, outpath:str=None, figsize:Tuple[int, int]=None, c:Union[list, np.array]=None, **kwargs):
+        if 'umap' in self.cnv_data.uns:
+            projection = self.get_umap('X')
+        else:
+            projection = umap(self.cnv_data)
+        if 'label' in self.cnv_data.feat.columns:
+            Drawer.draw('scatter', data=projection, title = 'Cluster projection', x_label='X', y_label='Y', outpath=outpath,  
+                figsize = figsize, labels=self.cnv_data.feat['label'].values, legend=True, **kwargs)
+        else:
+            logg.error("{} object has no column 'label'".format(self.cnv_data.feat))
     
 
 

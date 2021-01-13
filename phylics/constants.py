@@ -4,7 +4,8 @@ from .utils import dotdict
 K_METHODS = dotdict({
     'KMEANS' : "kmeans", 
     'AGGLOMERATIVE' :"agglomerative", 
-    'BIRCH' : "birch"})
+    'BIRCH' : "birch",
+    'SPECTRAL':"spectral"})
 
 LINKAGE = dotdict({
         'AVERAGE' : "average", 

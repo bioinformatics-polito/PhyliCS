@@ -12,3 +12,4 @@ typing
 umap-learn
 IPython
 hdbscan
+joblib

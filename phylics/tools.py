@@ -22,9 +22,9 @@ from .preprocessing._highly_variant_features import _highly_variable_features
 from .types import CnvData
 from .preprocessing._pca import _pca
 from .preprocessing._umap import _umap
-from .clustering.clustering_opt import silhouette_, davies_bouldin_, calinski_harabasz_
-from .clustering.consensus_clustering import ConsensusCluster
+from .clustering.metrics import silhouette_, davies_bouldin_, calinski_harabasz_, cluster_accuracy_
 from .clustering.utils import ClusterConfig
+from .clustering.cluster import cluster_
 import numpy as np
 import pandas as pd
 from typing import Union, List, Optional, Sequence, Dict
@@ -32,7 +32,7 @@ from  sklearn.decomposition import PCA
 from .utils import AnyRandom, _InitPos, clustering_func
 from .constants import K_METHODS, LINKAGE, EMBEDDINGS
 from . import logging as logg
-
+from joblib import Parallel, delayed
 
 METRICS = ["euclidean", "l1", "l2", "manhattan", "cosine"]
 
@@ -56,9 +56,6 @@ def umap(data: Union[CnvData, np.ndarray], n_neighbors: int = 15, n_components: 
                 b: Optional[float] = None, use_highly_variable: Optional[bool] = False):
         return _umap(data, n_neighbors, n_components, metric, metric_kwds, min_dist, spread, maxiter, alpha, gamma,
                                 fast, negative_sample_rate, local_connectivity, init_pos, random_state, a, b, use_highly_variable)
-def cluster(data: Union[CnvData, np.ndarray],method:Optional[str]="hdbscan", metric:Optional[str]="l1", 
-            embeddings:Optional[Union[str, None]]=None, **kwargs):
-            return NotImplemented
 
 def nk_clust(data: Union[CnvData, np.ndarray], method:str, metric:Optional[Union[str, None]]="euclidean", 
             linkage:Optional[Union[str, None]]=None, embeddings:Optional[Union[str, None]]=None, 
@@ -73,11 +70,11 @@ def nk_clust(data: Union[CnvData, np.ndarray], method:str, metric:Optional[Union
         cnvdata = data if isinstance(data, CnvData) else CnvData(data)
 
         if method not in K_METHODS.values():
-                raise ValueError("Accepted values for method are [" + ', '.join(K_METHODS.values()) +"]")
+                raise ValueError("Accepted values for method are " + ', '.join(K_METHODS.values()) +"")
         if (linkage is not None) and (linkage not in LINKAGE.values()):
-                raise ValueError("Accepted values for linkage are [" + ', '.join(LINKAGE.values()) +"]")
+                raise ValueError("Accepted values for linkage are " + ', '.join(LINKAGE.values()) +"")
         if (metric is not None) and (metric not in METRICS):
-                raise ValueError("Accepted values for metric are [" + ', '.join(METRICS) +"]")
+                raise ValueError("Accepted values for metric are " + ', '.join(METRICS) +"")
 
         if embeddings is not None:
             if embeddings == EMBEDDINGS.PCA:
@@ -97,7 +94,7 @@ def nk_clust(data: Union[CnvData, np.ndarray], method:str, metric:Optional[Union
                 else:
                     data_comp = (cnvdata[:, cnvdata.uns['umap']["X"] ])
             else:
-                raise ValueError("Accepted values for embeggings are ['umap', 'pca']")
+                raise ValueError("Accepted values for embeggings are 'umap', 'pca'")
         else: 
             data_comp = (cnvdata.X)
 
@@ -136,9 +133,9 @@ def nk_clust(data: Union[CnvData, np.ndarray], method:str, metric:Optional[Union
                 indices["ch"] = calinski_harabasz_(data_comp, method, metric, linkage, min_k, max_k, n_jobs)
 
         return indices
-
+"""
 def consensus_clustering(data: Union[CnvData, np.ndarray], method:str, cluster_configs:List[ClusterConfig],
-                n_iter=Optional[int]=5, embeddings:Optional[Union[str, None]]=None, n_jobs:Optional[int]=1):
+                n_iter:Optional[int]=5, embeddings:Optional[Union[str, None]]=None, n_jobs:Optional[int]=1):
         cnvdata = data if isinstance(data, CnvData) else CnvData(data)
 
         if method not in clustering_func.keys():
@@ -167,3 +164,66 @@ def consensus_clustering(data: Union[CnvData, np.ndarray], method:str, cluster_c
             data_comp = (cnvdata.X)
 
         return ConsensusCluster(clustering_func, configurations, n_iter).fit(data_comp)
+"""
+def cluster_accuracy(clusterer_, data, labels):
+        return cluster_accuracy_(clusterer_, data, labels)
+
+def clust_accuracy_ranking(data:Union[CnvData, np.ndarray], cluster_configurations:ClusterConfig, 
+                        labels:Union[list, np.array], embeddings:Optional[Union[str, None]]=None, n_jobs:Optional[int]=1):
+        cnvdata = data if isinstance(data, CnvData) else CnvData(data)
+
+        if embeddings is not None:
+            if embeddings == EMBEDDINGS.PCA:
+                if "pca" not in cnvdata.uns.keys():
+                    raise ValueError(
+                        'Did not find cnv.uns[\'pca\']. '
+                        'Consider running `Sample.pca()` first.'
+                    )
+                else:
+                    data_comp = (cnvdata[:, cnvdata.uns['pca']["X"] ])
+            elif embeddings == EMBEDDINGS.UMAP:
+                if "umap" not in cnvdata.uns.keys():
+                    raise ValueError(
+                        'Did not find cnv.uns[\'umap\']. '
+                        'Consider running `Sample.umap()` first.'
+                    )
+                else:
+                    data_comp = (cnvdata[:, cnvdata.uns['umap']["X"] ])
+            else:
+                raise ValueError("Accepted values for embeggings are 'umap', 'pca'")
+        else: 
+            data_comp = (cnvdata.X)
+        results = Parallel(n_jobs=n_jobs)(delayed(cluster_accuracy)(clusterer_, data_comp, labels) for clusterer_ in cluster_configurations.clusterer_)
+        ranking = pd.concat(results, ignore_index=True)
+        #rank results according to the average ranking of the four indices
+        ranking['rank'] = ranking[['ari', 'ami', 'fmi', 'vm']].rank().mean(axis=1)
+        ranking = ranking.sort_values(by='rank', ascending=False)
+        ranking = ranking.drop('rank', axis=1)
+        ranking = ranking.set_index('method')
+        return ranking
+
+def cluster(data:Union[CnvData, np.ndarray], method:str, embeddings:Optional[Union[str, None]]=None, **kwargs):
+        cnvdata = data if isinstance(data, CnvData) else CnvData(data)
+        if embeddings is not None:
+            if embeddings == EMBEDDINGS.PCA:
+                if "pca" not in cnvdata.uns.keys():
+                    raise ValueError(
+                        'Did not find cnv.uns[\'pca\']. '
+                        'Consider running `Sample.pca()` first.'
+                    )
+                else:
+                    data_comp = (cnvdata[:, cnvdata.uns['pca']["X"] ])
+            elif embeddings == EMBEDDINGS.UMAP:
+                if "umap" not in cnvdata.uns.keys():
+                    raise ValueError(
+                        'Did not find cnv.uns[\'umap\']. '
+                        'Consider running `Sample.umap()` first.'
+                    )
+                else:
+                    data_comp = (cnvdata[:, cnvdata.uns['umap']["X"] ])
+            else:
+                raise ValueError("Accepted values for embeggings are 'umap', 'pca'")
+        else: 
+            data_comp = (cnvdata.X)
+        
+        return cluster_(data_comp, method, **kwargs)
