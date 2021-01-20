@@ -71,7 +71,7 @@ def calinski_harabasz_(data: np.ndarray, method:str, metric:Optional[Union[str, 
         scores_dict[k] = score
     return scores_dict
 
-def cluster_accuracy_(clusterer_:object, data:np.ndarray, true_labels:Union(list, np.array)):
+def cluster_accuracy_(clusterer_:object, data:np.ndarray, true_labels:Union[list, np.array]):
     pred_labels = clusterer_.fit_predict(data)
     ari = adjusted_rand_score(true_labels, pred_labels)
     ami = adjusted_mutual_info_score(true_labels, pred_labels)

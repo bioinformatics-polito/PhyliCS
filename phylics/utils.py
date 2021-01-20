@@ -1,7 +1,7 @@
 import pandas as pd
 from numpy import random
 from ._compat import Literal
-from typing import Union, Mapping
+from typing import Union, Mapping, Sequence
 import collections.abc as cabc 
 from sklearn.cluster import KMeans, AgglomerativeClustering, Birch, AffinityPropagation, DBSCAN, OPTICS, SpectralClustering
 from hdbscan import HDBSCAN
@@ -47,6 +47,19 @@ def sanitize_annotation(ann:Union[pd.Series, Mapping[str, Union[float, int]]]):
         return pd.Series(ann)
     else:
         raise ValueError("The annotation must be of type pd.Series or Mapping: got {})".format(type(ann)))
+
+def partition(set_):
+    if len(set_) == 0:
+        yield []
+        return
+    for i in range(int(2**len(set_)/2)):
+        parts = [[], []]
+        for item in set_:
+            parts[i&1].append(item)
+            i >>= 1
+        for b in partition(parts[1]):
+            yield [parts[0]]+b
+
 
 
 

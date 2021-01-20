@@ -18,13 +18,11 @@
 # ==========================================================================
 # custom_types.py: this module implements phylics worker types
 # ==========================================================================
-
-from ..utils import clustering_func
+import pandas as pd 
 import numpy as np
+from sklearn.metrics import silhouette_score
+from sklearn.metrics import pairwise_distances
 
-
-def cluster_(data:np.ndarray, method:str, **kwargs):
-    if method == "agglomerative":
-        return clustering_func[method](compute_distances=True, **kwargs).fit(data)
-    else:
-        return clustering_func[method](**kwargs).fit(data)
+def het_score_(data:pd.DataFrame, labels:np.array, n_jobs:int=1):
+    X = pairwise_distances(data, metric='l1', n_jobs=n_jobs)
+    return silhouette_score(X, labels, metric='precomputed')

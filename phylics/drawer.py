@@ -23,6 +23,7 @@ __all__ = ['Drawer']
 
 
 import sys
+import warnings
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -41,13 +42,52 @@ from ._compat import Literal
 from . import logging as logg
 from .plotting._utils import make_projection_available, ColorLike, _Dimensions
 
-def heatmap(cnvs, boundaries, method='ward', metric='euclidean', outpath=None, verbose=False, sample=None,
-                vmin:int = 0, vmax:int = 12, vcenter:int=2, figsize:Tuple[int, int]=(37, 21), fontsize:int=16): 
+def clustermap(data, boundaries, labels:Union[np.array, None]=None, outpath=None, title: str=None, legend: bool=False, linkage:Union[np.ndarray, None]=None,
+                 vmin:int = 0, vmax:int = 12, vcenter:int=2, figsize:Tuple[int, int]=(37, 21), fontsize:int=16, row_cluster:bool=False): 
+    warnings.filterwarnings("ignore")
     divnorm = colors.TwoSlopeNorm(vmin=vmin, vcenter=vcenter, vmax=vmax)
-    
-    if method == 'ward' and metric != 'euclidean':
-        raise ValueError("metric must be 'euclidean' if method is 'ward'")
+    cbar_kws={"ticks":np.arange(vmin,vmax+1,1)}
+    if labels is not None:
+        if linkage is None:
+            #sort rows by cluster label
+            data['label'] = labels
+            data = data.sort_values(by='label')
+            labels = data["label"].values
+            data = data.drop(['label'], axis=1)
+        
+        # Cluster colors
+        color_palette = sns.color_palette("hls", len(np.unique(labels)))
+        cluster_lut = dict(zip(np.unique(labels), color_palette))
+        cluster_colors=pd.Series(labels, index=data.index).map(cluster_lut)
+        if linkage is None:
+            if row_cluster == False:
+                h = sns.clustermap(data, row_cluster=False, col_cluster=False, yticklabels = False,  row_colors=cluster_colors,
+                    cmap='RdBu_r', vmin=vmin, vmax=vmax,norm=divnorm, figsize=figsize, cbar_kws=cbar_kws)   
+            else:
+                 h = sns.clustermap(data, method="ward", col_cluster=False, yticklabels = False,  row_colors=cluster_colors,
+                    cmap='RdBu_r', vmin=vmin, vmax=vmax,norm=divnorm, figsize=figsize, cbar_kws=cbar_kws)
+        else:
+            h = sns.clustermap(data, row_linkage=linkage, col_cluster=False, yticklabels = False,  row_colors=cluster_colors,
+                    cmap='RdBu_r', vmin=vmin, vmax=vmax, norm=divnorm, figsize=figsize, cbar_kws=cbar_kws)
 
+    else:
+        if row_cluster == False:
+            h = sns.clustermap(data, method="ward", row_cluster=False, col_cluster=False, yticklabels = False,  
+                    cmap='RdBu_r', vmin=vmin, vmax=vmax,norm=divnorm, figsize=figsize, cbar_kws=cbar_kws)
+        else:
+            h = sns.clustermap(data, method="ward", col_cluster=False, yticklabels = False,  
+                    cmap='RdBu_r', vmin=vmin, vmax=vmax,norm=divnorm, figsize=figsize, cbar_kws=cbar_kws)
+    
+    if legend == True: 
+        # Draw the legend bar for the classes                 
+        for label in np.unique(labels):
+            h.ax_row_dendrogram.bar(0, 0, color=cluster_lut[label],
+                        label=label, linewidth=0)
+        h.ax_row_dendrogram.legend(loc='center', bbox_to_anchor=(0.5,0.9), ncol=len(np.unique(labels)), fontsize=14, 
+                title_fontsize='x-large', bbox_transform=plt.gcf().transFigure)
+        
+    h.cax.set_position([0.05, .2, .03, .45])
+    ax = h.ax_heatmap
 
     chr_limits = []
     for k,v in boundaries.groupby('CHR', sort=False)['END'].max().items():
@@ -67,13 +107,6 @@ def heatmap(cnvs, boundaries, method='ward', metric='euclidean', outpath=None, v
         pos_list.append((start+end)/2)
         start = end+1
 
-    
-    cbar_kws={"ticks":np.arange(vmin,vmax+1,1)}
-    h = sns.clustermap(cnvs, method=method, metric=metric, col_cluster=False, yticklabels = False,  
-                cmap='RdBu_r', vmin=vmin, vmax=vmax,norm=divnorm, figsize=figsize, cbar_kws=cbar_kws)    
-    h.cax.set_position([0.05, .2, .03, .45])
-
-    ax = h.ax_heatmap
     #place vertical lines to identify chromosomes
     for pos in chr_limits:
         ax.axvline(x=pos, color='black')
@@ -90,7 +123,8 @@ def heatmap(cnvs, boundaries, method='ward', metric='euclidean', outpath=None, v
     ax.set_ylabel("cells", fontsize=16, fontweight='bold')
 
     #plt.gcf().set_size_inches(37, 21)
-    plt.gcf().suptitle("CNV heatmap - Sample = " + sample, fontsize=fontsize+2, fontweight='bold')
+    if title is not None:
+        plt.gcf().suptitle(title)
 
     if outpath != None:
         plt.savefig(outpath)
@@ -121,6 +155,7 @@ def dist(a:Union[list, np.array, pd.Series], grid:bool=False, quantiles:List[flo
     return ax
 
 _ScatterBasis = Literal['pca', 'umap', 'X']
+
 
 def scatter(data:np.ndarray, projection: _Dimensions = "2d", outpath:str=None, title: str=None, 
                 x_label: str=None, y_label: str=None, z_label: str=None,
@@ -294,7 +329,7 @@ def jackstraw(explained_variance_ratio: np.array, mean_expl_var_ratio_perm: np.a
 
 
 _DRAWING_FUNCTIONS_ = {
-    'heatmap' : heatmap,
+    'heatmap' : clustermap,
     'dist': dist,
     'scatter':scatter,
     'variable_features':highly_variable_features,

@@ -29,9 +29,10 @@ import numpy as np
 import pandas as pd
 from typing import Union, List, Optional, Sequence, Dict
 from  sklearn.decomposition import PCA
-from .utils import AnyRandom, _InitPos, clustering_func
+from .utils import AnyRandom, _InitPos, clustering_func, partition
 from .constants import K_METHODS, LINKAGE, EMBEDDINGS
 from . import logging as logg
+from .multisample.spatiality import het_score_
 from joblib import Parallel, delayed
 
 METRICS = ["euclidean", "l1", "l2", "manhattan", "cosine"]
@@ -67,15 +68,13 @@ def nk_clust(data: Union[CnvData, np.ndarray], method:str, metric:Optional[Union
 
         It allows also to select the distance metric and the linkage method, for agglomerative clustering.
         """
-        cnvdata = data if isinstance(data, CnvData) else CnvData(data)
-
         if method not in K_METHODS.values():
                 raise ValueError("Accepted values for method are " + ', '.join(K_METHODS.values()) +"")
         if (linkage is not None) and (linkage not in LINKAGE.values()):
                 raise ValueError("Accepted values for linkage are " + ', '.join(LINKAGE.values()) +"")
         if (metric is not None) and (metric not in METRICS):
                 raise ValueError("Accepted values for metric are " + ', '.join(METRICS) +"")
-
+        """
         if embeddings is not None:
             if embeddings == EMBEDDINGS.PCA:
                 if "pca" not in cnvdata.uns.keys():
@@ -97,7 +96,7 @@ def nk_clust(data: Union[CnvData, np.ndarray], method:str, metric:Optional[Union
                 raise ValueError("Accepted values for embeggings are 'umap', 'pca'")
         else: 
             data_comp = (cnvdata.X)
-
+        """
         if min_k < 2:
                 raise ValueError("min_k must be at least equal to 2")
 
@@ -126,11 +125,11 @@ def nk_clust(data: Union[CnvData, np.ndarray], method:str, metric:Optional[Union
                         ch = True
         indices = {}
         if silhouette == True:
-                indices["silhouette"] = silhouette_(data_comp, method, metric, linkage, min_k, max_k, n_jobs)
+                indices["silhouette"] = silhouette_(data, method, metric, linkage, min_k, max_k, n_jobs)
         if db == True:
-                indices["db"] = davies_bouldin_(data_comp, method, metric, linkage,  min_k, max_k, n_jobs)
+                indices["db"] = davies_bouldin_(data, method, metric, linkage,  min_k, max_k, n_jobs)
         if ch == True:
-                indices["ch"] = calinski_harabasz_(data_comp, method, metric, linkage, min_k, max_k, n_jobs)
+                indices["ch"] = calinski_harabasz_(data, method, metric, linkage, min_k, max_k, n_jobs)
 
         return indices
 """
@@ -227,3 +226,38 @@ def cluster(data:Union[CnvData, np.ndarray], method:str, embeddings:Optional[Uni
             data_comp = (cnvdata.X)
         
         return cluster_(data_comp, method, **kwargs)
+
+def segregation_score(data:CnvData, n_jobs:int=1, verbose:bool=False):
+    labels = data.obs['sample'].values
+    samples = np.unique(labels)
+    partitions = partition(samples)
+    #tries all possibile partitions of sample list and compute the score
+    #in other words, samples are combined in subsets and the most convenient
+    #scheme is found
+    scores = pd.DataFrame(columns=['samples_partition', 'score'])
+    if verbose:
+        print("Computing spatial segretation score")
+    for p in partitions:
+        if len(p) == 1:
+            continue
+        if len(p) < len(samples):
+            #ex. p = [[1], [2], [3, 4]]
+            # subsets = [1], [2], [3, 4]
+            # cells from sample 3 and 4 will be assigned to the same sample
+            new_labels = np.array(labels)
+            #subset_dict = dict(zip(range(len(p)), p))   
+            for idx, subset in enumerate(p):
+                for l in subset:
+                    #for each sample in this subset, aggregate
+                    #find cells from sample l
+                    # get positions in labels which value is l
+                    new_labels[labels == l] = idx
+            s = het_score_(data.X, new_labels, n_jobs)
+            scores = scores.append(pd.DataFrame({'samples_partition':[p], 'score':[s]}), ignore_index=True)
+        else:
+            #compute overall score
+            s = het_score_(data.X, labels, n_jobs)
+            scores = scores.append(pd.DataFrame({'samples_partition':[p], 'score':[s]}), ignore_index=True)
+        if verbose:
+            print("Samples' partition: " + " vs ".join(str(pp) for pp in p) + " - score: " + str(s))
+    return scores

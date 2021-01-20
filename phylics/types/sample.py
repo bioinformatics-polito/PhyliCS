@@ -22,6 +22,7 @@
 __all__ = ['Sample']
 
 from .cnvdata import CnvData 
+#from .multisample import MultiSample
 from .. import utils
 from ..tools import variable_features, pca, umap, nk_clust, clust_accuracy_ranking, cluster
 from ..drawer import Drawer
@@ -34,6 +35,7 @@ from ..plotting._utils import _Dimensions
 from .. import logging as logg
 import collections.abc as cabc
 from ..clustering.utils import ClusterConfig
+from ..constants import EMBEDDINGS
 
 
 _FILTER_SINGLE_METHODS_ = {  
@@ -80,20 +82,20 @@ class Sample:
     def shape(self):
         return self.cnv_data.shape
         
-    def add_annotation(self, ann:Union[pd.Series, Mapping[str, Union[float, int]]], key:str, axis:int=0):
+    def add_annotation(self, ann:Union[pd.Series, Mapping[str, Union[float, int]]], key:str, axis:str="obs"):
         ann = utils.sanitize_annotation(ann)
-        if axis == 0:
+        if axis == "obs":
             if (ann.index.equals(self.cnv_data.obs.index) == False):
                 raise ValueError("indices mismatch")
             self.cnv_data.obs[key] = ann
-        elif axis == 1:
+        elif axis == "feat":
             if (ann.index.equals(self.cnv_data.feat.index) == False):
                 raise ValueError("indices mismatch")
             self.cnv_data.feat[key] = ann
         else:
-            raise ValueError("IllegalArgument: axis = {}. Accepted values are 0 and 1")
+            raise ValueError("IllegalArgument: axis = {}. Accepted values are obs and feat")
     
-    def load_annotation(self, filepath:str, key:str, axis:int=0):
+    def load_annotation(self, filepath:str, key:str, axis:str="obs"):
         ann = utils.load_annotation_(filepath)
         self.add_annotation(ann, key, axis)
     
@@ -109,22 +111,22 @@ class Sample:
     def get_boundaries(self):
         return self.cnv_data.feat[['CHR', 'START', 'END']]
 
-    def get_annotations(self, axis:int=0):
-        if axis == 0:
+    def get_annotations(self, axis:str="obs"):
+        if axis == "obs":
             return self.cnv_data.obs
-        elif axis == 1:
+        elif axis == "feat":
             return self.cnv_data.feat
         else:
-            raise ValueError("IllegalArgument: axis = {}. Accepted values are 0 and 1")
+            raise ValueError("IllegalArgument: axis = {}. Accepted values are obs and feat")
     
 
-    def get_annotation(self, key:str, axis:int=0):
-        if axis == 0:
+    def get_annotation(self, key:str, axis:str="obs"):
+        if axis == "obs":
             return self.cnv_data.obs[key]
-        elif axis == 1:
+        elif axis == "feat":
             return self.cnv_data.feat[key]
         else:
-            raise ValueError("IllegalArgument: axis = {}. Accepted values are 0 and 1")
+            raise ValueError("IllegalArgument: axis = {}. Accepted values are obs and feat")
 
     def count(self):
         return self.cnv_data.n_obs
@@ -211,24 +213,65 @@ class Sample:
                 return self.cnv_data.uns['umap']
 
     # clustering
-    def nk_clust(self, method:str, metric:Optional[Union[str, None]]=None, 
+    def nk_clust(self, method:str, metric:Optional[Union[str, None]]="euclidean", 
             linkage:Optional[Union[str, None]]=None, embeddings:Optional[Union[str, None]]=None, 
             min_k:Optional[int]=2, max_k:Optional[int]=15, index:Optional[Union[str, List[str]]]="all",
             n_jobs:Optional[int]=1):
-        results = nk_clust(self.cnv_data , method, metric, linkage, embeddings, min_k, max_k, index, n_jobs) 
+
+        if embeddings is not None:
+            if embeddings == EMBEDDINGS.PCA:
+                if "pca" not in self.cnv_data.uns.keys():
+                    raise ValueError(
+                        'Did not find cnv.uns[\'pca\']. '
+                        'Consider running `Sample.pca()` first.'
+                    )
+                else:
+                    data = self.get_pca("X")
+            elif embeddings == EMBEDDINGS.UMAP:
+                if "umap" not in self.cnv_data.uns.keys():
+                    raise ValueError(
+                        'Did not find cnv.uns[\'umap\']. '
+                        'Consider running `Sample.umap()` first.'
+                    )
+                else:
+                    data = self.get_umap("X")
+            else:
+                raise ValueError("Accepted values for embeggings are 'umap', 'pca'")
+        else: 
+            data = (self.cnv_data.X)
+        results = nk_clust(data , method, metric, linkage, embeddings, min_k, max_k, index, n_jobs) 
         scores_df = pd.DataFrame(results)
         scores_df.index.name = "k"
-        print(scores_df.to_string())
         self.cnv_data.uns['nk_clust'] = scores_df
+        return scores_df
 
     def cluster_benchmark(self, methods:Sequence[object], cluster_configurations:ClusterConfig, labels:Union[list, np.array], 
                         embeddings:Optional[Union[str, None]]=None, n_jobs:Optional[int]=1):
         ranking = clust_accuracy_ranking(self.cnv_data, cluster_configurations, labels, embeddings, n_jobs)
-        print(ranking.to_string())
         self.cnv_data.uns['cluster_benchmark'] = ranking
+        return ranking
 
     def cluster(self, method:str, embeddings:Optional[Union[str, None]]=None, **kwargs):
-        self.cnv_data.feat['label'] = cluster(self.cnv_data, method, embeddings, **kwargs)
+        res = cluster(self.cnv_data, method, embeddings, **kwargs)
+        self.cnv_data.uns['cluster_model'] = res
+        self.cnv_data.obs['label'] = res.labels_
+        return res
+
+    def get_clusterer(self):
+        return self.cnv_data.uns['cluster_model']
+    
+    def get_cluster_labels(self):
+        return self.cnv_data.obs['label']
+
+    #Multi-sample analysis
+    #def co_cluster(self, samples:list, method:str, embeddings:Optional[Union[str, None]]=None, **kwargs):
+    #    multisample = MultiSample.from_list(samples)
+    #    multisample.cluster(method, embeddings, **kwargs)
+    #    return multisample
+    
+    #def multi_sample_score(self, samples:list, n_jobs:int=1, verbose:bool=False):
+    #    multisample = MultiSample.from_list(samples)
+    #    return multisample.het_score(n_jobs, verbose)
 
     #Filter functions
     def filter(self, key:str, method:str,
@@ -312,12 +355,13 @@ class Sample:
                                 outpath:str=None, **kwargs):
         Drawer.draw('dist', self.get_annotation(key=ann, axis=axis), grid, quantiles, figsize, outpath, **kwargs)
 
+    """
     def heatmap(self, method:str ='ward', metric:str ='euclidean', outpath:str=None,
                     vmin:int = 0, vmax:int = 12, vcenter:int=2, figsize:Tuple[int, int]=(37, 21), fontsize:int=16):
-        Drawer.draw('heatmap', self.get_cnv_matrix(), self.get_boundaries(), method, metric,  outpath=outpath, sample=self.name, 
+        Drawer.draw('heatmap', self.get_cnv_matrix(), self.get_boundaries(),  outpath=outpath, sample=self.name, 
             vmin = vmin, vmax=vmax, vcenter=vcenter, figsize=figsize, fontsize=fontsize)
 
-    """
+    
     def scatter_plot(self, outpath:str=None, figsize:Tuple[int, int]=None, **kwargs):
         embeddings = Reducer.umap_(self.cnv_data.get_cnvs())
         Drawer.draw('scatter', X=embeddings, figsize=figsize, outpath=outpath, **kwargs)
@@ -360,16 +404,49 @@ class Sample:
         else:
             logg.error("{} object has no attribute 'umap'".format(self.cnv_data.uns))
 
-    def plot_clusters(self, outpath:str=None, figsize:Tuple[int, int]=None, c:Union[list, np.array]=None, **kwargs):
-        if 'umap' in self.cnv_data.uns:
-            projection = self.get_umap('X')
-        else:
-            projection = umap(self.cnv_data)
-        if 'label' in self.cnv_data.feat.columns:
-            Drawer.draw('scatter', data=projection, title = 'Cluster projection', x_label='X', y_label='Y', outpath=outpath,  
-                figsize = figsize, labels=self.cnv_data.feat['label'].values, legend=True, **kwargs)
+    def plot_clusters(self, plot:str="scatter", outpath:str=None, figsize:Tuple[int, int]=None, **kwargs):
+        if 'label' in self.cnv_data.obs.columns:
+            if plot == "scatter":
+                if 'umap' in self.cnv_data.uns:
+                    projection = self.get_umap('X')
+                else:
+                    projection = umap(self.cnv_data)
+                Drawer.draw('scatter', data=projection, title = 'Cluster projection', x_label='X', y_label='Y', outpath=outpath,  
+                    figsize = figsize, labels=self.cnv_data.obs['label'].values, legend=True, **kwargs)
+            elif plot == "heatmap":
+                Drawer.draw('heatmap', data=self.get_cnv_dataframe(), boundaries=self.get_boundaries(),  title = 'Cluster heatmap', outpath=outpath,  
+                    labels=self.cnv_data.obs['label'].values, legend=True, **kwargs)
         else:
             logg.error("{} object has no column 'label'".format(self.cnv_data.feat))
+
+    def plot_dendrogram(self, outpath:str=None, clusters:bool=False, figsize:Tuple[int, int]=None, **kwargs):
+        if clusters == True: 
+            if 'label' in self.cnv_data.obs.columns:
+                model =  self.get_clusterer()
+                if hasattr(model, 'children_'):
+                    #agglomerative clustering has been computed
+                    counts = np.zeros(model.children_.shape[0])
+                    n_samples = len(model.labels_)
+                    for i, merge in enumerate(model.children_):
+                        current_count = 0
+                        for child_idx in merge:
+                            if child_idx < n_samples:
+                                current_count += 1  # leaf node
+                            else:
+                                current_count += counts[child_idx - n_samples]
+                        counts[i] = current_count
+
+                    linkage_matrix = np.column_stack([model.children_, model.distances_,
+                                      counts]).astype(float)
+                    Drawer.draw('heatmap', data=self.get_cnv_dataframe(), boundaries=self.get_boundaries(), linkage=linkage_matrix,  title = 'Cluster dendrogram & heatmap', outpath=outpath,  
+                        labels=self.cnv_data.obs['label'].values, legend=True, **kwargs)
+                else:
+                    logg.error("Cluster model has no attribute 'children'. Consider executing agglomerative clustering.")
+            else:
+                logg.error("{} object has no column 'label'".format(self.cnv_data.feat))
+        else:
+            Drawer.draw('heatmap', data=self.get_cnv_dataframe(), boundaries=self.get_boundaries(),  title = 'Dataset dendrogram & heatmap', outpath=outpath,  
+                        legend=True, **kwargs)
     
 
 

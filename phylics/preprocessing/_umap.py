@@ -162,9 +162,8 @@ def _umap(
         )
     if use_highly_variable:
         logg.info('    on highly variable features')
-    data_comp = (
-        data[:, data.feat['highly_variable']] if use_highly_variable else data
-    )
+    data_comp = data.X[:, data.feat['highly_variable']] if use_highly_variable else data.X
+    
     
     start = logg.info('computing UMAP') 
     from umap.umap_ import find_ab_params, simplicial_set_embedding
