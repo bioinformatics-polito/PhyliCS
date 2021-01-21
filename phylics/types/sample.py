@@ -130,6 +130,9 @@ class Sample:
 
     def count(self):
         return self.cnv_data.n_obs
+
+    def sort_rows(self, by:Union[list, np.array]):
+        return Sample(self.cnv_data.sort_rows(by), self.name)
     
     def drop_cells(self, cells:list, inplace:bool=False):
         cnv_data = self.cnv_data.drop_obs(select=cells, inplace=inplace)
@@ -254,14 +257,14 @@ class Sample:
     def cluster(self, method:str, embeddings:Optional[Union[str, None]]=None, **kwargs):
         res = cluster(self.cnv_data, method, embeddings, **kwargs)
         self.cnv_data.uns['cluster_model'] = res
-        self.cnv_data.obs['label'] = res.labels_
+        self.cnv_data.obs['cluster'] = res.labels_
         return res
 
     def get_clusterer(self):
         return self.cnv_data.uns['cluster_model']
     
     def get_cluster_labels(self):
-        return self.cnv_data.obs['label']
+        return self.cnv_data.obs['cluster']
 
     #Multi-sample analysis
     #def co_cluster(self, samples:list, method:str, embeddings:Optional[Union[str, None]]=None, **kwargs):
@@ -405,23 +408,24 @@ class Sample:
             logg.error("{} object has no attribute 'umap'".format(self.cnv_data.uns))
 
     def plot_clusters(self, plot:str="scatter", outpath:str=None, figsize:Tuple[int, int]=None, **kwargs):
-        if 'label' in self.cnv_data.obs.columns:
+        if 'cluster' in self.cnv_data.obs.columns:
+            s = self.sort_rows(by="cluster")
             if plot == "scatter":
-                if 'umap' in self.cnv_data.uns:
-                    projection = self.get_umap('X')
+                if 'umap' in s.cnv_data.uns:
+                    projection = s.get_umap('X')
                 else:
-                    projection = umap(self.cnv_data)
+                    projection = umap(s.cnv_data)
                 Drawer.draw('scatter', data=projection, title = 'Cluster projection', x_label='X', y_label='Y', outpath=outpath,  
-                    figsize = figsize, labels=self.cnv_data.obs['label'].values, legend=True, **kwargs)
+                    figsize = figsize, labels=s.cnv_data.obs['cluster'], legend=True, **kwargs)
             elif plot == "heatmap":
-                Drawer.draw('heatmap', data=self.get_cnv_dataframe(), boundaries=self.get_boundaries(),  title = 'Cluster heatmap', outpath=outpath,  
-                    labels=self.cnv_data.obs['label'].values, legend=True, **kwargs)
+                Drawer.draw('heatmap', data=s.get_cnv_dataframe(), boundaries=s.get_boundaries(),  title = 'Cluster heatmap', outpath=outpath,  
+                    labels=s.cnv_data.obs['cluster'], figsize=figsize, legend=False, **kwargs)
         else:
-            logg.error("{} object has no column 'label'".format(self.cnv_data.feat))
+            logg.error("{} object has no column 'cluster'".format(self.cnv_data.feat))
 
     def plot_dendrogram(self, outpath:str=None, clusters:bool=False, figsize:Tuple[int, int]=None, **kwargs):
         if clusters == True: 
-            if 'label' in self.cnv_data.obs.columns:
+            if 'cluster' in self.cnv_data.obs.columns:
                 model =  self.get_clusterer()
                 if hasattr(model, 'children_'):
                     #agglomerative clustering has been computed
@@ -438,15 +442,15 @@ class Sample:
 
                     linkage_matrix = np.column_stack([model.children_, model.distances_,
                                       counts]).astype(float)
-                    Drawer.draw('heatmap', data=self.get_cnv_dataframe(), boundaries=self.get_boundaries(), linkage=linkage_matrix,  title = 'Cluster dendrogram & heatmap', outpath=outpath,  
-                        labels=self.cnv_data.obs['label'].values, legend=True, **kwargs)
+                    Drawer.draw('heatmap', data=self.get_cnv_dataframe(), row_cluster=True, boundaries=self.get_boundaries(), linkage=linkage_matrix,  title = 'Cluster dendrogram & heatmap', outpath=outpath,  
+                        labels=self.cnv_data.obs['cluster'], legend=True, **kwargs)
                 else:
                     logg.error("Cluster model has no attribute 'children'. Consider executing agglomerative clustering.")
             else:
-                logg.error("{} object has no column 'label'".format(self.cnv_data.feat))
+                logg.error("{} object has no column 'cluster'".format(self.cnv_data.feat))
         else:
-            Drawer.draw('heatmap', data=self.get_cnv_dataframe(), boundaries=self.get_boundaries(),  title = 'Dataset dendrogram & heatmap', outpath=outpath,  
-                        legend=True, **kwargs)
+            Drawer.draw('heatmap', data=self.get_cnv_dataframe(), row_cluster=True, boundaries=self.get_boundaries(),  title = 'Dataset dendrogram & heatmap', outpath=outpath,  
+                         **kwargs)
     
 
 

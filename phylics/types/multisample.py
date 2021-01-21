@@ -73,9 +73,8 @@ class MultiSample(Sample):
 
 
     def plot_dendrogram(self, outpath:str=None, clusters:bool=False, figsize:Tuple[int, int]=None, **kwargs):
-        #TODO manage multi-layer labels
         if clusters == True: 
-            if 'label' in self.cnv_data.obs.columns:
+            if 'cluster' in self.cnv_data.obs.columns:
                 model =  self.get_clusterer()
                 if hasattr(model, 'children_'):
                     #agglomerative clustering has been computed
@@ -92,12 +91,15 @@ class MultiSample(Sample):
 
                     linkage_matrix = np.column_stack([model.children_, model.distances_,
                                       counts]).astype(float)
-                    Drawer.draw('heatmap', data=self.get_cnv_dataframe(), boundaries=self.get_boundaries(), linkage=linkage_matrix,  title = 'Multi dataset cluster dendrogram & heatmap', outpath=outpath,  
-                        labels=self.cnv_data.obs[['sample', 'label']], legend=True, **kwargs)
+                    Drawer.draw('heatmap', data=self.get_cnv_dataframe(), row_cluster=True, boundaries=self.get_boundaries(), linkage=linkage_matrix,  title = 'Cluster dendrogram & heatmap', outpath=outpath,  
+                        labels=self.cnv_data.obs[['sample','cluster']], legend=False, **kwargs)
                 else:
                     logg.error("Cluster model has no attribute 'children'. Consider executing agglomerative clustering.")
             else:
-                logg.error("{} object has no column 'label'".format(self.cnv_data.feat))
+                logg.error("{} object has no column 'cluster'".format(self.cnv_data.feat))
         else:
-            Drawer.draw('heatmap', data=self.get_cnv_dataframe(), boundaries=self.get_boundaries(), row_cluster=True,  title = 'Multi dataset dendrogram & heatmap',  outpath=outpath,  
-                        labels=self.cnv_data.obs['sample'].values, legend=True, **kwargs)
+            Drawer.draw('heatmap', data=self.get_cnv_dataframe(), row_cluster=True, boundaries=self.get_boundaries(),  title = 'Dataset dendrogram & heatmap', outpath=outpath,  
+                         **kwargs)
+    
+
+

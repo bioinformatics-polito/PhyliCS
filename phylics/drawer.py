@@ -36,11 +36,107 @@ import matplotlib.ticker as ticker
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 import matplotlib.transforms as transforms
+from matplotlib.patches import Patch
 from typing import Tuple, Union, List, Iterable, Collection, Sequence, Optional
 from .types import CnvData
 from ._compat import Literal
 from . import logging as logg
 from .plotting._utils import make_projection_available, ColorLike, _Dimensions
+
+def clustermap2(data, boundaries, labels:Union[pd.Series, pd.DataFrame]=None,  row_cluster:bool=False, vmin:int = 0, vmax:int = 12, vcenter:int=2, 
+            linkage:Union[np.ndarray, None]=None, outpath=None, legend: bool=False,  title: str=None, 
+                 figsize:Tuple[int, int]=(37, 21)):
+    warnings.filterwarnings("ignore")
+    sns.set(font_scale=2)
+    
+    if figsize == None:
+        figsize = (37, 21)
+    divnorm = colors.TwoSlopeNorm(vmin=vmin, vcenter=vcenter, vmax=vmax)
+    cbar_kws={"ticks":np.arange(vmin,vmax+1,1)}
+
+    cluster_colors = None
+    cluster_lut = {}
+    if labels is not None:
+        if isinstance(labels, pd.Series):
+            color_palette = sns.color_palette("hls", len(np.unique(labels)))
+            cluster_lut = dict(zip(np.unique(labels), color_palette))
+            cluster_colors=pd.Series(labels, index=data.index, name=labels.name).map(cluster_lut)
+        elif isinstance(labels, pd.DataFrame):
+            cluster_colors = pd.DataFrame(columns=labels.columns)
+            for c in labels.columns:
+                color_palette = sns.color_palette("hls", len(np.unique(labels[c])))
+                cluster_lut = dict(zip(np.unique(labels[c]), color_palette))
+                cluster_colors[c] = pd.Series(labels[c], index=data.index, name=c).map(cluster_lut)
+                
+    h = sns.clustermap(data, row_cluster=row_cluster, col_cluster=False, row_linkage=linkage, yticklabels = False,  
+                    row_colors=cluster_colors, cmap='RdBu_r', vmin=vmin, vmax=vmax,norm=divnorm, cbar_kws=cbar_kws, figsize=figsize)   
+    if legend == True: 
+        # Draw the legend bar for the classes                 
+        # label in np.unique(labels):
+        #    h.ax_row_dendrogram.bar(0, 0, color=cluster_lut[label],
+        #                label=label, linewidth=0)
+        #h.ax_row_dendrogram.legend(loc='best', bbox_to_anchor=(0.05, .2, .03, .45), ncol=len(np.unique(labels)), 
+                #title_fontsize='x-large', bbox_transform=plt.gcf().transFigure)
+        #plt.figlegend(title=labels.name, loc='center', bbox_to_anchor=(0.5,0.9))      
+        handles = [Patch(facecolor=cluster_lut[l]) for l in cluster_lut]
+        h.ax_heatmap.legend(handles, cluster_lut, title=labels.name, bbox_to_anchor=(0.5, 0.9), ncol=len(np.unique(labels)), bbox_transform=plt.gcf().transFigure, loc='upper right')
+    
+    h.fig.tight_layout()
+    h.fig.subplots_adjust(right=0.9, left=0.0)
+    h.ax_cbar.set_position((0.95, .2, .03, .4))
+
+    ax = h.ax_heatmap
+
+    chr_limits = []
+    for k,v in boundaries.groupby('CHR', sort=False)['END'].max().items():
+        chr_limits.append(boundaries.index[(boundaries['CHR'] == k) & (boundaries['END'] == v)].tolist()[0])
+    chr_boundaries = np.append(0, chr_limits)
+    chr_list = boundaries['CHR'].unique().tolist()
+    chrN_list = []
+
+    for x in chr_list:
+        x = x[3:] #remove 'chr' for readability
+        chrN_list.append(x)
+
+    #compute the position where chromosome labels will be placed on the plots
+    start = 0
+    pos_list = []
+    for end in chr_limits:
+        pos_list.append((start+end)/2)
+        start = end+1
+
+    #place vertical lines to identify chromosomes
+    for pos in chr_limits:
+        ax.axvline(x=pos, color='black')
+
+    #place chromosome ticks at the right position
+    ax.xaxis.set_major_locator(ticker.FixedLocator((pos_list)))
+    ax.xaxis.set_major_formatter(ticker.FixedFormatter((chrN_list)))
+    ax.tick_params(axis='x', rotation=0, labelsize=16)
+    
+    ax.xaxis.set_minor_locator(ticker.FixedLocator(chr_boundaries))
+    ax.tick_params(axis='x', length=20, which='minor')
+
+    ax.set_xlabel("Chromosomes",)
+    ax.set_ylabel("cells")
+
+    #hm = h.ax_heatmap.get_position()
+    #plt.setp(h.ax_heatmap.xaxis.get_majorticklabels(), fontsize=6)
+    #h.ax_heatmap.set_position([hm.x0, hm.y0, hm.width*0.25, hm.height])
+    #row = h.ax_row_dendrogram.get_position()
+    #h.ax_row_dendrogram.set_position([row.x0, row.y0, row.width*0.25, row.height*0.5])
+
+
+    #plt.gcf().set_size_inches(37, 21)
+    if title is not None:
+        plt.gcf().suptitle(title, fontsize=40)
+
+    if outpath != None:
+        plt.savefig(outpath)
+    else:
+        plt.show()
+    plt.clf()
+    return h
 
 def clustermap(data, boundaries, labels:Union[np.array, None]=None, outpath=None, title: str=None, legend: bool=False, linkage:Union[np.ndarray, None]=None,
                  vmin:int = 0, vmax:int = 12, vcenter:int=2, figsize:Tuple[int, int]=(37, 21), fontsize:int=16, row_cluster:bool=False): 
@@ -329,7 +425,7 @@ def jackstraw(explained_variance_ratio: np.array, mean_expl_var_ratio_perm: np.a
 
 
 _DRAWING_FUNCTIONS_ = {
-    'heatmap' : clustermap,
+    'heatmap' : clustermap2,
     'dist': dist,
     'scatter':scatter,
     'variable_features':highly_variable_features,

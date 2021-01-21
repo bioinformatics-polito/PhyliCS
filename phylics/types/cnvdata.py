@@ -25,6 +25,7 @@ import numpy as np
 import pandas as pd
 from copy import copy
 from typing import Union, List, Tuple, Optional, Mapping, Iterable, Any, Sequence
+from .. import logging as logg
 
 from .views import (
     ArrayView,
@@ -41,8 +42,8 @@ __all__ = ["CnvData"]
 
 class CnvData:
     def __init__(self, X:Union[np.ndarray, pd.DataFrame, "CnvData"], 
-            obs_names:Optional[Union[Sequence[Union['str','int']], str]] = 'auto', 
-            feat_names:Optional[Union[Sequence[Union['str','int']], str]] = 'auto', 
+            obs_names:Optional[Union[Sequence[Union['str','int']], np.ndarray, str]] = 'auto', 
+            feat_names:Optional[Union[Sequence[Union['str','int']], np.ndarray, str]] = 'auto', 
             obs:Optional[Union[pd.DataFrame, Mapping[str, Iterable[Any]]]]=None, 
             feat:Optional[Union[pd.DataFrame, Mapping[str, Iterable[Any]]]]=None, 
             uns:Optional[Mapping[str, Any]]=None, raw:Optional[Mapping[str, Any]]=None, 
@@ -76,10 +77,10 @@ class CnvData:
                         raise ValueError("obs_names = 'obs_names' requires obs of type pd.DataFrame or Mapping") 
                 else:
                     raise ValueError("Illegal argument for obs_names ({})".format(obs_names))               
-            elif isinstance(obs_names, cabc.Sequence):
+            elif isinstance(obs_names, (cabc.Sequence, np.ndarray)):
                 self.obs_names = obs_names
             else:
-                raise ValueError("obs_names must be of type Sequence or string")
+                raise ValueError("obs_names must be of type Sequence, np.ndarray or string. Current type: " + str(type(obs_names)))
             
             if isinstance(feat_names, str):
                 if feat_names == 'auto':
@@ -101,14 +102,14 @@ class CnvData:
                         raise ValueError("feat_names = 'obs_names' requires obs of type pd.DataFrame or Mapping") 
                 else:
                     raise ValueError("Illegal argument for feat_names ({})".format(feat_names))               
-            elif isinstance(feat_names, cabc.Sequence):
+            elif isinstance(feat_names, (cabc.Sequence, np.ndarray)):
                 self.feat_names = feat_names
             else:
-                raise ValueError("feat_names must be of type Sequence or string")
+                raise ValueError("feat_names must be of type Sequence, np.ndarray or string")
             
 
             if len(self.obs_names) != X.shape[0] or len(self.feat_names) != X.shape[1]:
-                raise ValueError("X: expected shape ({} {}) but got ({})".format(len(self.obs_names), len(self.feat_names), X.shape))
+                raise ValueError("X: expected shape ({} {}) but got {}".format(len(self.obs_names), len(self.feat_names), X.shape))
 
             if isinstance(X, pd.DataFrame):
                 X_arr = X.to_numpy()
@@ -137,7 +138,7 @@ class CnvData:
                 raise ValueError("feat must be one of (pd.DataFrame, Mapping[str, Iterable[Any]])")
 
             if len(self.obs) != X.shape[0] or len(self.feat) != X.shape[1]:
-                raise ValueError("X: expected shape ({} {}) but got ({})".format(len(self.obs), len(self.feat), X.shape))
+                raise ValueError("X: expected shape ({} {}) but got {}".format(len(self.obs), len(self.feat), X.shape))
 
             self.n_obs = len(self.obs_names)
             self.n_feat = len(self.feat_names)
@@ -298,3 +299,27 @@ class CnvData:
                 uns=self.uns.copy() if self.uns is not None else None,
                 raw=self.raw.copy() if self.raw is not None else None,
             )
+
+    def sort_rows(self, by:Union[list, np.array]):
+        df = self.to_df()
+        obs = self.obs
+        if isinstance(by, str):
+            if by in obs.columns:
+                df[by] = obs[by]
+            else:
+                raise ValueError("Key error: " + str(by))
+        elif isinstance(by, str):
+            if by.all() in obs.columns:
+                for l in by:
+                    df[l] = obs[l]
+            else:
+                for l in by:
+                    if l not in obs.columns:
+                        raise ValueError("Key error: " + str(by))
+        df = df.sort_values(by=by)
+        df = df.drop(by, axis=1)
+        obs = obs.reindex(df.index)
+        return CnvData(X=df, obs_names = df.index.values, feat_names= 'col_names', obs=obs, feat=self.feat, uns = self.uns)
+
+                
+
