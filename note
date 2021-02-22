@@ -1,0 +1,47 @@
+/home/mmontemurro/.conda/envs/phylics_env/lib/python3.8/site-packages/seaborn/distributions.py:2557: FutureWarning: `distplot` is a deprecated function and will be removed in a future version. Please adapt your code to use either `displot` (a figure-level function with similar flexibility) or `histplot` (an axes-level function for histograms).
+  warnings.warn(msg, FutureWarning)
+
+s_filter = s.filter("mean_cn", "in_eq", (1.5, 3))
+/scratch/trcanmed/phylics/local/PhyliCS/phylics/types/cnvdata.py:229: FutureWarning: is_categorical is deprecated and will be removed in a future version.  Use is_categorical_dtype instead
+  if not is_categorical(df_full[k]):
+
+FutureWarning: `distplot` is a deprecated function and will be removed in a future version. Please adapt your code to use either `displot` (a figure-level function with similar flexibility) or `histplot` (an axes-level function for histograms).
+
+
+Dopo i filtri:
+Breast_A
+  - ploidia: not in [1.5, 3]
+  - mad: < 0.95 perc
+  - 110
+
+Breast_B
+  - ploidia: not in [1.5, 3]
+  - mad: < 0.95 perc
+  - 1172
+
+Breast_C
+  - ploidia: not in [1.5, 3]
+  - mad: < 0.95 perc
+  - 1040
+
+Breast_D
+  - ploidia: not in [1.5, 3]
+  - mad: < 0.95 perc
+  - 1137
+
+Breast_E
+  - ploidia: not in [1.5, 3]
+  - mad: < 0.95 perc
+  - 1473
+
+Navin_primary:
+  - ploidia: >= 3
+  - mad: < 0.95 perc
+  - 17
+
+Navin_metastasis:
+  - ploidia: >= 3
+  - mad: < 0.95 perc
+  - 21
+
+

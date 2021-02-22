@@ -211,7 +211,7 @@ def cluster(data:Union[CnvData, np.ndarray], method:str, embeddings:Optional[Uni
                         'Consider running `Sample.pca()` first.'
                     )
                 else:
-                    data_comp = (cnvdata[:, cnvdata.uns['pca']["X"] ])
+                    data_comp = cnvdata.uns['pca']["X"] 
             elif embeddings == EMBEDDINGS.UMAP:
                 if "umap" not in cnvdata.uns.keys():
                     raise ValueError(
@@ -219,7 +219,7 @@ def cluster(data:Union[CnvData, np.ndarray], method:str, embeddings:Optional[Uni
                         'Consider running `Sample.umap()` first.'
                     )
                 else:
-                    data_comp = (cnvdata[:, cnvdata.uns['umap']["X"] ])
+                    data_comp = cnvdata.uns['umap']["X"] 
             else:
                 raise ValueError("Accepted values for embeggings are 'umap', 'pca'")
         else: 

@@ -46,7 +46,7 @@ class CnvData:
             feat_names:Optional[Union[Sequence[Union['str','int']], np.ndarray, str]] = 'auto', 
             obs:Optional[Union[pd.DataFrame, Mapping[str, Iterable[Any]]]]=None, 
             feat:Optional[Union[pd.DataFrame, Mapping[str, Iterable[Any]]]]=None, 
-            uns:Optional[Mapping[str, Any]]=None, raw:Optional[Mapping[str, Any]]=None, 
+            uns:Optional[Mapping[str, Any]]=None,  
             asview: bool = False,
             oidx: Index1D = None,
             fidx: Index1D = None
@@ -56,21 +56,57 @@ class CnvData:
                 raise ValueError("`X` has to be an CnvData object.")
             self._init_as_view(X, oidx, fidx)
         else:
-            self._is_view = False
+            self._init_as_actual(
+                X=X,
+                obs=obs,
+                feat=feat,
+                uns=uns,
+                obs_names=obs_names,
+                feat_names=feat_names
+            )
+
+    def _init_as_actual(
+        self,
+        X=None,
+        obs=None,
+        feat=None,
+        uns=None,
+        obs_names=None,
+        feat_names=None
+    ):
+        # view attributes
+        self._is_view = False
+        self.data_ref = None
+        self.oidx = None
+        self.vidx = None
+
+    # init from AnnData
+        if isinstance(X, CnvData):
+            X, obs, feat, uns, obs_names, feat_names = (
+                X.X,
+                X.obs,
+                X.feat,
+                X.uns,
+                X.obs_names,
+                X.feat_names
+            )
+
+            # init from DataFrame
+        elif isinstance(X, pd.DataFrame):    
             if isinstance(obs_names, str):
                 if obs_names == 'auto':
-                    self.obs_names = np.arange(0, X.shape[0])
+                    obs_names = np.arange(0, X.shape[0])
                 elif obs_names == 'row_names':
                     if isinstance(X, pd.DataFrame):
-                        self.obs_names = list(X.index.values)
+                        obs_names = list(X.index.values)
                     else:
                         raise ValueError("obs_names = 'raw_names' requires X of type pd.DataFrame")
                 elif obs_names == 'obs_names':
                     if obs != None:
                         if isinstance(obs, pd.DataFrame):
-                            self.obs_names = list(obs.index.values)
+                            obs_names = list(obs.index.values)
                         elif isinstance(obs, cabc.Mapping):
-                            self.obs_names = list(obs.keys())
+                            obs_names = list(obs.keys())
                         else:
                             raise ValueError("obs must be one of type pd.DataFrame or Mappin")
                     else:
@@ -78,24 +114,24 @@ class CnvData:
                 else:
                     raise ValueError("Illegal argument for obs_names ({})".format(obs_names))               
             elif isinstance(obs_names, (cabc.Sequence, np.ndarray)):
-                self.obs_names = obs_names
+                obs_names = obs_names
             else:
                 raise ValueError("obs_names must be of type Sequence, np.ndarray or string. Current type: " + str(type(obs_names)))
-            
+           
             if isinstance(feat_names, str):
                 if feat_names == 'auto':
-                    self.feat_names = np.arange(0, X.shape[1])
+                    feat_names = np.arange(0, X.shape[1])
                 elif feat_names == 'col_names':
                     if isinstance(X, pd.DataFrame):
-                        self.feat_names = list(X.columns.values)
+                        feat_names = list(X.columns.values)
                     else:
                         raise ValueError("feat_names = 'col_names' requires X of type pd.DataFrame")
                 elif feat_names == 'feat_names':
                     if feat != None:
                         if isinstance(feat, pd.DataFrame):
-                            self.feat_names = list(obs.index.values)
+                            feat_names = list(obs.index.values)
                         elif isinstance(feat, cabc.Mapping):
-                            self.feat_names = list(feat.keys())
+                            feat_names = list(feat.keys())
                         else:
                             raise ValueError("feat must be of type pd.DataFrame or Mapping")
                     else:
@@ -103,58 +139,54 @@ class CnvData:
                 else:
                     raise ValueError("Illegal argument for feat_names ({})".format(feat_names))               
             elif isinstance(feat_names, (cabc.Sequence, np.ndarray)):
-                self.feat_names = feat_names
+                feat_names = feat_names
             else:
                 raise ValueError("feat_names must be of type Sequence, np.ndarray or string")
             
 
-            if len(self.obs_names) != X.shape[0] or len(self.feat_names) != X.shape[1]:
-                raise ValueError("X: expected shape ({} {}) but got {}".format(len(self.obs_names), len(self.feat_names), X.shape))
+            if len(obs_names) != X.shape[0] or len(feat_names) != X.shape[1]:
+                raise ValueError("X: expected shape ({} {}) but got {}".format(len(obs_names), len(feat_names), X.shape))
 
-            if isinstance(X, pd.DataFrame):
-                X_arr = X.to_numpy()
-                self.X = X_arr
-            elif isinstance(X, np.ndarray):
-                self.X = X 
-            else:
-                raise ValueError("X must be one of (np.ndarray, pd.DataFrame)")
-
+            X = X.to_numpy()
+            #self.X = X_arr
+        #elif isinstance(X, np.ndarray):
+        #    self.X = X 
+        #else:
+        #    raise ValueError("X must be one of (np.ndarray, pd.DataFrame)")
             if obs is None:
-                self.obs = pd.DataFrame(index=self.obs_names)
-            elif isinstance(obs, pd.DataFrame):
-                self.obs = obs
+                obs = pd.DataFrame(index=obs_names)
+            #elif isinstance(obs, pd.DataFrame):
+            #    self.obs = obs
             elif isinstance(obs, cabc.Mapping):
-                self.obs = pd.DataFrame.from_dict(obs, orient='index')
-            else:
-                raise ValueError("obs must be one of (pd.DataFrame, Mapping[str, Iterable[Any]])")
-        
+                obs = pd.DataFrame.from_dict(obs, orient='index')
+            #else:
+            #    raise ValueError("obs must be one of (pd.DataFrame, Mapping[str, Iterable[Any]])")
+      
             if feat is None:
-                self.feat = pd.DataFrame(index=self.feat_names)
-            elif isinstance(feat, pd.DataFrame):
-                self.feat = feat
+                feat = pd.DataFrame(index=feat_names)
+            #elif isinstance(feat, pd.DataFrame):
+            #    feat = feat
             elif isinstance(feat, cabc.Mapping):
-                self.feat = pd.DataFrame.from_dict(feat, orient='index')
-            else:
-                raise ValueError("feat must be one of (pd.DataFrame, Mapping[str, Iterable[Any]])")
-
-            if len(self.obs) != X.shape[0] or len(self.feat) != X.shape[1]:
-                raise ValueError("X: expected shape ({} {}) but got {}".format(len(self.obs), len(self.feat), X.shape))
-
-            self.n_obs = len(self.obs_names)
-            self.n_feat = len(self.feat_names)
+                feat = pd.DataFrame.from_dict(feat, orient='index')
+            #else:
+            #    raise ValueError("feat must be one of (pd.DataFrame, Mapping[str, Iterable[Any]])")
             if uns == None:
-                self.uns = {}
-            else:
-                self.uns = uns 
-            if raw == None:
-                self.raw = {}
-                self.raw['X'] = self.X
-                self.raw['obs'] = self.obs
-                self.raw['feat'] = self.feat
-            else:
-                self.raw = raw
-            self.shape = (self.n_obs, self.n_feat)
-            
+                uns = {}
+
+        if len(obs) != X.shape[0] or len(feat) != X.shape[1]:
+            raise ValueError("X: expected shape ({} {}) but got {}".format(len(obs), len(feat), X.shape))
+
+        self.X = X
+        self.obs = obs
+        self.feat = feat 
+        self.uns = uns 
+        self.obs_names = obs_names
+        self.feat_names = feat_names
+
+        self.n_obs = len(self.obs_names)
+        self.n_feat = len(self.feat_names)
+        
+        self.shape = (self.n_obs, self.n_feat)
 
     def _init_as_view(self, data_ref:"CnvData" , oidx: Index, fidx: Index):
         self._is_view = True
@@ -163,11 +195,12 @@ class CnvData:
         if isinstance(fidx, (int, np.integer)):
             fidx = slice(fidx, fidx + 1, 1)
         if data_ref._is_view:
-            prev_oidx, prev_fidx = data_ref._oidx, data_ref._fidx
-            data_ref = data_ref._adata_ref
+            prev_oidx, prev_fidx = data_ref.oidx, data_ref.fidx
+            data_ref = data_ref.data_ref
             oidx, fidx = _resolve_idxs((prev_oidx, prev_fidx), (oidx, fidx), data_ref)
+        self.data_ref = data_ref
         self.oidx = oidx
-        self.idx = fidx
+        self.fidx = fidx
     
         obs_sub = data_ref.obs.iloc[oidx]
         feat_sub = data_ref.feat.iloc[fidx]
@@ -187,16 +220,12 @@ class CnvData:
         self.n_obs = len(self.obs)
         self.n_feat = len(self.feat)
 
-        if data_ref.raw is not None:
-            self.raw = data_ref.raw
-        else:
-            self.raw = None
         self.shape = (self.n_obs, self.n_feat)
     
 
     def __repr__(self) -> str:
         descr = f"CnvData object with n_obs × n_vars = {self.n_obs} × {self.n_feat}"
-        for attr in ["obs", "feat", "uns","raw"]:
+        for attr in ["obs", "feat", "uns"]:
             x = getattr(self, attr)
             keys = []
             if isinstance(x, pd.DataFrame):
@@ -223,10 +252,10 @@ class CnvData:
         return _normalize_indices(index, self.obs.index, self.feat.index)
     
     def _remove_unused_categories(self, df_full, df_sub, uns):
-        from pandas.api.types import is_categorical
+        from pandas.api.types import is_categorical_dtype
 
         for k in df_full:
-            if not is_categorical(df_full[k]):
+            if not is_categorical_dtype(df_full[k]):
                 continue
             all_categories = df_full[k].cat.categories
             df_sub[k].cat.remove_unused_categories(inplace=True)
@@ -297,7 +326,6 @@ class CnvData:
                 obs_names=self.obs_names,
                 feat_names=self.feat_names,
                 uns=self.uns.copy() if self.uns is not None else None,
-                raw=self.raw.copy() if self.raw is not None else None,
             )
 
     def sort_rows(self, by:Union[list, np.array]):

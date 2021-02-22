@@ -131,6 +131,7 @@ class Sample:
     def count(self):
         return self.cnv_data.n_obs
 
+    #da sistemare: basterebbe usare il meccanismo delle views
     def sort_rows(self, by:Union[list, np.array]):
         return Sample(self.cnv_data.sort_rows(by), self.name)
     
@@ -284,9 +285,9 @@ class Sample:
             raise ValueError('Did not find cnv_data.obs[\'{}\']. '.format(key))
         if isinstance(value, tuple):
             return self._filter_interval(key, method, value, inplace=inplace)
-        elif isinstance(value, Union[int, float]):
+        elif isinstance(value, int) or isinstance(value, float):
             return self._filter_value(key, method, value, percentile=percentile, inplace=inplace)
-        elif isinstance(value, cabc.Sequence):
+        elif isinstance(value, list) or isinstance(value, np.array):
             return self._filter_list(key, method, value, inplace=inplace)
         else:
             raise TypeError("value: expected int, string, sequence or tuple but got {}".format(type(value)))
@@ -298,13 +299,21 @@ class Sample:
             raise ValueError("Wrong interval of values: value_0 must be smaller than value_1")
         annotation = self.get_annotation(key)
         if method == _FILTER_INTERVAL_METHODS_['IN']:
-            subset = self.cnv_data[annotation > value[0] and annotation < value[1], :]
+            subset = self.cnv_data[(annotation > value[0]) & (annotation < value[1]), :]
         elif method ==  _FILTER_INTERVAL_METHODS_['IN_EQ']:
-            subset = self.cnv_data[annotation >= value[0] and annotation <= value[1], :]
+            subset = self.cnv_data[(annotation >= value[0]) & (annotation <= value[1]), :]
         elif method ==  _FILTER_INTERVAL_METHODS_['OUT']:
-            subset = self.cnv_data[annotation < value[0] or annotation > value[1], :]
+            subset = self.cnv_data[(annotation < value[0]) | (annotation > value[1]), :]
         elif method ==  _FILTER_INTERVAL_METHODS_['OUT_EQ']:
-            subset = self.cnv_data[annotation <= value[0] or annotation >= value[1], :]
+            subset = self.cnv_data[(annotation <= value[0]) | (annotation >= value[1]), :]
+        #index = subset.obs_names
+        #annotations = self.get_annotations()
+        #new_annotations = annotations[annotations.index.isin(index)]
+        #s = Sample(subset, self.name)
+        #for c in new_annotations.columns:
+        #    s.add_annotation(new_annotations[c], c)
+        if inplace == True:
+            self.cnv_data = subset
         else:
             return Sample(subset, self.name)
 
@@ -354,7 +363,7 @@ class Sample:
         else:
             return Sample(subset, self.name)    
 
-    def plot_annotation_dist(self, ann:str, axis:int=0, grid:bool=False, quantiles:List[float]=None, figsize:Tuple[int, int]=None, 
+    def plot_annotation_dist(self, ann:str, axis:str="obs", grid:bool=False, quantiles:List[float]=None, figsize:Tuple[int, int]=None, 
                                 outpath:str=None, **kwargs):
         Drawer.draw('dist', self.get_annotation(key=ann, axis=axis), grid, quantiles, figsize, outpath, **kwargs)
 
@@ -410,6 +419,7 @@ class Sample:
     def plot_clusters(self, plot:str="scatter", outpath:str=None, figsize:Tuple[int, int]=None, **kwargs):
         if 'cluster' in self.cnv_data.obs.columns:
             s = self.sort_rows(by="cluster")
+            print(s)
             if plot == "scatter":
                 if 'umap' in s.cnv_data.uns:
                     projection = s.get_umap('X')

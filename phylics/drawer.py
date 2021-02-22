@@ -43,6 +43,38 @@ from ._compat import Literal
 from . import logging as logg
 from .plotting._utils import make_projection_available, ColorLike, _Dimensions
 
+def dots_plot(data:Union[np.array, list, pd.Series], yticks:Union[np.array, list, pd.Series]=None,  
+               title:str=None, x_label:str="X", y_label:str="Y", figsize:tuple=(18, 7), outpath:str=None):
+    fig2, ax1 = plt.subplots()
+    fig2.set_size_inches(figsize)
+            
+    #yticks = yticks if yticks is not None else np.range(len(data))
+
+    matplotlib.rcParams.update({'font.size': 16})
+    ax1.scatter(yticks, data)
+
+    for i, d in enumerate(data):
+        txt =  "{:.4f}".format(d)
+        ax1.annotate(txt, xy= (i+0.003, d+0.003))
+   
+    ax1.grid(True)
+    plt.xticks(rotation=45)
+    plt.subplots_adjust(hspace=0, bottom=0.3)
+    ax1.set_xlabel(x_label, fontsize=16)
+    ax1.set_ylabel(y_label, fontsize=16)
+    ax1.tick_params(axis='both', which='major', labelsize=14)
+    if title is not None:
+        fig2.suptitle(title, fontweight='bold')        
+   
+    if outpath != None:
+        fig2.savefig(outpath)
+    else:
+        fig2.show()
+    fig2.clf()
+
+    return ax1
+
+
 def clustermap2(data, boundaries, labels:Union[pd.Series, pd.DataFrame]=None,  row_cluster:bool=False, vmin:int = 0, vmax:int = 12, vcenter:int=2, 
             linkage:Union[np.ndarray, None]=None, outpath=None, legend: bool=False,  title: str=None, 
                  figsize:Tuple[int, int]=(37, 21)):
@@ -231,7 +263,7 @@ def clustermap(data, boundaries, labels:Union[np.array, None]=None, outpath=None
 
 def dist(a:Union[list, np.array, pd.Series], grid:bool=False, quantiles:List[float]=None, figsize:Tuple[int, int]=None, outpath:str=None, **kwargs):
 
-    ax = sns.distplot(a, **kwargs)
+    ax = sns.displot(a, **kwargs)
     
     if quantiles != None:
         for q in quantiles:
@@ -255,11 +287,11 @@ _ScatterBasis = Literal['pca', 'umap', 'X']
 
 def scatter(data:np.ndarray, projection: _Dimensions = "2d", outpath:str=None, title: str=None, 
                 x_label: str=None, y_label: str=None, z_label: str=None,
-                alpha: float = 1.0, bw: bool = False, cmap: str = "Set1", 
-                na_color: ColorLike = "lightgray", labels: Union[np.array, None] = None, legend: bool=False,
+                alpha: float = 1.0, bw: bool = False, cmap: str = "Paired", 
+                na_color: ColorLike = "lightgray", labels: Union[np.array, pd.Series, None] = None, legend: bool=False,
                 wspace : Union[float, None]= 0.3, figsize:Tuple[int, int]=None, show: bool=False, **kwargs):
     
-
+    warnings.filterwarnings('error')
     n_dimensions = data.shape[1]
     if n_dimensions < 2:
         logg.error(
@@ -292,16 +324,23 @@ def scatter(data:np.ndarray, projection: _Dimensions = "2d", outpath:str=None, t
             ax = fig.add_subplot(111)
 
         if labels is not None:
+            if isinstance(labels, pd.Series):
+                labels = labels.values
             cmap = copy(get_cmap(cmap, len(np.unique(labels))))
             cmap.set_bad(na_color)
             na_color = colors.to_hex(na_color, keep_alpha=True)
+            print(na_color)
             clusters_dict = {k: v for v, k in enumerate(np.unique(labels))}
             cluster_colors = [cmap.colors[clusters_dict[x]] if x >= 0
                       else na_color
                       for x in labels] 
+            colors_legend = [cmap.colors[clusters_dict[x]] if x >= 0
+                      else na_color
+                      for x in np.unique(labels)]
             kwargs["c"] = cluster_colors
             if labels is not None and legend==True:
-                markers = [plt.Line2D([0,0],[0,0],color=color, marker='o', linestyle='') for color in cmap.colors ]
+                #ax.legend()
+                markers = [plt.Line2D([0,0],[0,0],color=color, marker='o', linestyle='') for color in colors_legend ]
                 fig.legend(markers, clusters_dict.keys(), numpoints=1)
         else:
             cmap = copy(get_cmap(cmap))
@@ -313,7 +352,7 @@ def scatter(data:np.ndarray, projection: _Dimensions = "2d", outpath:str=None, t
         if title is None:
             ax.set_title('')
         else:
-            ax.set_title(title)
+            ax.set_title(title, fontsize=18)
 
         if projection == "2d":
             cax = ax.scatter(X[:,0], 
@@ -331,9 +370,9 @@ def scatter(data:np.ndarray, projection: _Dimensions = "2d", outpath:str=None, t
                     **kwargs
                     )
         if x_label is not None:
-            ax.set_xlabel(x_label)
+            ax.set_xlabel(x_label, fontsize=16)
         if y_label is not None:
-            ax.set_ylabel(y_label)
+            ax.set_ylabel(y_label, fontsize=16)
         if projection == '3d' and z_label is not None:
             ax.set_zlabel(z_label, labelpad=-7)
         ax.autoscale_view()
@@ -429,7 +468,8 @@ _DRAWING_FUNCTIONS_ = {
     'dist': dist,
     'scatter':scatter,
     'variable_features':highly_variable_features,
-    'jackstraw': jackstraw
+    'jackstraw': jackstraw,
+    'dots': dots_plot
 }
 
 

@@ -36,16 +36,21 @@ class MultiSample(Sample):
     def __init__(self, 
                 cnv_data:CnvData, 
                 sample_names:str="MultiSample"):      
-        super().__init__(cnv_data, sample_names)
+        super().__init__(cnv_data, "MultiSample")
+        self.sample_names = sample_names
 
     @classmethod
-    def from_list(cls, samples:list):
+    #TODO fix arguments: undefined list of arguments
+    def from_list(cls, *samples:tuple):
         sample_names = ""
         boundaries = None
         X = None
         sample_df = pd.DataFrame(columns=["sample"])
         for s in samples:
-            sample_names += s.name
+            if sample_names == "":
+                sample_names += s.name
+            else:
+                sample_names += "_" + s.name
             if boundaries is None:
                 boundaries = s.get_boundaries()
             if X is None:
@@ -59,12 +64,35 @@ class MultiSample(Sample):
     def get_sample_labels(self):
         return self.get_annotation("sample")
 
-    def segregation_score(self, n_jobs:int=1, verbose:bool=False):
-        return segregation_score(self.cnv_data, n_jobs, verbose)
+    def SHscore(self, n_jobs:int=1, verbose:bool=False):
+        scores = segregation_score(self.cnv_data, n_jobs, verbose)
+        self.cnv_data.uns["scores"] = scores
+        return scores
+
+    def plot_scores(self, outpath:str=None, figsize:tuple=(18, 7)):
+        if 'scores' not in self.cnv_data.uns.keys():
+            raise ValueError(
+                        'Did not find cnv.uns[\'scores\']. '
+                        'Consider running `MultiSampleSample.SHscore()` first.'
+                    )
+        scores = self.cnv_data.uns["scores"]
+        partitions = scores["samples_partition"].values
+        data =  scores["score"].values
+        yticks = []
+        for pp in partitions:
+            str = ''
+            for p in pp:
+                if str == "":
+                    str = '+'.join(p)
+                else:
+                    str += " vs " + "+".join(p)
+            yticks.append(str)
+        Drawer.draw('dots', data=data, yticks=yticks, title="SHscore", 
+                    x_label="sample partition", y_label="score", figsize=figsize, outpath=outpath)
     
     def plot_samples(self, outpath:str=None, 
                 figsize:Tuple[int, int]=None, **kwargs):
-        if 'umap' in self.cnv_data.uns:
+        if 'umap' in self.cnv_data.uns.keys():
             projection = self.get_umap('X')
         else:
             projection = umap(self.cnv_data)
@@ -98,8 +126,8 @@ class MultiSample(Sample):
             else:
                 logg.error("{} object has no column 'cluster'".format(self.cnv_data.feat))
         else:
-            Drawer.draw('heatmap', data=self.get_cnv_dataframe(), row_cluster=True, boundaries=self.get_boundaries(),  title = 'Dataset dendrogram & heatmap', outpath=outpath,  
-                         **kwargs)
+            Drawer.draw('heatmap', data=self.get_cnv_dataframe(), row_cluster=True, boundaries=self.get_boundaries(),  title = 'Dataset dendrogram & heatmap', outpath=outpath, labels=self.cnv_data.obs['sample'], 
+                         legend=True, **kwargs)
     
 
 
