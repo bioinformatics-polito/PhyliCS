@@ -58,7 +58,7 @@ def dots_plot(data:Union[np.array, list, pd.Series], yticks:Union[np.array, list
         ax1.annotate(txt, xy= (i+0.003, d+0.003))
    
     ax1.grid(True)
-    plt.xticks(rotation=45)
+    plt.xticks(rotation=30)
     plt.subplots_adjust(hspace=0, bottom=0.3)
     ax1.set_xlabel(x_label, fontsize=16)
     ax1.set_ylabel(y_label, fontsize=16)

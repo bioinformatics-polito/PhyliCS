@@ -1,5 +1,0 @@
-samples_partition,score
-"[['breast_b', 'breast_c'], ['breast_a']]",0.2048951655469462
-"[['breast_a', 'breast_c'], ['breast_b']]",0.053726669514594115
-"[['breast_c'], ['breast_a', 'breast_b']]",0.04443066024328144
-"[['breast_c'], ['breast_b'], ['breast_a']]",0.04081645299927186

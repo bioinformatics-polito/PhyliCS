@@ -1,6 +1,6 @@
 import phylics
 import pandas as pd
-breast_a = phylics.Sample.from_file("data/10x_breastA/SegCopy", sample_name="breast_a")
+breast_a = phylics.Sample.from_file("data/10x_breastA/SegCopy", sample_name="S_A")
 df = pd.read_csv("data/10x_breastA/results.txt", sep="\t", index_col=0).dropna()
 ploidy = df['Copy_Number']
 breast_a.add_annotation(ploidy, "mean_cn")
@@ -12,7 +12,7 @@ breast_a = breast_a.filter("mad", "lt_eq", 0.95, percentile=True)
 #s_filter.plot_umap(outpath="data/10x_breastA/umap.png")
 #s_filter.cluster("hdbscan", embeddings="umap")
 #s_filter.plot_clusters("heatmap", "data/10x_breastA/hdbscan_clusters.png")
-breast_b = phylics.Sample.from_file("data/10x_breastB/SegCopy", sample_name="breast_b")
+breast_b = phylics.Sample.from_file("data/10x_breastB/SegCopy", sample_name="S_B")
 df = pd.read_csv("data/10x_breastB/results.txt", sep="\t", index_col=0).dropna()
 ploidy = df['Copy_Number']
 breast_b.add_annotation(ploidy, "mean_cn")
@@ -24,7 +24,7 @@ breast_b = breast_b.filter("mad", "lt_eq", 0.95, percentile=True)
 #breast_b.cluster("hdbscan", embeddings="umap",  min_cluster_size=15, metric='manhattan')
 #breast_b.plot_clusters("scatter", "data/10x_breastB/hdbscan_clusters_scatter.png")
 
-breast_c = phylics.Sample.from_file("data/10x_breastC/SegCopy", sample_name="breast_c")
+breast_c = phylics.Sample.from_file("data/10x_breastC/SegCopy", sample_name="S_C")
 df = pd.read_csv("data/10x_breastC/results.txt", sep="\t", index_col=0).dropna()
 ploidy = df['Copy_Number']
 breast_c.add_annotation(ploidy, "mean_cn")
@@ -33,7 +33,7 @@ breast_c.variable_features()
 breast_c = breast_c.filter("mean_cn", "out_eq", (1.5, 3))
 breast_c = breast_c.filter("mad", "lt_eq", 0.95, percentile=True)
 
-breast_d = phylics.Sample.from_file("data/10x_breastD/SegCopy", sample_name="breast_d")
+breast_d = phylics.Sample.from_file("data/10x_breastD/SegCopy", sample_name="S_D")
 df = pd.read_csv("data/10x_breastD/results.txt", sep="\t", index_col=0).dropna()
 ploidy = df['Copy_Number']
 breast_d.add_annotation(ploidy, "mean_cn")
@@ -42,7 +42,7 @@ breast_d.variable_features()
 breast_d = breast_d.filter("mean_cn", "out_eq", (1.5, 3))
 breast_d = breast_d.filter("mad", "lt_eq", 0.95, percentile=True)
 
-breast_e = phylics.Sample.from_file("data/10x_breastE/SegCopy", sample_name="breast_e")
+breast_e = phylics.Sample.from_file("data/10x_breastE/SegCopy", sample_name="S_E")
 df = pd.read_csv("data/10x_breastE/results.txt", sep="\t", index_col=0).dropna()
 ploidy = df['Copy_Number']
 breast_e.add_annotation(ploidy, "mean_cn")
