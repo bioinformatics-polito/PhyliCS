@@ -43,6 +43,8 @@ from ._compat import Literal
 from . import logging as logg
 from .plotting._utils import make_projection_available, ColorLike, _Dimensions
 
+matplotlib.rcParams.update({'font.size': 24})
+
 def dots_plot(data:Union[np.array, list, pd.Series], yticks:Union[np.array, list, pd.Series]=None,  
                title:str=None, x_label:str="X", y_label:str="Y", figsize:tuple=(18, 7), outpath:str=None):
     fig2, ax1 = plt.subplots()
@@ -79,7 +81,7 @@ def clustermap2(data, boundaries, labels:Union[pd.Series, pd.DataFrame]=None,  r
             linkage:Union[np.ndarray, None]=None, outpath=None, legend: bool=False,  title: str=None, 
                  figsize:Tuple[int, int]=(37, 21)):
     warnings.filterwarnings("ignore")
-    sns.set(font_scale=2)
+    sns.set(font_scale=3.5)
     
     if figsize == None:
         figsize = (37, 21)
@@ -101,7 +103,10 @@ def clustermap2(data, boundaries, labels:Union[pd.Series, pd.DataFrame]=None,  r
                 cluster_colors[c] = pd.Series(labels[c], index=data.index, name=c).map(cluster_lut)
                 
     h = sns.clustermap(data, row_cluster=row_cluster, col_cluster=False, row_linkage=linkage, yticklabels = False,  
-                    row_colors=cluster_colors, cmap='RdBu_r', vmin=vmin, vmax=vmax,norm=divnorm, cbar_kws=cbar_kws, figsize=figsize)   
+                row_colors=cluster_colors, cmap='RdBu_r', vmin=vmin, vmax=vmax,norm=divnorm, cbar_kws=cbar_kws, 
+                figsize=figsize
+                )   
+    
     if legend == True: 
         # Draw the legend bar for the classes                 
         # label in np.unique(labels):
@@ -111,8 +116,12 @@ def clustermap2(data, boundaries, labels:Union[pd.Series, pd.DataFrame]=None,  r
                 #title_fontsize='x-large', bbox_transform=plt.gcf().transFigure)
         #plt.figlegend(title=labels.name, loc='center', bbox_to_anchor=(0.5,0.9))      
         handles = [Patch(facecolor=cluster_lut[l]) for l in cluster_lut]
-        h.ax_heatmap.legend(handles, cluster_lut, title=labels.name, bbox_to_anchor=(0.5, 0.9), ncol=len(np.unique(labels)), bbox_transform=plt.gcf().transFigure, loc='upper right')
+        plt.legend(handles, cluster_lut, title='Samples',
+           bbox_to_anchor=(1, 1), bbox_transform=plt.gcf().transFigure, loc='upper right')
+
+        #h.ax_heatmap.legend(handles, cluster_lut, title=labels.name, bbox_to_anchor=(0.5, 0.9), ncol=len(np.unique(labels)), bbox_transform=plt.gcf().transFigure, loc='upper right')
     
+
     h.fig.tight_layout()
     h.fig.subplots_adjust(right=0.9, left=0.0)
     h.ax_cbar.set_position((0.95, .2, .03, .4))
@@ -144,13 +153,13 @@ def clustermap2(data, boundaries, labels:Union[pd.Series, pd.DataFrame]=None,  r
     #place chromosome ticks at the right position
     ax.xaxis.set_major_locator(ticker.FixedLocator((pos_list)))
     ax.xaxis.set_major_formatter(ticker.FixedFormatter((chrN_list)))
-    ax.tick_params(axis='x', rotation=0, labelsize=16)
+    ax.tick_params(axis='x',  width=2, rotation=90)
     
     ax.xaxis.set_minor_locator(ticker.FixedLocator(chr_boundaries))
     ax.tick_params(axis='x', length=20, which='minor')
 
     ax.set_xlabel("Chromosomes",)
-    ax.set_ylabel("cells")
+    ax.set_ylabel("Cells")
 
     #hm = h.ax_heatmap.get_position()
     #plt.setp(h.ax_heatmap.xaxis.get_majorticklabels(), fontsize=6)
