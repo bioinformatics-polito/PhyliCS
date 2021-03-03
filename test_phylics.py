@@ -53,7 +53,7 @@ breast_e = breast_e.filter("mad", "lt_eq", 0.95, percentile=True)
 
 ss = phylics.MultiSample.from_list(breast_b, breast_c, breast_d, breast_e)
 ss.SHscore(n_jobs=10)
-ss.plot_scores("/scratch/trcanmed/phylics/dataset/10x_multi_sample/scores.png")
+#ss.plot_scores("/scratch/trcanmed/phylics/dataset/10x_multi_sample/scores.png")
 ss.plot_dendrogram(outpath="/scratch/trcanmed/phylics/dataset/10x_multi_sample/agglomerative_heatmap.png")
 
 navin_prim = phylics.Sample.from_file("/scratch/trcanmed/phylics/dataset/navin_primary/SegCopy", sample_name="primary")

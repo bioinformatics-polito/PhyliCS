@@ -1,13 +1,23 @@
 # PhyliCS
-A pipeline for multi-sample copy-number variation (CNV) analysis on single-cell DNA sequencing data and intra-tumor heterogeneity quantification. 
+a Python library to explore scCNA data and quantify spatial tumor heterogeneity
 
 ## Requirements
 
-- Platform: 
-    - linux-64
-- Software:
-    - python >= 3.6
-    - conda >= 4.8.2
+- python=3.8
+- sctools
+- numpy
+- scipy
+- pandas
+- matplotlib
+- seaborn
+- scikit-learn=0.24
+- statsmodels
+- anndata
+- typing
+- umap-learn
+- IPython
+- hdbscan
+- joblib
 
 ## Installation and setup instructions
 
