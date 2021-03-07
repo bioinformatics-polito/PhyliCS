@@ -1,10 +1,11 @@
 README.md
+pyproject.toml
+setup.cfg
 setup.py
 phylics/__init__.py
 phylics/_compat.py
 phylics/_settings.py
 phylics/check_funcs.py
-phylics/cli.py
 phylics/constants.py
 phylics/drawer.py
 phylics/logging.py

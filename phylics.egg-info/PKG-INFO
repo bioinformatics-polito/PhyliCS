@@ -2,9 +2,25 @@ Metadata-Version: 1.2
 Name: phylics
 Version: 1.0.0
 Summary: Single-cell CNV data analysis toolkit
-Home-page: UNKNOWN
+Home-page: https://github.com/bioinformatics-polito/PhyliCS
 Author: Marilisa Montemurro
+Author-email: marilisa.montemurro@polito.it
+Maintainer: Elena Grassi, Gianvito Urgese
+Maintainer-email: elena.grassi@irccs, gianvito.urgese@polito.it
 License: AGPL3
 Description: UNKNOWN
 Platform: UNKNOWN
+Classifier: License :: OSI Approved :: AGPL3 License
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: Console
+Classifier: Framework :: Jupyter
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Science/Research
+Classifier: Natural Language :: English
+Classifier: Operating System :: MacOS :: MacOS X
+Classifier: Operating System :: Microsoft :: Windows
+Classifier: Operating System :: POSIX :: Linux
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Topic :: Scientific/Engineering :: Bio-Informatics
 Requires-Python: >=3.8, <3.9

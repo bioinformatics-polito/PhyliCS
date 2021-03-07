@@ -3,25 +3,31 @@ a Python library to explore scCNA data and quantify spatial tumor heterogeneity
 
 ## Requirements
 
-- python=3.8
-- sctools
-- numpy
-- scipy
-- pandas
-- matplotlib
-- seaborn
-- scikit-learn=0.24
-- statsmodels
-- anndata
+- python >=3.8, <3.9
+- numpy>=1.19.5
+- scipy>=1.6.0
+- pandas>=1.1.3 
+- matplotlib>=3.3.1
+- seaborn>=0.11.1 
+- scikit-learn>=0.24
+- statsmodels>=0.12.0
+- anndata>=0.7.5 
 - typing
-- umap-learn
-- IPython
-- hdbscan
-- joblib
+- umap-learn>=0.4.6
+- IPython>=7.19.0
+- hdbscan>=0.8.26
+- joblib>=1.0.0
 
 ## Installation and setup instructions
 
-### From source code
+f you do not have a working installation of Python 3.8.X (not 3.9), consider installing Miniconda (see [Miniconda](https://docs.conda.io/en/latest/miniconda.html) website). Then run:
+
+```
+conda create --name py38 python=3.8
+conda activate py38
+```
+
+### From dist file
 Clone the git archive:
 
 ```

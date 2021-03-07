@@ -1,9 +1,0 @@
-Sample	Copy_Number	SoS_Predicted_Ploidy	Error_in_SoS_Approach
-1: (function () 
-   traceback(2))()
-2: (function () 
-   traceback(2))()
-1: writeLines(c("<?xml version='1.0'?>", "<status>", "<step>3</step>", 
-       paste("<processingfile>Saving Data</processingfile>", sep = ""), 
-       paste("<percentdone>", (w * 100)%/%(w + 4), "</percentdone>", 
-           sep = ""), "<tree>clust.xml</tree>", "</status>"), statusFile)

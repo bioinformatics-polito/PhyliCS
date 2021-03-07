@@ -1,4 +1,0 @@
-#/bin/bash
-
-match_genes_to_bins ${IN} genes genes_${IN}
-
