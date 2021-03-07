@@ -20,7 +20,7 @@ a Python library to explore scCNA data and quantify spatial tumor heterogeneity
 
 ## Installation and setup instructions
 
-f you do not have a working installation of Python 3.8.X (not 3.9), consider installing Miniconda (see [Miniconda](https://docs.conda.io/en/latest/miniconda.html) website). Then run:
+If you do not have a working installation of Python 3.8.X (not 3.9), consider installing Miniconda (see [Miniconda](https://docs.conda.io/en/latest/miniconda.html) website). Then run:
 
 ```
 conda create --name py38 python=3.8
@@ -28,80 +28,66 @@ conda activate py38
 ```
 
 ### From dist file
-Clone the git archive:
+Download the built distribution file. You can do it manually by navigating to PhyliCS/dist/phylics-1.0.0-py3-none-any.whl and clicking on 'Download'.
+
+Alternatively, you can do it from the command line by typing:
 
 ```
-git clone https://github.com/bioinformatics-polito/PhyliCS.git
+wget https://github.com/bioinformatics-polito/PhyliCS/raw/master/dist/phylics-1.0.0-py3-none-any.whl
+```
+Install PhyliCS by typing:
+```
+pip install /path/to/phylics-1.0.0-py3-none-any.whl
 ```
 
-You need to create and activate a conda environment which will contain all the packages required to run PhyliCS. Then you can build the application by executing `build.sh`:
-```
-cd PhyliCS
-conda create --name phylics --file phylics_env.txt
-conda activate phylics
+### From PyPI
 
-./build.sh
-```
-Once you have built the application, add the directory containing the binaries to your `$PATH`. To do so, open `~/.bashrc` and add the following line:
-
-```export PATH=<path/to/phylics>/PhyliCS/bin:$PATH```
-
-### From Bioconda
-
-Add Bioconda channel:
-
-```conda config --add channels bioconda```
-
-Create an environment containing PhyliCS and all its dependencies:
-
-```
-conda create --name phylics phylics
-conda activate phylics
-```
+Installation trough PyPI is not available yet. We will upload PhyliCS to PyPI only after paper acceptance.
 
 ## Test
-We have provided a Jupyter-notebook showing the code to test our application. It must be executed after activating the conda environment. 
+Here we present the code to reproduce the results we have presented in our paper.
 
-If you have installed PhyliCS from the source code, then, just do:
+### Download the dataset
 
-```
-cd PhyliCS
-jupyter notebook
-```
+First you need to download the input data. We have provided the CNV calls (SegCopy files) and a statistics file (results.txt) for each dataset.
 
-If you have installed it from conda, instead, then you need download the input data and the notebook from this repo and run the test. To do so, `cd` to the directory where you want to perform the test and type:
+Go to the location where you want to store the data and type:
 
 ```
-mkdir data
-mkdir data/navin_primary data/navin_metastasis
-mkdir data/10x_breastA data/10x_breastB data/10x_breastC
-
-cd data/navin_primary 
-wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/navin_primary/SegCopy
-wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/navin_primary/results.txt
-
-cd ../navin_metastasis
-wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/navin_metastasis/SegCopy
-wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/navin_metastasis/results.txt
-
-cd ../..
+mkdir -p data/breast/breastA data/breast/breastB data/breast/breastC data/breast/breastD data/breast/breastE 
+mkdir -p data/lung/primary data/lung/metastasis
     
-cd data/10x_breastA
-wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/10x_breastA/SegCopy
-wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/10x_breastA/results.txt
+cd data/breast/breastA
+wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/breast/breastA/SegCopy
+wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/breast/breastA/results.txt
     
-cd ../10x_breastB
-wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/10x_breastB/SegCopy
-wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/10x_breastB/results.txt
+cd ../breastB
+wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/breast/breastB/SegCopy
+wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/breast/breastB/results.txt
     
-cd ../10x_breastC
-wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/10x_breastC/SegCopy
-wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/10x_breastC/results.txt
+cd ../breastC
+wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/breast/breastC/SegCopy
+wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/breast/breastC/results.txt
 
-cd ../..
-    
-wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/phylics.ipynb
+cd ../breastD
+wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/breast/breastD/SegCopy
+wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/breast/breastD/results.txt
 
-#be sure you have activated phylics conda environment
-jupyter notebook
+cd ../breastE
+wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/breast/breastE/SegCopy
+wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/breast/breastE/results.txt
+
+cd ../../..
+
+cd data/lung/primary 
+wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/lung/primary/SegCopy
+wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/lung/primary/results.txt
+
+cd ../metastasis
+wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/lung/metastasis/SegCopy
+wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/lung/metastasis/results.txt
+
+cd ../../..
+    
 ```
+### Run PhyliCS
