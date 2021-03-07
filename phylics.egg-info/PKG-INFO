@@ -1,0 +1,10 @@
+Metadata-Version: 1.2
+Name: phylics
+Version: 1.0.0
+Summary: Single-cell CNV data analysis toolkit
+Home-page: UNKNOWN
+Author: Marilisa Montemurro
+License: AGPL3
+Description: UNKNOWN
+Platform: UNKNOWN
+Requires-Python: >=3.8, <3.9

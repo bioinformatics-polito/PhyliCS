@@ -1,0 +1,20 @@
+#!/usr/bin/env python
+from .utils import dotdict
+
+K_METHODS = dotdict({
+    'KMEANS' : "kmeans", 
+    'AGGLOMERATIVE' :"agglomerative", 
+    'BIRCH' : "birch",
+    'SPECTRAL':"spectral"})
+
+LINKAGE = dotdict({
+        'AVERAGE' : "average", 
+        'COMPLETE' : "complete", 
+        'SINGLE' : "single", 
+        'WARD' : "ward"})
+
+EMBEDDINGS = dotdict({
+    'PCA' : "pca",
+    'UMAP' : "umap"
+
+})

@@ -44,4 +44,6 @@ Navin_metastasis:
   - mad: < 0.95 perc
   - 21
 
-
+conda create --name py38 python=3.8
+conda activate py38
+pip install dist/phylics-1.0.0-py3-none-any.whl
