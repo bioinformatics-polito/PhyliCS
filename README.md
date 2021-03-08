@@ -1,5 +1,5 @@
 # PhyliCS
-a Python library to explore scCNA data and quantify spatial tumor heterogeneity
+A Python library to explore scCNA data and quantify spatial tumor heterogeneity
 
 ## Requirements
 
@@ -28,13 +28,9 @@ conda activate py38
 ```
 
 ### From dist file
-Download the built distribution file. You can do it manually by navigating to PhyliCS/dist/phylics-1.0.0-py3-none-any.whl and clicking on 'Download'.
+Download the built distribution file. 
+You can do it manually by clicking [here](https://github.com/bioinformatics-polito/PhyliCS/raw/master/dist/phylics-1.0.0-py3-none-any.whl).
 
-Alternatively, you can do it from the command line by typing:
-
-```
-wget https://github.com/bioinformatics-polito/PhyliCS/raw/master/dist/phylics-1.0.0-py3-none-any.whl
-```
 Install PhyliCS by typing:
 ```
 pip install /path/to/phylics-1.0.0-py3-none-any.whl
@@ -51,7 +47,12 @@ Here we present the code to reproduce the results we have presented in our paper
 
 First you need to download the input data. We have provided the CNV calls (SegCopy files) and a statistics file (results.txt) for each dataset.
 
-Go to the location where you want to store the data and type:
+Breat tumor data:
+- sectionA: [CNVs](https://github.com/bioinformatics-polito/PhyliCS/raw/master/data/breast/breastA/SegCopy), [statistics](https://github.com/bioinformatics-polito/PhyliCS/raw/master/data/breast/breastA/results.txt)
+- sectionB: [CNVs](https://github.com/bioinformatics-polito/PhyliCS/raw/master/data/breast/breastB/SegCopy), [statistics](https://github.com/bioinformatics-polito/PhyliCS/raw/master/data/breast/breastB/results.txt)
+- sectionC: [CNVs](https://github.com/bioinformatics-polito/PhyliCS/raw/master/data/breast/breastC/SegCopy), [statistics](https://github.com/bioinformatics-polito/PhyliCS/raw/master/data/breast/breastC/results.txt)
+- sectionD: [CNVs](https://github.com/bioinformatics-polito/PhyliCS/raw/master/data/breast/breastD/SegCopy), [statistics](https://github.com/bioinformatics-polito/PhyliCS/raw/master/data/breast/breastD/results.txt)
+- sectionE: [CNVs](https://github.com/bioinformatics-polito/PhyliCS/raw/master/data/breast/breastE/SegCopy), [statistics](https://github.com/bioinformatics-polito/PhyliCS/raw/master/data/breast/breastE/results.txt)
 
 ```
 mkdir -p data/breast/breastA data/breast/breastB data/breast/breastC data/breast/breastD data/breast/breastE 
