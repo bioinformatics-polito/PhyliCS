@@ -10,11 +10,9 @@ setup(
     #long_description = 'README.md',
     url='https://github.com/bioinformatics-polito/PhyliCS',
     author='Marilisa Montemurro',
-    maintainer='Elena Grassi, Gianvito Urgese',
-    maintainer_email='elena.grassi@irccs, gianvito.urgese@polito.it',
     author_email='marilisa.montemurro@polito.it', 
     classifiers = [
-            'License :: OSI Approved :: AGPL3 License',
+            'License :: OSI Approved :: GNU Affero General Public License v3',
             'Development Status :: 5 - Production/Stable',
             'Environment :: Console',
             'Framework :: Jupyter',

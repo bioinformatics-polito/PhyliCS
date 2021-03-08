@@ -38,7 +38,11 @@ pip install /path/to/phylics-1.0.0-py3-none-any.whl
 
 ### From PyPI
 
-Installation trough PyPI is not available yet. We will upload PhyliCS to PyPI only after paper acceptance.
+PhyliCS is distributed via PyPi. To install it just type:
+
+```
+pip install phylics==1.0.0
+```
 
 ## Usage
 
