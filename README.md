@@ -219,7 +219,7 @@ We load the CNV calls of the metastasis sample, together with a pair of annotati
 >>> navin_met.mad()
 ```
 
-Before computing the score we filter out cells which mean CN ≈ 2, because they are uninformative, and keep only with mean CN >= 3; additionally, we keep only cells with MAD <= 95th percentile$ and removed noisy ones: 
+Before computing the score we filter out cells which mean CN ≈ 2, because they are uninformative, and keep only with mean CN >= 3; additionally, we keep only cells with MAD <= 95th percentile and removed noisy ones: 
 
 ```
 navin_prim = navin_prim.filter("mean_cn", "gt_eq", 3)
