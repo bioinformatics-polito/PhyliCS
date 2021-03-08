@@ -145,9 +145,9 @@ This command returns a `pandas.DataFrame` which index correspondS to the cells/b
 
 We may look at the distribution of the annotations. For example, you may be interesting in the distribution of the mean copy-number over the dataset and try to identify clusters. In that case, you need to run:
 ```
->>> navin_prim.plot_annotation_dist("mean_cn", outpath="ploidy_dist.png", kind="kde", figsize=(14,14))
+>>> navin_prim.plot_annotation_dist("mean_cn", outpath="ploidy.png", kind="kde", figsize=(14,14))
 ```
-<img src="figures/ploidy_dist.png" alt="primary lung tumor mean cn distribution" width="500"/>
+<img src="figures/ploidy.png" alt="primary lung tumor mean cn distribution" width="500"/>
 
 In this case, it is evident that the dataset is made of two major group of cells, characterized by a mean $CN \approx 2$ and a mean $CN \approx 4.5$, respectively.
 
