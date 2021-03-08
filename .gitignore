@@ -15,6 +15,7 @@ __pycache__/
 /dist/
 /build/
 /phylics.egg-info/
+/README_PyPI.md
 
 .ipynb_checkpoints
 

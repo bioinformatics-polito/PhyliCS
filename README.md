@@ -38,7 +38,7 @@ conda activate py38
 PhyliCS is distributed via PyPi. To install it run:
 
 ```
-pip install phylics==1.0.0
+pip install phylics
 ```
 
 Dependencies are checked by `pip` and missing packages are automatically downloaded and installed.
