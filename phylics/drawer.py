@@ -398,8 +398,7 @@ def scatter(data:np.ndarray, projection: _Dimensions = "2d", outpath:str=None, t
         if outpath != None:
             fig.savefig(outpath)
         else:
-            if show == True:
-                fig.show()
+            fig.show()
         fig.clf()
     
     return ax 

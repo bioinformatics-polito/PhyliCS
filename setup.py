@@ -2,10 +2,15 @@ from setuptools import find_packages, setup
 import pathlib
 
 here = pathlib.Path(__file__).parent.resolve()
+from os import path
+this_directory = path.abspath(path.dirname(__file__))
+with open(path.join(this_directory, 'README_PyPI.md'), encoding='utf-8') as f:
+    long_description = f.read()
+
 
 setup(
     name='phylics',
-    version='1.0.0',
+    version='1.0.4',
     description='Single-cell CNV data analysis toolkit',
     #long_description = 'README.md',
     url='https://github.com/bioinformatics-polito/PhyliCS',
@@ -29,7 +34,9 @@ setup(
     license='AGPL3',
     packages=find_packages(),
     #package_data={'phylics': ['datasets/*']},
-    python_requires='>=3.8, <3.9',
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    python_requires='>=3.7, <3.9',
     install_requires=['numpy>=1.19.5', 
             'scipy>=1.6.0', 
             'pandas>=1.1.3', 

@@ -3,7 +3,7 @@ A Python library to explore scCNA data and quantify spatial tumor heterogeneity
 
 ## Requirements
 
-- python >=3.8, <3.9
+- python >=3.7, <3.9
 - numpy>=1.19.5
 - scipy>=1.6.0
 - pandas>=1.1.3 
@@ -20,17 +20,17 @@ A Python library to explore scCNA data and quantify spatial tumor heterogeneity
 
 ## Installation and setup instructions
 ### Python requirements
-For library dependency issues, PhyliCS works with Python 3.8 or higher (e.g. 3.8.1, 3.8.2, etc.) but not 3.9 . So if you do not have a working installation of Python 3.8.X, consider installing Miniconda (see [Miniconda](https://docs.conda.io/en/latest/miniconda.html) website) to create a clean environment to work with PhyliCS.
+For library dependency issues, PhyliCS works with Python >= 3.7 but < 3.9 . So if you do not have a working installation of Python 3.7.X, consider installing Miniconda (see [Miniconda](https://docs.conda.io/en/latest/miniconda.html) website) to create a clean environment to work with PhyliCS.
 
-To create an enviroment named `py38` with a fresh Python 3.8 installation, run:
+To create an enviroment named `py37` with a fresh Python 3.7 installation, run:
 ```
-conda create --name py38 python=3.8
+conda create --name py37 python=3.7
 ```
 
 Then, you can activate the new enviroment by typing:
 
 ```
-conda activate py38
+conda activate py37
 ```
 
 ### PhyliCS installation from PyPI
