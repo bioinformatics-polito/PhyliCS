@@ -147,7 +147,7 @@ We may look at the distribution of the annotations. For example, you may be inte
 ```
 >>> navin_prim.plot_annotation_dist("mean_cn", outpath="ploidy_dist.png", kind="kde", figsize=(14,14))
 ```
-<img src="figures/ploidy_dist.png" alt="primary lung tumor mean cn distribution" width="700"/>
+<img src="figures/ploidy_dist.png" alt="primary lung tumor mean cn distribution" width="500"/>
 
 In this case, it is evident that the dataset is made of two major group of cells, characterized by a mean $CN \approx 2$ and a mean $CN \approx 4.5$, respectively.
 
