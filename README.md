@@ -149,7 +149,7 @@ We may look at the distribution of the annotations. For example, you may be inte
 ```
 <img src="figures/ploidy.png" alt="primary lung tumor mean cn distribution" width="500"/>
 
-In this case, it is evident that the dataset is made of two major group of cells, characterized by a mean $CN \approx 2$ and a mean $CN \approx 4.5$, respectively.
+In this case, it is evident that the dataset is made of two major group of cells, characterized by a mean CN ≈ 2 and a mean CN ≈ 4.5, respectively.
 
 ### Clustering
 Before clustering CNV data, we perform dimensionality reduction using only highly variable features to mitigate the negative impact of the curse of dimensionality. Run:
@@ -204,7 +204,7 @@ navin_prim.plot_clusters(plot="heatmap", outpath="heatmap.png")
 ```
 <img src="figures/heatmap.png" alt="primary lung tumor clustering heatmap" width="700"/>
 
-The rows of the above heatmap represent the CNV profile of each cell and are sorted according to the cluster they belong. The colored bars on the left of the heatmap represent the different clusters. In this case, as it was expected, the algorithm divided the dataset into two subgroups of cells, characterized by a mean $CN \approx 2$ and a mean $CN \approx 4.5$, respectively.
+The rows of the above heatmap represent the CNV profile of each cell and are sorted according to the cluster they belong. The colored bars on the left of the heatmap represent the different clusters. In this case, as it was expected, the algorithm divided the dataset into two subgroups of cells, characterized by a mean CN ≈ 2 and a mean CN ≈ 4.5, respectively.
 
 ### SHscore computation
 Now we load the data from the liver metastasis of the same tumor to quantify the spatial intra-tumor heterogeneity through the Spatial-Heterogeneity score, SHscore, we presented in our paper. 
