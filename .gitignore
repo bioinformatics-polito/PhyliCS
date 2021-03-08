@@ -7,6 +7,9 @@
 *.log
 *.sbatch
 *.swp
+*test_phylics.py*
+*note*
+*requirements.txt*
 
 .ipynb_checkpoints
 

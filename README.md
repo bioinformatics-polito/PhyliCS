@@ -40,55 +40,10 @@ pip install /path/to/phylics-1.0.0-py3-none-any.whl
 
 Installation trough PyPI is not available yet. We will upload PhyliCS to PyPI only after paper acceptance.
 
-## Test
-Here we present the code to reproduce the results we have presented in our paper.
+## Usage
 
-### Download the dataset
 
-First you need to download the input data. We have provided the CNV calls (SegCopy files) and a statistics file (results.txt) for each dataset.
-
-Breat tumor data:
-- sectionA: [CNVs](https://github.com/bioinformatics-polito/PhyliCS/raw/master/data/breast/breastA/SegCopy), [statistics](https://github.com/bioinformatics-polito/PhyliCS/raw/master/data/breast/breastA/results.txt)
-- sectionB: [CNVs](https://github.com/bioinformatics-polito/PhyliCS/raw/master/data/breast/breastB/SegCopy), [statistics](https://github.com/bioinformatics-polito/PhyliCS/raw/master/data/breast/breastB/results.txt)
-- sectionC: [CNVs](https://github.com/bioinformatics-polito/PhyliCS/raw/master/data/breast/breastC/SegCopy), [statistics](https://github.com/bioinformatics-polito/PhyliCS/raw/master/data/breast/breastC/results.txt)
-- sectionD: [CNVs](https://github.com/bioinformatics-polito/PhyliCS/raw/master/data/breast/breastD/SegCopy), [statistics](https://github.com/bioinformatics-polito/PhyliCS/raw/master/data/breast/breastD/results.txt)
-- sectionE: [CNVs](https://github.com/bioinformatics-polito/PhyliCS/raw/master/data/breast/breastE/SegCopy), [statistics](https://github.com/bioinformatics-polito/PhyliCS/raw/master/data/breast/breastE/results.txt)
-
-```
-mkdir -p data/breast/breastA data/breast/breastB data/breast/breastC data/breast/breastD data/breast/breastE 
-mkdir -p data/lung/primary data/lung/metastasis
-    
-cd data/breast/breastA
-wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/breast/breastA/SegCopy
-wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/breast/breastA/results.txt
-    
-cd ../breastB
-wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/breast/breastB/SegCopy
-wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/breast/breastB/results.txt
-    
-cd ../breastC
-wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/breast/breastC/SegCopy
-wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/breast/breastC/results.txt
-
-cd ../breastD
-wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/breast/breastD/SegCopy
-wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/breast/breastD/results.txt
-
-cd ../breastE
-wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/breast/breastE/SegCopy
-wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/breast/breastE/results.txt
-
-cd ../../..
-
-cd data/lung/primary 
-wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/lung/primary/SegCopy
-wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/lung/primary/results.txt
-
-cd ../metastasis
-wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/lung/metastasis/SegCopy
-wget https://raw.githubusercontent.com/bioinformatics-polito/PhyliCS/master/data/lung/metastasis/results.txt
-
-cd ../../..
-    
-```
-### Run PhyliCS
+## Case studies
+Results discussed in the paper are all stored in a dedicated [repository](https://github.com/bioinformatics-polito/PhyliCS_usage) and summarized by means of a pair of  jupyter notebooks accessible trhough:
+- [breast tumor](https://github.com/bioinformatics-polito/PhyliCS_usage/blob/main/breast_tumor.ipynb) 
+- [lung tumor](https://github.com/bioinformatics-polito/PhyliCS_usage/blob/main/lung_tumor.ipynb)
