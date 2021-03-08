@@ -212,7 +212,8 @@ Now we load the data from the liver metastasis of the same tumor to quantify the
 We load the CNV calls of the metastasis sample, together with a pair of annotations (mean CN and MAD) to characterize the data. We run:
 
 ```
->>> df = pd.read_csv("/scratch/trcanmed/phylics/dataset/navin_metastasis/results.txt", sep="\t", index_col=0).dropna()
+>>> navin_met = phylics.Sample.from_file("PhyliCS_usage/data/lung/metastasis/SegCopy", sample_name="metastasis")
+>>> df = pd.read_csv("PhyliCS_usage/data/lung/metastasis/results.txt", sep="\t", index_col=0).dropna()
 >>> ploidy = df['Copy_Number']
 >>> navin_met.add_annotation(ploidy, "mean_cn")
 >>> navin_met.mad()
