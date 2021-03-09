@@ -22,7 +22,7 @@ A Python library to explore scCNA data and quantify spatial tumor heterogeneity
 ## Installation and setup instructions
 Before going into the installation details, please notice that at the end of this guide is a [Troubleshooting](#troubleshooting) section. If you meet any problem during the installation of the library or its usage, please, take a look to that section because you may find the solution. 
 
-If none of the proposed solutions work for you, feel free to concact the author of the library by email (marilisa.montemurro@polito.it).
+If none of the proposed solutions work for you, feel free to contact the author of the library by email (marilisa.montemurro@polito.it).
 ### Python requirements
 For library dependency issues, PhyliCS works with Python >= 3.7 but < 3.9 . So if you do not have a working installation of Python 3.7.X, consider installing Miniconda (see [Miniconda](https://docs.conda.io/en/latest/miniconda.html) website) to create a clean environment to work with PhyliCS.
 
