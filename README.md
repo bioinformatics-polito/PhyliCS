@@ -277,20 +277,20 @@ In MS environment, you may receive an error message saying:
   ----------------------------------------
   ERROR: Failed building wheel for hdbscan
 ```
-So, in order to fix the problem and be able to install `HDBSCAN` library and then PhyliCS, navigate to the [Microsoft C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) and follow the installation instruction. Then try to install PhyliCS again. 
+In order to fix the problem and be able to install `HDBSCAN` library and then PhyliCS, navigate to the [Microsoft C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) and follow the installation instruction. Then try to install PhyliCS again. 
 
 There is the possibility that you have some trouble in launching Visual Studio installer because of an error in parsing the datetime of your local timezone. In that case, open the cmd prompt with admin privileges and try installing it from there, running:
 ```
 ./vs_buildtools.exe --locale en-US
 ```
-This will run the installer using english localization and issue with the datetime value will not occur.
+This will run the installer using english localization and the issue with the datetime value will not occur.
 
 #### HDBSCAN from conda
 In any case, if you are working into a conda environment, you may decide to install `HDBSCAN` from Anaconda (`conda install -c conda-forge hdbscan`), before running the PhyliCS installation command. This should not generate the gcc error and you should be able to proceed to install PhyliCS without any problem.
 
 ### WSL + X-Server
 
-If you are using a Windows Subsystem for Linux, you may face some trouble when generating figures. In fact, `matplotlib` library, which is the standard graphics library for python, may try to connect to the X-Server of your Linux subsystem. 
+If you are using a Windows Subsystem for Linux, you may face some trouble when generating figures. In fact, `matplotlib` library, which is the standard graphics library for python, may try to connect to the X-Server of your Linux subsystem and fail.
 
 This is not due to PhyliCS or to any of its dependencies but on how your WSL is configured. 
 
