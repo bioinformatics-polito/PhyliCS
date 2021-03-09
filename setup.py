@@ -10,7 +10,7 @@ with open(path.join(this_directory, 'README_PyPI.md'), encoding='utf-8') as f:
 
 setup(
     name='phylics',
-    version='1.0.4',
+    version='1.0.5',
     description='Single-cell CNV data analysis toolkit',
     #long_description = 'README.md',
     url='https://github.com/bioinformatics-polito/PhyliCS',
@@ -18,7 +18,7 @@ setup(
     author_email='marilisa.montemurro@polito.it', 
     classifiers = [
             'License :: OSI Approved :: GNU Affero General Public License v3',
-            'Development Status :: 5 - Production/Stable',
+            'Development Status :: 4 - Beta',
             'Environment :: Console',
             'Framework :: Jupyter',
             'Intended Audience :: Developers',
@@ -28,6 +28,7 @@ setup(
             'Operating System :: Microsoft :: Windows',
             'Operating System :: POSIX :: Linux',
             'Programming Language :: Python :: 3',
+            'Programming Language :: Python :: 3.7',
             'Programming Language :: Python :: 3.8',
             'Topic :: Scientific/Engineering :: Bio-Informatics',
     ],

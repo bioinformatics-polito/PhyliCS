@@ -17,8 +17,12 @@ A Python library to explore scCNA data and quantify spatial tumor heterogeneity
 - IPython>=7.19.0
 - hdbscan>=0.8.26
 - joblib>=1.0.0
+- gcc
 
 ## Installation and setup instructions
+Before going into the installation details, please notice that at the end of this guide is a [Troubleshooting](#troubleshooting) section. If you meet any problems during the installation of the library or its usage, please, take a look to that section because you may find the solution. 
+
+If any of the proposed solutions work for you, feel free to concact the author of the library by email (marilisa.montemurro@polito.it).
 ### Python requirements
 For library dependency issues, PhyliCS works with Python >= 3.7 but < 3.9 . So if you do not have a working installation of Python 3.7.X, consider installing Miniconda (see [Miniconda](https://docs.conda.io/en/latest/miniconda.html) website) to create a clean environment to work with PhyliCS.
 
@@ -38,7 +42,7 @@ conda activate py37
 PhyliCS is distributed via PyPi. To install it run:
 
 ```
-pip install phylics==1.0.0
+pip install phylics
 ```
 
 Dependencies are checked by `pip` and missing packages are automatically downloaded and installed.
@@ -49,7 +53,7 @@ To test the library, open the Python interprete and import it:
 >>> import phylics
 ```
 
-If you do not get any error message the library has been properly installed. If you have any trouble, please contact the author of the package by email (marilisa.montemurro@polito.it).
+If you do not get any error message the library has been properly installed. 
 
 ### Input data format
 Sample data need to be put in a tab-delimited matrix where:
@@ -145,7 +149,7 @@ This command returns a `pandas.DataFrame` which index correspondS to the cells/b
 
 We may look at the distribution of the annotations. For example, you may be interesting in the distribution of the mean copy-number over the dataset and try to identify clusters. In that case, you need to run:
 ```
->>> navin_prim.plot_annotation_dist("mean_cn", outpath="ploidy.png", kind="kde", figsize=(14,14))
+>>> navin_prim.plot_annotation_dist("mean_cn", outpath="ploidy.png", kind="kde", figsize=(7,7))
 ```
 <img src="figures/ploidy.png" alt="primary lung tumor mean cn distribution" width="500"/>
 
@@ -164,21 +168,24 @@ To visualize UMAP embeddings, run:
 
 <img src="figures/umap.png" alt="primary umap" width="500"/>
 
-Finally, you can cluster your data, choosing one of the clustering algorithms provided by [scikit-learn](https://scikit-learn.org/stable/modules/clustering.html#), using all the available parameters. Specifically, you can choose among:
+Finally, you can cluster your data, choosing one of the available clustering algorithms.
+
+Specifically, you can choose among:
 
 | Method  | PhyliCS denomination   | 
 | ---- | ------- | 
-| KMeans | kmeans      |
-| Agglomerative Clustering | agglomerative|
-| Birch | birch |
-| Affinity Propagation | affinity|
-| DBSCAN | dbscan |
-| HDBSCAN | hdbscan |
-| OPTICS | optics |
-| Spectral Clustering | spectral |
+| [KMeans](https://scikit-learn.org/stable/modules/clustering.html#k-means)| kmeans      |
+| [Hierarchical Clustering](https://scikit-learn.org/stable/modules/clustering.html#hierarchical-clustering) | agglomerative|
+| [Birch](https://scikit-learn.org/stable/modules/clustering.html#birch) | birch |
+| [Affinity Propagation](https://scikit-learn.org/stable/modules/clustering.html#affinity-propagation) | affinity|
+| [DBSCAN](https://scikit-learn.org/stable/modules/clustering.html#dbscan) | dbscan |
+| [HDBSCAN] | hdbscan |
+| [OPTICS](https://scikit-learn.org/stable/modules/clustering.html#optics) | optics |
+| [Spectral Clustering](https://scikit-learn.org/stable/modules/clustering.html#spectral-clustering) | spectral |
 
+If you click on the above links you may find a brief description of the algorithms and the parameters that are accepted by the methods. You can provide all of them also to PhyliCS clustering method.
 
-We decide to cluster our data using KMeans algorithm which requires to declare the desidered number of clusters. In our case, looking the the UMAP embeddings, it is evident that the best option would be K=2; alternatively, we may test different values of K and compute three indices (the Silhouette Coefficient, the Calinsky-Harabasz index, the Davies-Bouldin index), to pick the optimal one. This functionality is provided only for algorithms which need to be seeded with the cluster number in advance. In this case, we run:
+We decide to cluster our data using KMeans algorithm which requires to declare the desidered number of clusters. In our case, looking the the UMAP embeddings, it is evident that the best option would be K=2; anyhow, we may test different values of K and compute three indices (the Silhouette Coefficient, the Calinsky-Harabasz index, the Davies-Bouldin index), to pick the optimal one. This functionality is provided only for algorithms which need to be seeded with the cluster number in advance. In this case, we run:
 ```
 >>> navin_prim.nk_clust(method="kmeans", min_k=2, max_k=8, embeddings="umap")   #embeddings="umap" is used to cluster on umap embeddings 
                                                                                 #which must have been previously computed
@@ -242,6 +249,52 @@ To conclude, we can plot a multi-sample heatmap with a dendrogram computed perfo
 ```
 <img src="figures/agglomerative_heatmap.png" alt="aggregated navin" width="700"/>
 
+## Troubleshooting
+
+### HDBSCAN + gcc
+If PhyliCS installation fails and you receive such an error message: 
+```
+error: command 'gcc' failed with exit status 1
+ERROR: Failed building wheel for hdbscan  
+```
+
+it is highly probable that you don't have a running version of gcc installed in your working environment. 
+In fact `HDBSCAN` package, which is one of PhyliCS dependencies, is partially implented in Cython which requires gcc to be built.
+
+To check it, you may simply open a terminal, type `gcc` and check the output.
+
+#### Linux
+To install gcc in your current working environment, simply run:
+```
+sudo apt-get update & sudo apt install gcc
+```
+Then open a new terminal and try to install PhyliCS again.
+#### Microsoft Windows
+
+In MS environment, you may receive an error message saying:
+```
+  error: Microsoft Visual C++ 14.0 or greater is required. Get it with "Microsoft C++ Build Tools": https://visualstudio.microsoft.com/visual-cpp-build-tools/
+  ----------------------------------------
+  ERROR: Failed building wheel for hdbscan
+```
+So, in order to fix the problem and be able to install `HDBSCAN` library and then PhyliCS, navigate to the [Microsoft C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) and follow the installation instruction. Then try to install PhyliCS again. 
+
+There is the possibility that you have some trouble in launching Visual Studio installer because of an error in parsing the datetime of your local timezone. In that case, open the cmd prompt with admin privileges and try installing it from there, running:
+```
+./vs_buildtools.exe --locale en-US
+```
+This will run the installer using english localization and issue with the datetime value will not occur.
+
+#### HDBSCAN from conda
+In any case, if you are working into a conda environment, you may decide to install `HDBSCAN` from Anaconda (`conda install -c conda-forge hdbscan`), before running the PhyliCS installation command. This should not generate the gcc error and you should be able to proceed to install PhyliCS without any problem.
+
+### WSL + X-Server
+
+If you are using a Windows Subsystem for Linux, you may face some trouble when generating figures. In fact, `matplotlib` library, which is the standard graphics library for python, may try to connect to the X-Server of your Linux subsystem. 
+
+This is not due to PhyliCS or to any of its dependencies but on how your WSL is configured. 
+
+To solve this problem, please, refer to this [answer](https://stackoverflow.com/a/43399827) on [StackOverflow](https://stackoverflow.com) that should fix the issue.
 
 ## Case studies
 Results discussed in the paper are all stored in a dedicated [repository](https://github.com/bioinformatics-polito/PhyliCS_usage) and summarized by means of a pair of  jupyter notebooks accessible trhough:

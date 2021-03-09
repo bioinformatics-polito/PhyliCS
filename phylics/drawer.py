@@ -43,7 +43,7 @@ from ._compat import Literal
 from . import logging as logg
 from .plotting._utils import make_projection_available, ColorLike, _Dimensions
 
-matplotlib.rcParams.update({'font.size': 24})
+#matplotlib.rcParams.update({'font.size': 24})
 
 def dots_plot(data:Union[np.array, list, pd.Series], yticks:Union[np.array, list, pd.Series]=None,  
                title:str=None, x_label:str="X", y_label:str="Y", figsize:tuple=(18, 7), outpath:str=None):
@@ -72,7 +72,7 @@ def dots_plot(data:Union[np.array, list, pd.Series], yticks:Union[np.array, list
         fig2.savefig(outpath)
     else:
         fig2.show()
-    fig2.clf()
+    plt.close('all')
 
     return ax1
 
@@ -176,7 +176,7 @@ def clustermap2(data, boundaries, labels:Union[pd.Series, pd.DataFrame]=None,  r
         plt.savefig(outpath)
     else:
         plt.show()
-    plt.clf()
+    plt.close('all')
     return h
 
 def clustermap(data, boundaries, labels:Union[np.array, None]=None, outpath=None, title: str=None, legend: bool=False, linkage:Union[np.ndarray, None]=None,
@@ -267,7 +267,7 @@ def clustermap(data, boundaries, labels:Union[np.array, None]=None, outpath=None
         plt.savefig(outpath)
     else:
         plt.show()
-    plt.clf()
+    plt.close('all')
     return h
 
 def dist(a:Union[list, np.array, pd.Series], grid:bool=False, quantiles:List[float]=None, figsize:Tuple[int, int]=None, outpath:str=None, **kwargs):
@@ -288,7 +288,7 @@ def dist(a:Union[list, np.array, pd.Series], grid:bool=False, quantiles:List[flo
         plt.savefig(outpath)
     else:
         plt.show()
-    plt.clf()
+    plt.close('all')
     return ax
 
 _ScatterBasis = Literal['pca', 'umap', 'X']
@@ -398,8 +398,8 @@ def scatter(data:np.ndarray, projection: _Dimensions = "2d", outpath:str=None, t
         if outpath != None:
             fig.savefig(outpath)
         else:
-            fig.show()
-        fig.clf()
+            plt.show()
+        plt.close('all')
     
     return ax 
 
@@ -435,7 +435,7 @@ def highly_variable_features(X: CnvData, log: bool = False, outpath: str = None)
     else: 
         plt.show()
     ax = plt.gca()
-    plt.clf()
+    plt.close('all')
     return ax
 
 def jackstraw(explained_variance_ratio: np.array, mean_expl_var_ratio_perm: np.array, n_pcs:int = 50, figsize:Tuple[int, int]=None,
@@ -466,7 +466,7 @@ def jackstraw(explained_variance_ratio: np.array, mean_expl_var_ratio_perm: np.a
     else:
         if show == True:
             fig.show()
-    fig.clf()
+    plt.close('all')
 
     return ax
 
