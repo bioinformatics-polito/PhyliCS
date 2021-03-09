@@ -179,7 +179,7 @@ Specifically, you can choose among:
 | [Birch](https://scikit-learn.org/stable/modules/clustering.html#birch) | birch |
 | [Affinity Propagation](https://scikit-learn.org/stable/modules/clustering.html#affinity-propagation) | affinity|
 | [DBSCAN](https://scikit-learn.org/stable/modules/clustering.html#dbscan) | dbscan |
-| [HDBSCAN] | hdbscan |
+| [HDBSCAN](https://hdbscan.readthedocs.io/en/latest/) | hdbscan |
 | [OPTICS](https://scikit-learn.org/stable/modules/clustering.html#optics) | optics |
 | [Spectral Clustering](https://scikit-learn.org/stable/modules/clustering.html#spectral-clustering) | spectral |
 
