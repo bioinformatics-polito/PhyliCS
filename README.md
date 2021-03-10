@@ -47,6 +47,19 @@ pip install phylics
 
 Dependencies are checked by `pip` and missing packages are automatically downloaded and installed.
 
+### PhyliCS installation from Bioconda
+
+Add Bioconda channel:
+
+```conda config --add channels bioconda```
+
+Create an environment containing PhyliCS and all its dependencies and activate it:
+
+```
+conda create --name phylics phylics
+conda activate phylics
+```
+
 ## Usage
 To test the library, open the Python interprete and import it:
 ```
@@ -252,7 +265,7 @@ To conclude, we can plot a multi-sample heatmap with a dendrogram computed perfo
 ## Troubleshooting
 
 ### HDBSCAN + gcc
-If PhyliCS installation fails and you receive such an error message: 
+If PhyliCS from PyPI installation fails and you receive such an error message: 
 ```
 error: command 'gcc' failed with exit status 1
 ERROR: Failed building wheel for hdbscan  
@@ -322,7 +335,7 @@ This is not due to PhyliCS or to any of its dependencies but on how your WSL is 
 To solve this problem, please, refer to this [answer](https://stackoverflow.com/a/43399827) on [StackOverflow](https://stackoverflow.com) that should fix the issue.
 
 ## Case studies
-Results discussed in the paper are all stored in a dedicated [repository](https://github.com/bioinformatics-polito/PhyliCS_usage) and summarized by means of a pair of  jupyter notebooks accessible trhough:
+Results discussed in the paper are all stored in a dedicated [repository](https://github.com/bioinformatics-polito/PhyliCS_usage) and summarized by means of  jupyter notebooks accessible through:
 - [simulations](https://github.com/bioinformatics-polito/PhyliCS_usage/blob/main/synth.ipynb)
 - [breast tumor](https://github.com/bioinformatics-polito/PhyliCS_usage/blob/main/breast_tumor.ipynb) 
 - [lung tumor](https://github.com/bioinformatics-polito/PhyliCS_usage/blob/main/lung_tumor.ipynb)
