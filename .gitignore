@@ -12,7 +12,7 @@
 
 /docs/
 __pycache__/
-/dist/*-none-any.whl
+/dist/
 /build/
 /phylics.egg-info/
 /README_PyPI.md

@@ -285,8 +285,33 @@ There is the possibility that you have some trouble in launching Visual Studio i
 ```
 This will run the installer using english localization and the issue with the datetime value will not occur.
 
-#### HDBSCAN from conda
-In any case, if you are working into a conda environment, you may decide to install `HDBSCAN` from Anaconda (`conda install -c conda-forge hdbscan`), before running the PhyliCS installation command. This should not generate the gcc error and you should be able to proceed to install PhyliCS without any problem.
+#### macOS
+
+Under macOS, you may get an error message saying:
+```
+error:
+xcrun: error: invalid active developer path (/Library/Developer/CommandLineTools), missing xcrun at: /Library/Developer/CommandLineTools/usr/bin/xcrun
+```
+
+This time, X-Code Command-line Tools should be installed (or updated).
+
+It can be installed from the terminal by running:
+
+` xcode-select --install`
+
+Follow the instructions and, when the installation is complete, restart the terminal.
+
+If it fails or you receive the error message `"Software not found on server"`, you can still install it manually, through the Apple Developer website. 
+
+Log into [Apple Developer](https://idmsa.apple.com/IDMSWebAuth/signin?appIdKey=891bd3417a7776362562d2197f89480a8547b108fd934911bcbea0110d07f757&path=%2Fdownload%2Fmore%2F&rv=1), create an account (if you don't already have it), look for: "Command Line Tools for Xcode XX.x" in the list of downloads and install it via webpage.
+
+#### HDBSCAN from conda (for all OS's)
+Under all OS's, if you are working into a conda environment, you may decide to install `HDBSCAN` from Anaconda.
+
+You should run:
+`conda install -c conda-forge hdbscan`. 
+
+This should not generate the gcc error and you will be able to proceed to install PhyliCS smoothly, via `pip` (see [PhyliCS installation from PyPI](#phylics-installation-from-pypi))
 
 ### WSL + X-Server
 
