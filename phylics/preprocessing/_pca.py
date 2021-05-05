@@ -9,9 +9,10 @@ from ..utils import AnyRandom
 from ..types import CnvData
 
 def shuffle_columns(X:np.ndarray):
-    for i in range(X.shape[1]):
-        np.random.shuffle(X[:,i])
-    return X
+    Y = X.copy()
+    for i in range(Y.shape[1]):
+        np.random.shuffle(Y[:,i])
+    return Y
 
 def _pca(
     data: Union[CnvData, np.ndarray],
@@ -33,15 +34,15 @@ def _pca(
     if use_highly_variable is True and 'highly_variable' not in cnvdata.feat.columns:
         raise ValueError(
             'Did not find cnv.feat[\'highly_variable\']. '
-            'Either your data already only consists of highly-variable features '
+            'Either your data import phylicsalready only consists of highly-variable features '
             'or consider running `Sample.variable_features()` first.'
         )
     if use_highly_variable:
         logg.info('    on highly variable features')
     data_comp = (
-        cnvdata[:, cnvdata.feat['highly_variable']] if use_highly_variable else cnvdata
-    )
-
+            cnvdata[:, cnvdata.feat['highly_variable']] if use_highly_variable else cnvdata
+        )
+    
     if n_comps is None:
         min_dim = min(data_comp.n_feat, data_comp.n_obs)
         if settings.N_PCS >= min_dim:
@@ -72,8 +73,7 @@ def _pca(
         pca_perm = pca_.fit_transform(perm)
         expl_var_ratio_df = pd.DataFrame(data=pca_.explained_variance_ratio_.reshape(-1, len(pca_.explained_variance_ratio_)))
         expl_var_ratio_perm = expl_var_ratio_perm.append(expl_var_ratio_df)
-
+    
     mean_expl_var_ratio_perm = expl_var_ratio_df.mean().values
-
 
     return (X_pca, pca_components, pca_explained_variance_ratio, pca_explained_variance, mean_expl_var_ratio_perm)

@@ -81,6 +81,9 @@ class Sample:
         
     def shape(self):
         return self.cnv_data.shape
+
+    def copy(self) -> "Sample":
+            return copy.deepcopy(self)
         
     def add_annotation(self, ann:Union[pd.Series, Mapping[str, Union[float, int]]], key:str, axis:str="obs"):
         ann = utils.sanitize_annotation(ann)
@@ -218,10 +221,10 @@ class Sample:
 
     # clustering
     def nk_clust(self, method:str, metric:Optional[Union[str, None]]="euclidean", 
-            linkage:Optional[Union[str, None]]=None, embeddings:Optional[Union[str, None]]=None, 
+            linkage:Optional[Union[str, None]]=None, embeddings:Optional[Union[str, None]]=None, n_comps: Optional[int] = None,
             min_k:Optional[int]=2, max_k:Optional[int]=15, index:Optional[Union[str, List[str]]]="all",
             n_jobs:Optional[int]=1):
-
+        """
         if embeddings is not None:
             if embeddings == EMBEDDINGS.PCA:
                 if "pca" not in self.cnv_data.uns.keys():
@@ -243,20 +246,21 @@ class Sample:
                 raise ValueError("Accepted values for embeggings are 'umap', 'pca'")
         else: 
             data = (self.cnv_data.X)
-        results = nk_clust(data , method, metric, linkage, embeddings, min_k, max_k, index, n_jobs) 
+        """
+        results = nk_clust(self.cnv_data , method, metric, linkage, embeddings, n_comps, min_k, max_k, index, n_jobs) 
         scores_df = pd.DataFrame(results)
         scores_df.index.name = "k"
         self.cnv_data.uns['nk_clust'] = scores_df
         return scores_df
 
     def cluster_benchmark(self, methods:Sequence[object], cluster_configurations:ClusterConfig, labels:Union[list, np.array], 
-                        embeddings:Optional[Union[str, None]]=None, n_jobs:Optional[int]=1):
-        ranking = clust_accuracy_ranking(self.cnv_data, cluster_configurations, labels, embeddings, n_jobs)
+                        embeddings:Optional[Union[str, None]]=None, n_comps: Optional[int] = None, n_jobs:Optional[int]=1):
+        ranking = clust_accuracy_ranking(self.cnv_data, cluster_configurations, labels, embeddings, n_comps, n_jobs)
         self.cnv_data.uns['cluster_benchmark'] = ranking
         return ranking
 
-    def cluster(self, method:str, embeddings:Optional[Union[str, None]]=None, **kwargs):
-        res = cluster(self.cnv_data, method, embeddings, **kwargs)
+    def cluster(self, method:str, embeddings:Optional[Union[str, None]]=None, n_comps: Optional[int] = None, **kwargs):
+        res = cluster(self.cnv_data, method, embeddings, n_comps, **kwargs)
         self.cnv_data.uns['cluster_model'] = res
         self.cnv_data.obs['cluster'] = res.labels_
         return res
@@ -429,7 +433,7 @@ class Sample:
                     figsize = figsize, labels=s.cnv_data.obs['cluster'], legend=True, **kwargs)
             elif plot == "heatmap":
                 Drawer.draw('heatmap', data=s.get_cnv_dataframe(), boundaries=s.get_boundaries(),  title = 'Cluster heatmap', outpath=outpath,  
-                    labels=s.cnv_data.obs['cluster'], figsize=figsize, legend=False, **kwargs)
+                    labels=s.cnv_data.obs['cluster'], figsize=figsize, legend=True, **kwargs)
         else:
             logg.error("{} object has no column 'cluster'".format(self.cnv_data.feat))
 

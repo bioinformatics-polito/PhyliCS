@@ -59,7 +59,7 @@ def umap(data: Union[CnvData, np.ndarray], n_neighbors: int = 15, n_components: 
                                 fast, negative_sample_rate, local_connectivity, init_pos, random_state, a, b, use_highly_variable)
 
 def nk_clust(data: Union[CnvData, np.ndarray], method:str, metric:Optional[Union[str, None]]="euclidean", 
-            linkage:Optional[Union[str, None]]=None, embeddings:Optional[Union[str, None]]=None, 
+            linkage:Optional[Union[str, None]]=None, embeddings:Optional[Union[str, None]]=None, n_comps: Optional[int] = None,
             min_k:Optional[int]=2, max_k:Optional[int]=15, index:Optional[Union[str, List[str]]]="all",
             n_jobs:Optional[int]=1):
         """
@@ -74,7 +74,7 @@ def nk_clust(data: Union[CnvData, np.ndarray], method:str, metric:Optional[Union
                 raise ValueError("Accepted values for linkage are " + ', '.join(LINKAGE.values()) +"")
         if (metric is not None) and (metric not in METRICS):
                 raise ValueError("Accepted values for metric are " + ', '.join(METRICS) +"")
-        """
+        cnvdata = data if isinstance(data, CnvData) else CnvData(data)
         if embeddings is not None:
             if embeddings == EMBEDDINGS.PCA:
                 if "pca" not in cnvdata.uns.keys():
@@ -83,7 +83,10 @@ def nk_clust(data: Union[CnvData, np.ndarray], method:str, metric:Optional[Union
                         'Consider running `Sample.pca()` first.'
                     )
                 else:
-                    data_comp = (cnvdata[:, cnvdata.uns['pca']["X"] ])
+                    if n_comps is None:
+                        data_comp = cnvdata.uns['pca']["X"] 
+                    else:
+                        data_comp = cnvdata.uns['pca']["X"][:, 0:n_comps] 
             elif embeddings == EMBEDDINGS.UMAP:
                 if "umap" not in cnvdata.uns.keys():
                     raise ValueError(
@@ -91,12 +94,15 @@ def nk_clust(data: Union[CnvData, np.ndarray], method:str, metric:Optional[Union
                         'Consider running `Sample.umap()` first.'
                     )
                 else:
-                    data_comp = (cnvdata[:, cnvdata.uns['umap']["X"] ])
+                    if n_comps is None:
+                        data_comp = cnvdata.uns['umap']["X"]
+                    else:
+                        data_comp = cnvdata.uns['umap']["X"][:, 0:n_comps] 
             else:
                 raise ValueError("Accepted values for embeggings are 'umap', 'pca'")
         else: 
             data_comp = (cnvdata.X)
-        """
+        
         if min_k < 2:
                 raise ValueError("min_k must be at least equal to 2")
 
@@ -125,11 +131,11 @@ def nk_clust(data: Union[CnvData, np.ndarray], method:str, metric:Optional[Union
                         ch = True
         indices = {}
         if silhouette == True:
-                indices["silhouette"] = silhouette_(data, method, metric, linkage, min_k, max_k, n_jobs)
+                indices["silhouette"] = silhouette_(data_comp, method, metric, linkage, min_k, max_k, n_jobs)
         if db == True:
-                indices["db"] = davies_bouldin_(data, method, metric, linkage,  min_k, max_k, n_jobs)
+                indices["db"] = davies_bouldin_(data_comp, method, metric, linkage,  min_k, max_k, n_jobs)
         if ch == True:
-                indices["ch"] = calinski_harabasz_(data, method, metric, linkage, min_k, max_k, n_jobs)
+                indices["ch"] = calinski_harabasz_(data_comp, method, metric, linkage, min_k, max_k, n_jobs)
 
         return indices
 """
@@ -167,10 +173,10 @@ def consensus_clustering(data: Union[CnvData, np.ndarray], method:str, cluster_c
 def cluster_accuracy(clusterer_, data, labels):
         return cluster_accuracy_(clusterer_, data, labels)
 
-def clust_accuracy_ranking(data:Union[CnvData, np.ndarray], cluster_configurations:ClusterConfig, 
-                        labels:Union[list, np.array], embeddings:Optional[Union[str, None]]=None, n_jobs:Optional[int]=1):
+def clust_accuracy_ranking(data:Union[CnvData, np.ndarray], cluster_configurations:ClusterConfig,  
+                        labels:Union[list, np.array], embeddings:Optional[Union[str, None]]=None, 
+                        n_comps: Optional[int] = None,n_jobs:Optional[int]=1):
         cnvdata = data if isinstance(data, CnvData) else CnvData(data)
-
         if embeddings is not None:
             if embeddings == EMBEDDINGS.PCA:
                 if "pca" not in cnvdata.uns.keys():
@@ -179,7 +185,10 @@ def clust_accuracy_ranking(data:Union[CnvData, np.ndarray], cluster_configuratio
                         'Consider running `Sample.pca()` first.'
                     )
                 else:
-                    data_comp = (cnvdata[:, cnvdata.uns['pca']["X"] ])
+                    if n_comps is None:
+                        data_comp = cnvdata.uns['pca']["X"] 
+                    else:
+                        data_comp = cnvdata.uns['pca']["X"][:, 0:n_comps] 
             elif embeddings == EMBEDDINGS.UMAP:
                 if "umap" not in cnvdata.uns.keys():
                     raise ValueError(
@@ -187,7 +196,10 @@ def clust_accuracy_ranking(data:Union[CnvData, np.ndarray], cluster_configuratio
                         'Consider running `Sample.umap()` first.'
                     )
                 else:
-                    data_comp = (cnvdata[:, cnvdata.uns['umap']["X"] ])
+                    if n_comps is None:
+                        data_comp = cnvdata.uns['umap']["X"]
+                    else:
+                        data_comp = cnvdata.uns['umap']["X"][:, 0:n_comps] 
             else:
                 raise ValueError("Accepted values for embeggings are 'umap', 'pca'")
         else: 
@@ -201,7 +213,7 @@ def clust_accuracy_ranking(data:Union[CnvData, np.ndarray], cluster_configuratio
         ranking = ranking.set_index('method')
         return ranking
 
-def cluster(data:Union[CnvData, np.ndarray], method:str, embeddings:Optional[Union[str, None]]=None, **kwargs):
+def cluster(data:Union[CnvData, np.ndarray], method:str, embeddings:Optional[Union[str, None]]=None, n_comps: Optional[int] = None, **kwargs):
         cnvdata = data if isinstance(data, CnvData) else CnvData(data)
         if embeddings is not None:
             if embeddings == EMBEDDINGS.PCA:
@@ -211,7 +223,10 @@ def cluster(data:Union[CnvData, np.ndarray], method:str, embeddings:Optional[Uni
                         'Consider running `Sample.pca()` first.'
                     )
                 else:
-                    data_comp = cnvdata.uns['pca']["X"] 
+                    if n_comps is None:
+                        data_comp = cnvdata.uns['pca']["X"] 
+                    else:
+                        data_comp = cnvdata.uns['pca']["X"][:, 0:n_comps] 
             elif embeddings == EMBEDDINGS.UMAP:
                 if "umap" not in cnvdata.uns.keys():
                     raise ValueError(
@@ -219,7 +234,10 @@ def cluster(data:Union[CnvData, np.ndarray], method:str, embeddings:Optional[Uni
                         'Consider running `Sample.umap()` first.'
                     )
                 else:
-                    data_comp = cnvdata.uns['umap']["X"] 
+                    if n_comps is None:
+                        data_comp = cnvdata.uns['umap']["X"]
+                    else:
+                        data_comp = cnvdata.uns['umap']["X"][:, 0:n_comps] 
             else:
                 raise ValueError("Accepted values for embeggings are 'umap', 'pca'")
         else: 

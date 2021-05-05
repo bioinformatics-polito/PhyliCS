@@ -116,7 +116,7 @@ def clustermap2(data, boundaries, labels:Union[pd.Series, pd.DataFrame]=None,  r
                 #title_fontsize='x-large', bbox_transform=plt.gcf().transFigure)
         #plt.figlegend(title=labels.name, loc='center', bbox_to_anchor=(0.5,0.9))      
         handles = [Patch(facecolor=cluster_lut[l]) for l in cluster_lut]
-        plt.legend(handles, cluster_lut, title='Samples',
+        plt.legend(handles, cluster_lut, 
            bbox_to_anchor=(1, 1), bbox_transform=plt.gcf().transFigure, loc='upper right')
 
         #h.ax_heatmap.legend(handles, cluster_lut, title=labels.name, bbox_to_anchor=(0.5, 0.9), ncol=len(np.unique(labels)), bbox_transform=plt.gcf().transFigure, loc='upper right')
@@ -177,6 +177,7 @@ def clustermap2(data, boundaries, labels:Union[pd.Series, pd.DataFrame]=None,  r
     else:
         plt.show()
     plt.close('all')
+    sns.set(font_scale=1)
     return h
 
 def clustermap(data, boundaries, labels:Union[np.array, None]=None, outpath=None, title: str=None, legend: bool=False, linkage:Union[np.ndarray, None]=None,

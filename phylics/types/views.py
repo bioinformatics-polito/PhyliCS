@@ -24,9 +24,9 @@ class _SetItemMixin:
         if self._view_args is None:
             super().__setitem__(idx, value)
         else:
-            logger.warning(
-                f"Trying to set attribute `.{self._view_args.attrname}` of view, copying."
-            )
+            #logger.warning(
+            #    f"Trying to set attribute `.{self._view_args.attrname}` of view, copying."
+            #)
             with self._update() as container:
                 container[idx] = value
 
@@ -55,7 +55,7 @@ class _ViewMixin(_SetItemMixin):
     # TODO: This makes `deepcopy(obj)` return `obj._view_args.parent._adata_ref`, fix it
     def __deepcopy__(self, memo):
         parent, attrname, keys = self._view_args
-        return deepcopy(getattr(parent._adata_ref, attrname))
+        return deepcopy(getattr(parent.data_ref, attrname))
 
 
 class ArrayView(_SetItemMixin, np.ndarray):
