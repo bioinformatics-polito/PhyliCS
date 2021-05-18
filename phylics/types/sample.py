@@ -268,8 +268,11 @@ class Sample:
     def get_clusterer(self):
         return self.cnv_data.uns['cluster_model']
     
-    def get_cluster_labels(self):
+    def get_clusters(self):
         return self.cnv_data.obs['cluster']
+
+    def get_cluster_labels(self):
+        return self.cnv_data.obs['cluster'].values
 
     #Multi-sample analysis
     #def co_cluster(self, samples:list, method:str, embeddings:Optional[Union[str, None]]=None, **kwargs):
@@ -421,17 +424,16 @@ class Sample:
             logg.error("{} object has no attribute 'umap'".format(self.cnv_data.uns))
 
     def plot_clusters(self, plot:str="scatter", outpath:str=None, figsize:Tuple[int, int]=None, **kwargs):
-        if 'cluster' in self.cnv_data.obs.columns:
-            s = self.sort_rows(by="cluster")
-            print(s)
+        if 'cluster' in self.cnv_data.obs.columns:  
             if plot == "scatter":
-                if 'umap' in s.cnv_data.uns:
-                    projection = s.get_umap('X')
+                if 'umap' in self.cnv_data.uns:
+                    projection = self.get_umap('X')
                 else:
-                    projection = umap(s.cnv_data)
-                Drawer.draw('scatter', data=projection, title = 'Cluster projection', x_label='X', y_label='Y', outpath=outpath,  
-                    figsize = figsize, labels=s.cnv_data.obs['cluster'], legend=True, **kwargs)
+                    projection = umap(self.cnv_data)
+                Drawer.draw('scatter', data=projection, title = 'Clusters', x_label='X', y_label='Y', outpath=outpath,  
+                    figsize = figsize, labels=self.get_clusters(), legend=True, **kwargs)
             elif plot == "heatmap":
+                s = self.sort_rows(by="cluster")
                 Drawer.draw('heatmap', data=s.get_cnv_dataframe(), boundaries=s.get_boundaries(),  title = 'Cluster heatmap', outpath=outpath,  
                     labels=s.cnv_data.obs['cluster'], figsize=figsize, legend=True, **kwargs)
         else:

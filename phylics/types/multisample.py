@@ -64,12 +64,15 @@ class MultiSample(Sample):
     def get_sample_labels(self):
         return self.get_annotation("sample")
 
-    def SHscore(self, n_jobs:int=1, verbose:bool=False):
+    def SHscores(self, n_jobs:int=1, verbose:bool=False):
         scores = segregation_score(self.cnv_data, n_jobs, verbose)
         self.cnv_data.uns["scores"] = scores
         return scores
 
-    def plot_scores(self, outpath:str=None, figsize:tuple=(18, 7)):
+    def get_SHscores(self):
+        return self.cnv_data.uns["scores"]
+
+    def plot_SHscores(self, outpath:str=None, xticks_orientation:int=0, figsize:tuple=(18, 7)):
         if 'scores' not in self.cnv_data.uns.keys():
             raise ValueError(
                         'Did not find cnv.uns[\'scores\']. '

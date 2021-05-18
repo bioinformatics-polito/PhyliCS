@@ -46,28 +46,23 @@ from .plotting._utils import make_projection_available, ColorLike, _Dimensions
 #matplotlib.rcParams.update({'font.size': 24})
 
 def dots_plot(data:Union[np.array, list, pd.Series], yticks:Union[np.array, list, pd.Series]=None,  
-               title:str=None, x_label:str="X", y_label:str="Y", figsize:tuple=(18, 7), outpath:str=None):
+               title:str=None, x_label:str="X", y_label:str="Y", figsize:tuple=(18, 7), rotation:int=0, outpath:str=None):
     fig2, ax1 = plt.subplots()
-    fig2.set_size_inches(figsize)
-            
+    fig2.set_size_inches(figsize)        
     #yticks = yticks if yticks is not None else np.range(len(data))
-
     matplotlib.rcParams.update({'font.size': 16})
     ax1.scatter(yticks, data)
-
     for i, d in enumerate(data):
         txt =  "{:.4f}".format(d)
         ax1.annotate(txt, xy= (i+0.003, d+0.003))
-   
     ax1.grid(True)
-    plt.xticks(rotation=30)
+    plt.xticks(rotation=rotation)
     plt.subplots_adjust(hspace=0, bottom=0.3)
     ax1.set_xlabel(x_label, fontsize=16)
     ax1.set_ylabel(y_label, fontsize=16)
     ax1.tick_params(axis='both', which='major', labelsize=14)
     if title is not None:
         fig2.suptitle(title, fontweight='bold')        
-   
     if outpath != None:
         fig2.savefig(outpath)
     else:
@@ -339,7 +334,6 @@ def scatter(data:np.ndarray, projection: _Dimensions = "2d", outpath:str=None, t
             cmap = copy(get_cmap(cmap, len(np.unique(labels))))
             cmap.set_bad(na_color)
             na_color = colors.to_hex(na_color, keep_alpha=True)
-            print(na_color)
             clusters_dict = {k: v for v, k in enumerate(np.unique(labels))}
             cluster_colors = [cmap.colors[clusters_dict[x]] if x >= 0
                       else na_color
