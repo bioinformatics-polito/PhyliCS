@@ -335,7 +335,4 @@ This is not due to PhyliCS or to any of its dependencies but on how your WSL is 
 To solve this problem, please, refer to this [answer](https://stackoverflow.com/a/43399827) on [StackOverflow](https://stackoverflow.com) that should fix the issue.
 
 ## Case studies
-Results discussed in the paper are all stored in a dedicated [repository](https://github.com/bioinformatics-polito/PhyliCS_usage) and summarized by means of  jupyter notebooks accessible through:
-- [simulations](https://github.com/bioinformatics-polito/PhyliCS_usage/blob/main/synth.ipynb)
-- [breast tumor](https://github.com/bioinformatics-polito/PhyliCS_usage/blob/main/breast_tumor.ipynb) 
-- [lung tumor](https://github.com/bioinformatics-polito/PhyliCS_usage/blob/main/lung_tumor.ipynb)
+Results discussed in the paper are all stored in a dedicated [repository](https://github.com/bioinformatics-polito/PhyliCS_usage).
