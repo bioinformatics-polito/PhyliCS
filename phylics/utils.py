@@ -4,7 +4,6 @@ from ._compat import Literal
 from typing import Union, Mapping, Sequence
 import collections.abc as cabc 
 from sklearn.cluster import KMeans, AgglomerativeClustering, Birch, AffinityPropagation, DBSCAN, OPTICS, SpectralClustering
-from hdbscan import HDBSCAN
 
 __all__ = ["from_ginkgo_to_phylics", 
             "load_annotation_",
@@ -20,7 +19,7 @@ clustering_func = {
     "birch": Birch,
     "affinity": AffinityPropagation, 
     "dbscan": DBSCAN,
-    "hdbscan": HDBSCAN,
+    #"hdbscan": HDBSCAN,
     "optics": OPTICS,
     "spectral":SpectralClustering
 }

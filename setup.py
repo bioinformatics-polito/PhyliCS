@@ -49,7 +49,6 @@ setup(
             'typing',
             'umap-learn>=0.4.6',
             'IPython>=7.19.0',
-            'hdbscan>=0.8.26',
             'joblib>=1.0.0'],
     
 )
