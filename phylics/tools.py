@@ -22,6 +22,7 @@ from .preprocessing._highly_variant_features import _highly_variable_features
 from .types import CnvData
 from .preprocessing._pca import _pca
 from .preprocessing._umap import _umap
+from .preprocessing._normalization import scale
 from .clustering.metrics import silhouette_, davies_bouldin_, calinski_harabasz_, cluster_accuracy_
 from .clustering.utils import ClusterConfig
 from .clustering.cluster import cluster_
@@ -279,3 +280,6 @@ def segregation_score(data:CnvData, n_jobs:int=1, verbose:bool=False):
         if verbose:
             print("Samples' partition: " + " vs ".join(str(pp) for pp in p) + " - score: " + str(s))
     return scores
+
+def zscore(data: Union[np.ndarray, pd.DataFrame], zero_center: bool = True, max_value: Optional[float] = None):
+    return scale(data, zero_center, max_value)

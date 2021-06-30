@@ -24,7 +24,7 @@ __all__ = ['Sample']
 from .cnvdata import CnvData 
 #from .multisample import MultiSample
 from .. import utils
-from ..tools import variable_features, pca, umap, nk_clust, clust_accuracy_ranking, cluster
+from ..tools import variable_features, pca, umap, nk_clust, clust_accuracy_ranking, cluster, zscore
 from ..drawer import Drawer
 import random
 import pandas as pd
@@ -218,6 +218,16 @@ class Sample:
                     f"InvalidArgument: sub_field={sub_field} is not valid. "
                 )
                 return self.cnv_data.uns['umap']
+    # normalization
+    def zscore(self, zero_center: bool = True, max_value: Optional[float] = None):
+        X_, mean, var = zscore(self.cnv_data.X, zero_center, max_value)
+        self.cnv_data.uns['zscore'] = {}
+        self.cnv_data.uns['zscore']['X'] = X_
+        self.cnv_data.feat['mean'] = mean
+        self.cnv_data.feat['var'] = var
+
+    def get_zscore(self):
+        return self.cnv_data.uns['zscore']['X']
 
     # clustering
     def nk_clust(self, method:str, metric:Optional[Union[str, None]]="euclidean", 
@@ -422,6 +432,13 @@ class Sample:
                 outpath=outpath, figsize = figsize, **kwargs)
         else:
             logg.error("{} object has no attribute 'umap'".format(self.cnv_data.uns))
+
+    def plot_zscore(self, outpath:str=None, figsize:Tuple[int, int]=None, **kwargs):
+        if 'zscore' in self.cnv_data.uns:
+            Drawer.draw('heatmap', data=self.get_zscore(), boundaries=self.get_boundaries(),  title = 'Z-Score', outpath=outpath, row_cluster=True, 
+                     vcenter=0, figsize=figsize, **kwargs)
+        else:
+            logg.error("{} object has no attribute 'zscore'".format(self.cnv_data.uns))
 
     def plot_clusters(self, plot:str="scatter", outpath:str=None, figsize:Tuple[int, int]=None, **kwargs):
         if 'cluster' in self.cnv_data.obs.columns:  

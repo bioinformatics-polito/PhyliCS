@@ -10,7 +10,7 @@ with open(path.join(this_directory, 'README_PyPI.md'), encoding='utf-8') as f:
 
 setup(
     name='phylics',
-    version='1.0.6',
+    version='1.0.7',
     description='Single-cell CNV data analysis toolkit',
     #long_description = 'README.md',
     url='https://github.com/bioinformatics-polito/PhyliCS',
