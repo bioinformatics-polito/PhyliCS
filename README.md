@@ -251,7 +251,7 @@ navin_met = navin_met.filter("mad", "lt_eq", 0.95, percentile=True)
 We can, finally, compute the SHscore. To that purpose, we introduce another class, named MultiSample, which extends the  features of the Sample class. We run:
 ```
 ss = phylics.MultiSample.from_list(navin_prim, navin_met)
->>> ss.SHscore(n_jobs=4)        #n_jobs = N for parallel computing. In this case, 4 cores are used to speedup computation
+>>> ss.SHscores(n_jobs=4)        #n_jobs = N for parallel computing. In this case, 4 cores are used to speedup computation
     samples_partition           score
 0   [[primary], [metastasis]]   0.536134
 ```
